@@ -1,0 +1,19 @@
+{
+    "name": "QueuedTracking",
+    "version": "0.1.0",
+    "description": "Queue",
+    "theme": false,
+    "keywords": ["tracker", "tracking", "queue", "redis"],
+    "license": "GPL v3+",
+    "homepage": "http://piwik.org",
+    "require": {
+        "piwik": ">=2.10.0-b1"
+    },
+    "authors": [
+        {
+            "name": "Piwik",
+            "email": "hello@piwik.org",
+            "homepage": "http://piwik.org"
+        }
+    ]
+}
