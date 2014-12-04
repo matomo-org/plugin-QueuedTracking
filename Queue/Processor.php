@@ -67,25 +67,32 @@ class Processor
 
         $loops = 0;
 
-        while ($queue->shouldProcess()) {
-            if ($loops > 500) {
-                break;
-            } else {
-                $loops++;
+        try {
+
+            while ($queue->shouldProcess()) {
+                if ($loops > 500) {
+                    break;
+                } else {
+                    $loops++;
+                }
+
+                if ($this->callbackOnProcessNewSet) {
+                    call_user_func($this->callbackOnProcessNewSet, $queue, $tracker);
+                }
+
+                $queuedRequestSets = $queue->getRequestSetsToProcess();
+
+                if (!empty($queuedRequestSets)) {
+                    $requestSetsToRetry = $this->processRequestSets($tracker, $queuedRequestSets);
+                    $this->processRequestSets($tracker, $requestSetsToRetry);
+                    $queue->markRequestSetsAsProcessed();
+                    // TODO if markR..() fails, we would process them again later
+                }
             }
 
-            if ($this->callbackOnProcessNewSet) {
-                call_user_func($this->callbackOnProcessNewSet, $queue, $tracker);
-            }
-
-            $queuedRequestSets = $queue->getRequestSetsToProcess();
-
-            if (!empty($queuedRequestSets)) {
-                $requestSetsToRetry = $this->processRequestSets($tracker, $queuedRequestSets);
-                $this->processRequestSets($tracker, $requestSetsToRetry);
-                $queue->markRequestSetsAsProcessed();
-                // TODO if markR..() fails, we would process them again later
-            }
+        } catch (Exception $e) {
+            $request->restoreEnvironment();
+            throw $e;
         }
 
         $request->restoreEnvironment();

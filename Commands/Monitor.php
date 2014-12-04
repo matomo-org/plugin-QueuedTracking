@@ -13,6 +13,7 @@ use Piwik\Access;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Processor;
+use Piwik\Plugins\QueuedTracking\SystemCheck;
 use Piwik\Tracker;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -29,6 +30,9 @@ class Monitor extends ConsoleCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $systemCheck = new SystemCheck();
+        $systemCheck->checkRedisIsInstalled();
+
         $backend  = Queue\Factory::makeBackend();
         $queue    = Queue\Factory::makeQueue($backend);
         $settings = Queue\Factory::getSettings();

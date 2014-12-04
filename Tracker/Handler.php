@@ -35,6 +35,7 @@ class Handler extends Tracker\Handler
         $this->setResponse(new Response());
     }
 
+    // here we write add the tracking requests to a list
     public function process(Tracker $tracker, RequestSet $requestSet)
     {
         $queue = $this->getQueue();

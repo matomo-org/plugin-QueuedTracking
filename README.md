@@ -65,11 +65,11 @@ __How can I access Redis data?__
 You can either acccess data on the command line via `redis-cli` or use a Redis monitor like [phpRedisAdmin](https://github.com/ErikDubbelboer/phpRedisAdmin).
 In case you are using something like a Redis monitor make sure it is not accessible by everyone.
 
-
 __Are there any known issues?__
 
-In case you are using bulk tracking the response varies compared to the normal bulk tracking. We will always return either
+* In case you are using bulk tracking the response varies compared to the normal bulk tracking. We will always return either
 an image or a 204 HTTP response code in case the parameter `send_image=0` is sent.
+* Anything related with Cookies won't work
 
 ## Changelog
 
