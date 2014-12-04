@@ -1,5 +1,7 @@
 # Piwik QueuedTracking Plugin
 
+[![Build Status](https://travis-ci.org/piwik/plugin-QueuedTracking.svg?branch=master)](https://travis-ci.org/piwik/plugin-QueuedTracking)
+
 ## Description
 
 This plugin writes all tracking requests into a [Redis](http://redis.io/) instance instead of directly into the database. 
