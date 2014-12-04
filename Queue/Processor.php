@@ -65,7 +65,15 @@ class Processor
         $request = new RequestSet();
         $request->rememberEnvironment();
 
+        $loops = 0;
+
         while ($queue->shouldProcess()) {
+            if ($loops > 500) {
+                break;
+            } else {
+                $loops++;
+            }
+
             if ($this->callbackOnProcessNewSet) {
                 call_user_func($this->callbackOnProcessNewSet, $queue, $tracker);
             }
