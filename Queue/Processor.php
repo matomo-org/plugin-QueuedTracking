@@ -43,7 +43,7 @@ class Processor
      */
     private $backend;
 
-    private $lockKey = 'trackingQueueLock';
+    private $lockKey = 'trackingProcessorLock';
     private $lockValue;
 
     private $callbackOnProcessNewSet;
