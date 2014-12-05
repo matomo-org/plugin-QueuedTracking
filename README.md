@@ -65,7 +65,7 @@ Make sure to have enough memory to save all tracking requests in the queue. One 
 20.000 tracking requests take about 50MB. All tracking requests of all websites are stored in the same queue.
 There should be only one Redis server to make sure the data will be replayed in the same order as they were recorded. 
 If you want to configure Redis HA (High Availability) it should be possible to use Redis Cluser, Redis Sentinel, ...
-We currently write into the Redis default database.
+We currently write into the Redis default database by default but you can configure to use a different one.
 
 __Why do some tests fail on my local Piwik instance?__
 

@@ -194,7 +194,7 @@ end';
             $success = $this->redis->auth($this->password);
         }
 
-        if (!empty($this->database)) {
+        if (!empty($this->database) || 0 === $this->database) {
             $this->redis->select($this->database);
         }
 
@@ -227,6 +227,6 @@ end';
 
     public function setDatabase($database)
     {
-        $this->database = (int) $database;
+        $this->database = $database;
     }
 }

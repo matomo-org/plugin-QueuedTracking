@@ -70,10 +70,7 @@ class Factory
 
         $redis = new Queue\Backend\Redis();
         $redis->setConfig($host, $port, $timeout, $password);
-
-        if (!empty($database)) {
-            $redis->setDatabase($database);
-        }
+        $redis->setDatabase($database);
 
         return $redis;
     }

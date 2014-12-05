@@ -52,8 +52,8 @@ class Settings extends \Piwik\Plugin\Settings
         $this->createRedisHostSetting();
         $this->createRedisPortSetting();
         $this->createRedisTimeoutSetting();
-        $this->createRedisPasswordSetting();
         $this->createRedisDatabaseSetting();
+        $this->createRedisPasswordSetting();
         $this->createQueueEnabledSetting();
         $this->createNumRequestsToProcessSetting();
         $this->createProcessInTrackingRequestSetting();
@@ -151,16 +151,20 @@ class Settings extends \Piwik\Plugin\Settings
         $this->redisDatabase->readableByCurrentUser = true;
         $this->redisDatabase->type = static::TYPE_INT;
         $this->redisDatabase->uiControlType = static::CONTROL_TEXT;
-        $this->redisDatabase->uiControlAttributes = array('size' => 6);
-        $this->redisDatabase->defaultValue = '';
+        $this->redisDatabase->uiControlAttributes = array('size' => 5);
+        $this->redisDatabase->defaultValue = 0;
         $this->redisDatabase->validate = function ($value) {
-            if (strlen($value) > 6) {
-                throw new \Exception('Max 6 digits allowed');
+            if (!is_numeric($value) || false !== strpos($value, '.')) {
+                throw new \Exception('The database has to be an integer');
             }
+
+            if (strlen($value) > 5) {
+                throw new \Exception('Max 5 digits allowed');
+            }
+
         };
 
-        // we do not expose this one to the UI currently. That's on purpose
-        $this->redisDatabase->setStorage($this->staticStorage);
+        $this->addSetting($this->redisDatabase);
     }
 
     private function createQueueEnabledSetting()

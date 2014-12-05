@@ -126,6 +126,45 @@ class SettingsTest extends IntegrationTestCase
         $this->settings->numRequestsToProcess->setValue('33d3.43');
     }
 
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage The database has to be an integer
+     */
+    public function test_redisDatabase_ShouldFail_IfIsNumericButFloat()
+    {
+        $this->settings->redisDatabase->setValue('5.34');
+    }
+
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage The database has to be an integer
+     */
+    public function test_redisDatabase_ShouldFail_IfNotNumeric()
+    {
+        $this->settings->redisDatabase->setValue('33d3.43');
+    }
+
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage Max 5 digits allowed
+     */
+    public function test_redisDatabase_ShouldFail_IfTooLong()
+    {
+        $this->settings->redisDatabase->setValue('333333');
+    }
+
+    public function test_redisDatabase_ShouldWorkAndCastValueToInt_IfAcceptedValue()
+    {
+        $this->settings->redisDatabase->setValue('14');
+
+        $this->assertSame(14, $this->settings->redisDatabase->getValue());
+    }
+
+    public function test_redisDatabase_ShouldBeEmptyByDefault()
+    {
+        $this->assertEmpty($this->settings->redisDatabase->getValue());
+    }
+
     public function test_redisTimeout_ShouldBeNotUnlimitedByDefault()
     {
         $this->assertSame(0.0, $this->settings->redisTimeout->getValue());
