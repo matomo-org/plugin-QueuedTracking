@@ -26,11 +26,13 @@ class QueuedTracking extends \Piwik\Plugin
 
     public function configureQueueTestBackend()
     {
-        $settings = Factory::getSettings();
-        $settings->redisHost->setValue('127.0.0.1');
-        $settings->redisPort->setValue(6379);
-        $settings->redisPassword->setValue('');
-        $settings->redisDatabase->setValue(15);
+        Access::doAsSuperUser(function () {
+            $settings = Factory::getSettings();
+            $settings->redisHost->setValue('127.0.0.1');
+            $settings->redisPort->setValue(6379);
+            $settings->redisPassword->setValue('');
+            $settings->redisDatabase->setValue(15);
+        });
     }
 
     public function replaceHandlerIfQueueIsEnabled(&$handler)
