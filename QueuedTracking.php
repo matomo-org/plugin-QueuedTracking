@@ -8,6 +8,7 @@
  */
 namespace Piwik\Plugins\QueuedTracking;
 
+use Piwik\Access;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Plugins\QueuedTracking\Tracker\Handler;
 
