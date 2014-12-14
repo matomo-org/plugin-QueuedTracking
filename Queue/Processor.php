@@ -168,7 +168,7 @@ class Processor
      */
     private function extendLockExpireToMakeSureWeCanProcessARequestSet(RequestSet $requestSet)
     {
-        // 2 seconds per request set should give it enough time to process it
+        // 2 seconds per tracking request should give it enough time to process it
         $ttl = $requestSet->getNumberOfRequests() * 2;
         $ttl = max($ttl, 20); // lock for at least 20 seconds
 
