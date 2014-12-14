@@ -170,7 +170,7 @@ class Processor
     {
         // 2 seconds per request set should give it enough time to process it
         $ttl = $requestSet->getNumberOfRequests() * 2;
-        $ttl = max($ttl, 4); // lock for at least 4 seconds
+        $ttl = max($ttl, 20); // lock for at least 20 seconds
 
         return $this->expireLock($ttl);
     }
