@@ -8,7 +8,9 @@
  */
 namespace Piwik\Plugins\QueuedTracking;
 
+use Piwik\Cache;
 use Piwik\Common;
+use Piwik\Config;
 use Piwik\Settings\Storage\StaticStorage;
 use Piwik\Settings\SystemSetting;
 
@@ -153,7 +155,8 @@ class Settings extends \Piwik\Plugin\Settings
         $this->redisDatabase->uiControlType = static::CONTROL_TEXT;
         $this->redisDatabase->uiControlAttributes = array('size' => 5);
         $this->redisDatabase->defaultValue = 0;
-        $this->redisDatabase->validate = function ($value) {
+        $this->redisDatabase->inlineHelp = 'In case you are using Redis for caching make sure to use a different database.';
+        $this->redisDatabase->validate = function ($value, Settings $settings) {
             if (!is_numeric($value) || false !== strpos($value, '.')) {
                 throw new \Exception('The database has to be an integer');
             }
@@ -161,7 +164,6 @@ class Settings extends \Piwik\Plugin\Settings
             if (strlen($value) > 5) {
                 throw new \Exception('Max 5 digits allowed');
             }
-
         };
 
         $this->addSetting($this->redisDatabase);
