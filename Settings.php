@@ -156,7 +156,7 @@ class Settings extends \Piwik\Plugin\Settings
         $this->redisDatabase->uiControlAttributes = array('size' => 5);
         $this->redisDatabase->defaultValue = 0;
         $this->redisDatabase->inlineHelp = 'In case you are using Redis for caching make sure to use a different database.';
-        $this->redisDatabase->validate = function ($value, Settings $settings) {
+        $this->redisDatabase->validate = function ($value) {
             if (!is_numeric($value) || false !== strpos($value, '.')) {
                 throw new \Exception('The database has to be an integer');
             }
