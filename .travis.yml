@@ -15,6 +15,8 @@ env:
   global:
     - PLUGIN_NAME=QueuedTracking
     - PIWIK_ROOT_DIR=$TRAVIS_BUILD_DIR/piwik
+    - secure: "XQHscVt/CuHd76xBnglzXyqB7jkYmab2sx7e4aEbCBfoTrEWGfd4w3IpV6NtGu2HcjvcLB3HNz0v5CyWCt8XFbABVMeqdWKF18MGyAn4pPYXh1F95PL5eRmcU1lcHFlAspUjVk6uy59YPomqElNfR474DQAMvk24MngyXhH81o4="
+    - secure: "MjZyWq/VgNCiIAHSJsENV6JzgGlljwjhXWauzp5xf8Le79XtCr5QTe1J540h0D9d0e3X28uIGqTvuZlZy+RPOdvsmcCaAdKk9j7cgfyzPPKNVPJcARfaB4W0mAalorn4CwZIZx+P2IdrZ8wqH+IwYaNEElcT0KBzEq8IuP1yeYU="
   matrix:
     - TEST_SUITE=PluginTests MYSQL_ADAPTER=PDO_MYSQL
     - TEST_SUITE=PluginTests MYSQL_ADAPTER=PDO_MYSQL TEST_AGAINST_CORE=latest_stable
@@ -88,6 +90,9 @@ before_script:
     phpenv config-rm xdebug.ini;
     fi
 
+  # add always_populate_raw_post_data=-1 to php.ini
+  - echo "always_populate_raw_post_data=-1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
   - ./tests/travis/configure_git.sh
 
   # print out mysql information
@@ -97,8 +102,6 @@ before_script:
   # configure mysql
   - mysql -e "SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES'" # Travis default
 
-  # Uncomment to enable sql_mode STRICT_TRANS_TABLES (new default in Mysql 5.6)
-  - mysql -e "SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION'"
   - mysql -e "SELECT @@sql_mode;"
   - mysql -e "SHOW GLOBAL VARIABLES;"
 
