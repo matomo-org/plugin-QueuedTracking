@@ -30,8 +30,8 @@ matrix:
       env: TEST_SUITE=PluginTests MYSQL_ADAPTER=PDO_MYSQL TEST_AGAINST_CORE=latest_stable
     - php: 5.4
       env: TEST_SUITE=PluginTests MYSQL_ADAPTER=PDO_MYSQL TEST_AGAINST_CORE=latest_stable
-    # execute UI tests only w/ PHP 5.6
-    - php: 5.3.3
+    # execute UI tests only w/ PHP 5.3.3
+    - php: 5.6
       env: TEST_SUITE=UITests MYSQL_ADAPTER=PDO_MYSQL
     - php: 5.4
       env: TEST_SUITE=UITests MYSQL_ADAPTER=PDO_MYSQL
