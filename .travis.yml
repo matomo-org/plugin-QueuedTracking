@@ -50,7 +50,6 @@ install:
   - cp -R !($PLUGIN_NAME) $PLUGIN_NAME
   - cp -R .git/ $PLUGIN_NAME/
   - cp .travis.yml $PLUGIN_NAME
-
   # checkout piwik in the current directory
   - git clone https://github.com/piwik/piwik.git piwik
   - cd piwik
@@ -68,7 +67,6 @@ install:
   - git checkout "$TEST_AGAINST_PIWIK_BRANCH"
   - git submodule init
   - git submodule update || true
-
   # move plugin contents to folder in the plugins subdirectory
   - rm -rf plugins/$PLUGIN_NAME
   - mv ../$PLUGIN_NAME plugins
@@ -79,12 +77,13 @@ install:
     fi
 
   # make sure travis test scripts are always latest (so in older releases/branches, the latest scripts will still be used)
-  - git checkout master -- ./tests/travis ./plugins/TestRunner
-
+  - git checkout master -- ./tests/travis ./plugins/TestRunner || true
   # clone dependent repos
   - ./tests/travis/checkout_dependent_plugins.sh
 
 before_script:
+  - ./tests/travis/install_mysql_5.6.sh
+
   - if ([ -z "$TEST_SUITE" ] || [ -n "$PLUGIN_NAME" ]);
     then composer require satooshi/php-coveralls dev-master;
     else
@@ -102,6 +101,7 @@ before_script:
 
   # configure mysql
   - mysql -e "SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES'" # Travis default
+  - mysql -e "SET GLOBAL wait_timeout = 3600" # try to avoid mysql has gone away errors
 
   - mysql -e "SELECT @@sql_mode;"
   - mysql -e "SHOW GLOBAL VARIABLES;"
