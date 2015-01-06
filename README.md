@@ -34,7 +34,7 @@ of requests is queued. By default we will check whether enough requests are queu
 and start processing them right after sending a response to the browser to make sure a user won't have to wait until 
 the queue has finished to process all requests. Have a look at this graph to see how it works: 
 
-![How it works](screenshots/How_it_works.png)
+![How it works](https://raw.githubusercontent.com/piwik/plugin-QueuedTracking/master/docs/How_it_works.png)
 
 __I do not want to process queued requests within a tracking request, what shall I do?__
 
