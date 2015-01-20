@@ -54,13 +54,13 @@ install:
   - git clone -q https://github.com/piwik/piwik.git piwik
   - cd piwik
   - git fetch -q --all
-  # move plugin contents to folder in the plugins subdirectory
-  - rm -rf plugins/$PLUGIN_NAME
-  - mv ../$PLUGIN_NAME plugins
-
   - ./tests/travis/checkout_test_against_branch.sh
   - git submodule init -q
   - git submodule update -q || true
+
+  # move plugin contents to folder in the plugins subdirectory
+  - rm -rf plugins/$PLUGIN_NAME
+  - mv ../$PLUGIN_NAME plugins
 
   # copy .coveralls.yml if none exists
   - if [ ! -f ../coveralls.yml ];
@@ -92,7 +92,11 @@ before_script:
 
   # configure mysql
   - mysql -e "SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES'" # Travis default
-  - mysql -e "SET GLOBAL wait_timeout = 3600" # try to avoid mysql has gone away errors
+  # try to avoid mysql has gone away errors
+  - mysql -e "SET GLOBAL wait_timeout = 36000;"
+  - mysql -e "SET GLOBAL max_allowed_packet = 134209536;"
+  - mysql -e "SHOW VARIABLES LIKE 'max_allowed_packet';"
+  - mysql -e "SHOW VARIABLES LIKE 'wait_timeout';"
 
   - mysql -e "SELECT @@sql_mode;"
   # - mysql -e "SHOW GLOBAL VARIABLES;"
@@ -101,7 +105,7 @@ before_script:
   # travis now complains about this failing 9 times out of 10, so removing it. hopefully the random failures it prevented won't come back
   # - travis_retry composer self-update
 
-  - travis_retry composer install -q
+  - travis_retry composer install
 
   # print out more debugging info
   - uname -a
