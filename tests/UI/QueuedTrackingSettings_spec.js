@@ -11,7 +11,7 @@ describe("QueuedTrackingSettings", function () {
     this.timeout(0);
 
     var selector = '#QueuedTracking,#QueuedTracking + .pluginIntroduction,#QueuedTracking + .pluginIntroduction + .adminTable';
-    var url = "?module=CoreAdminHome&action=pluginSettings&idSite=1&period=day&date=yesterday";
+    var url = "?module=CoreAdminHome&action=adminPluginSettings&idSite=1&period=day&date=yesterday";
 
     it("should display the settings page", function (done) {
         expect.screenshot('settings_page').to.be.captureSelector(selector, function (page) {
