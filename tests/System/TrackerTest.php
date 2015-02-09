@@ -205,3 +205,5 @@ class TrackerTest extends SystemTestCase
         $this->assertSame($numRequestSets, $queue->getNumberOfRequestSetsInQueue());
     }
 }
+
+TrackerTest::$fixture = new Fixture();
