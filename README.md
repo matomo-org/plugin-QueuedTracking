@@ -103,7 +103,9 @@ __Are there any known issues?__
 
 ## Changelog
 
-0.1.0 Initial Release
+0.1.2 - Updated description on Marketplace
+
+0.1.0 - Initial Release
 
 ## Support
 
