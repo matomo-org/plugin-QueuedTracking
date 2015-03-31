@@ -91,9 +91,16 @@ class TrackerTest extends SystemTestCase
 
     public function test_response_ShouldContainTrackingGifIfTrackedViaQueue()
     {
-        $response = $this->doTrackNumberOfRequests(2);
+        $response = $this->doTrackNumberOfRequests(2, false);
 
         Fixture::checkResponse($response);
+    }
+
+    public function test_response_ShouldContainJsonResponseIfTrackedViaQueue_InBulk()
+    {
+        $response = $this->doTrackNumberOfRequests(2);
+
+        $this->assertEquals('{"status":"success","tracked":2}', $response);
     }
 
     public function test_response_ShouldActuallyAddRequestsToQueue()
@@ -121,7 +128,7 @@ class TrackerTest extends SystemTestCase
     {
         for ($i = 1; $i < $this->requestProcessLimit; $i++) {
             $response = $this->doTrackNumberOfRequests(2);
-            Fixture::checkResponse($response);
+            $this->assertEquals('{"status":"success","tracked":2}', $response);
             $this->assertNumEntriesInQueue($i);
         }
 
