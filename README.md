@@ -89,7 +89,7 @@ __The processor won't start processing again as it things another processor is p
 First make sure there is actually no processor processing any requests. For example by executing the command 
 `./console queuedtracking:monitor`. In case you are using the command line to process tracking requests make sure there
 is no processer running using the Linux command `ps`. If you are sure there is no process running you can release the lock
-by executing the command `redis-cli del trackingProcessorLock`. Afterwards everything should work as normal again.
+by executing the command `./console queuedtracking:lock-status --unlock`. Afterwards everything should work as normal again.
 You should actually never have to do this as a lock automatically expires after a while. It just may take a while depending
 on the amount of requests you are importing.
 
@@ -103,9 +103,18 @@ __Are there any known issues?__
 
 ## Changelog
 
-0.1.2 - Updated description on Marketplace
+0.1.4
 
-0.1.0 - Initial Release
+- Monitor does now input information whether a processor is currently processing the queue and for how long a processor has the lock.
+- Added a new command `queuedtracking:lock-status` that outputs only the status of a lock. This command can also unlock the lock by using the option `--unlock`.
+
+0.1.2
+
+- Updated description on Marketplace
+
+0.1.0
+
+- Initial Release
 
 ## Support
 
