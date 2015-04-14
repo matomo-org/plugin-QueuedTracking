@@ -42,7 +42,7 @@ class Process extends ConsoleCommand
         $backend   = Queue\Factory::makeBackend();
         $queue     = Queue\Factory::makeQueue($backend);
         $processor = new Processor($backend);
-        $processor->setNumberOfLoops(1000);
+        $processor->setNumberOfMaxBatchesToProcess(1000);
 
         $numRequestsQueued = $queue->getNumberOfRequestSetsInQueue();
 
