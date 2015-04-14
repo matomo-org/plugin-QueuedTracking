@@ -84,6 +84,10 @@ class Handler extends Tracker\Handler
     {
         if ($processor->acquireLock()) {
 
+            register_shutdown_function(function () use ($processor) {
+                $processor->unlock();
+            });
+
             Common::printDebug('We are going to process the queue');
             set_time_limit(0);
 
