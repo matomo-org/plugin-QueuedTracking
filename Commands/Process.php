@@ -10,6 +10,7 @@
 namespace Piwik\Plugins\QueuedTracking\Commands;
 
 use Piwik\Access;
+use Piwik\Plugin;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Processor;
@@ -35,6 +36,7 @@ class Process extends ConsoleCommand
         $systemCheck->checkRedisIsInstalled();
 
         Access::getInstance()->setSuperUserAccess(false);
+        Plugin\Manager::getInstance()->setTrackerPluginsNotToLoad(array('Provider'));
         Tracker::loadTrackerEnvironment();
 
         $backend   = Queue\Factory::makeBackend();
@@ -50,6 +52,10 @@ class Process extends ConsoleCommand
             $this->writeSuccessMessage($output, array("Nothing to proccess. $numRequestsQueued request sets are queued and they are already in process by another script."));
         } else {
             $output->writeln("<info>Starting to process $numRequestsQueued request sets, this can take a while</info>");
+
+            register_shutdown_function(function () use ($processor) {
+                $processor->unlock();
+            });
 
             if ($input->getOption('verbose')) {
                 $this->setProgressCallback($processor, $output, $numRequestsQueued);
