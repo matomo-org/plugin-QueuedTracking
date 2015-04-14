@@ -222,6 +222,21 @@ class RedisTest extends IntegrationTestCase
         $this->assertFalse($success);
     }
 
+    public function test_getTimeToLive_ShouldReturnTheNumberOfTimeLeft_IfExpires()
+    {
+        $success = $this->redis->setIfNotExists($this->key, 'test', 60);
+        $this->assertTrue($success);
+
+        $timeToLive = $this->redis->getTimeToLive($this->key);
+        $this->assertGreaterThanOrEqual(40000, $timeToLive);
+    }
+
+    public function test_getTimeToLive_ShouldReturn0OrLessIfNoExpire()
+    {
+        $timeToLive = $this->redis->getTimeToLive($this->key);
+        $this->assertLessThanOrEqual(0, $timeToLive);
+    }
+
     private function assertNumberOfItemsInList($key, $expectedNumber)
     {
         $numValus = $this->redis->getNumValuesInList($key);

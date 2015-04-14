@@ -66,6 +66,18 @@ class Redis implements Backend
         return $memory;
     }
 
+    /**
+     * Returns the time to live of a key that can expire in ms.
+     * @param $key
+     * @return int
+     */
+    public function getTimeToLive($key)
+    {
+        $this->connectIfNeeded();
+
+        return $this->redis->pttl($key);
+    }
+
     public function appendValuesToList($key, $values)
     {
         $this->connectIfNeeded();
@@ -222,7 +234,7 @@ end';
 
     private function isConnected()
     {
-        return !is_null($this->redis);
+        return isset($this->redis);
     }
 
     public function setDatabase($database)

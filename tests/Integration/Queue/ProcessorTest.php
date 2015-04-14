@@ -402,6 +402,11 @@ class ProcessorTest extends IntegrationTestCase
         $this->assertEquals($serverBackup, $_SERVER);
     }
 
+    public function test_getLockKey_shouldReturnTheNameOfTheLockKey()
+    {
+        $this->assertEquals('trackingProcessorLock', $this->processor->getLockKey());
+    }
+
     private function lockAndProcess()
     {
         $this->assertTrue($this->processor->acquireLock());

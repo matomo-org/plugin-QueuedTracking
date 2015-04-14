@@ -62,6 +62,11 @@ class Processor
         $this->handler = new Handler();
     }
 
+    public function getLockKey()
+    {
+        return $this->lockKey;
+    }
+
     public function setNumberOfMaxBatchesToProcess($numBatches)
     {
         $this->numMaxBatchesToProcess = (int) $numBatches;
