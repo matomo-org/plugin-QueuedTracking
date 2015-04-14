@@ -46,12 +46,25 @@ class Processor
     private $lockKey = 'trackingProcessorLock';
     private $lockValue;
 
+    /**
+     * The number of batches to process before self-terminating.
+     * If this value is 500, and one has configured to insert 25 requests in one batch, 500 * 25 requests will be
+     * inserted. This way we prevent eg possible memory problems for when running too long.
+     * @var int
+     */
+    private $numLoops = 500;
+
     private $callbackOnProcessNewSet;
 
     public function __construct(Backend $backend)
     {
         $this->backend = $backend;
         $this->handler = new Handler();
+    }
+
+    public function setNumberOfLoops($numLoops)
+    {
+        $this->numLoops = (int) $numLoops;
     }
 
     public function process(Queue $queue)
@@ -70,7 +83,7 @@ class Processor
         try {
 
             while ($queue->shouldProcess()) {
-                if ($loops > 500) {
+                if ($loops > $this->numLoops) {
                     break;
                 } else {
                     $loops++;
