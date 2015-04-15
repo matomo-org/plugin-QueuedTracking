@@ -4,11 +4,10 @@
 
 ## Description
 
-This plugin writes all tracking requests into a [Redis](http://redis.io/) instance instead of directly into the database. 
-This is useful if you have too many requests per second and your server cannot handle all of them directly (eg too many connections in nginx or MySQL). 
-It is also useful if you experience peaks sometimes. Those peaks can be handled much better by using this queue. 
-Writing a tracking request into the queue is very fast (a tracking request takes in total a few milliseconds) compared to a regular tracking request (that 
-takes multiple hundreds of milliseconds). The queue makes sure to process the tracking requests whenever possible even if it takes a while to process all requests after there was a peak.
+This plugin writes all tracking requests into a [Redis](http://redis.io/) instance instead of directly into the database.
+This is useful if you have too many requests per second and your server cannot handle all of them directly (eg too many connections in nginx or MySQL).
+It is also useful if you experience peaks sometimes. Those peaks can be handled much better by using this queue.
+Writing a tracking request into the queue is very fast (a tracking request takes in total a few milliseconds) compared to a regular tracking request (that takes multiple hundreds of milliseconds). The queue makes sure to process the tracking requests whenever possible even if it takes a while to process all requests after there was a peak.
 
 *This plugin is currently BETA and there might be issues causing not tracked requests, wrongly tracked requests or duplicated tracked requests.*
 
@@ -28,27 +27,27 @@ In your Piwik instance go to "Settings => Plugin Settings". There is a config se
 
 __When will a queued tracking request be processed?__
 
-First you should know that multiple tracking requests will be inserted into the database at once using 
-[bulk tracking](http://developer.piwik.org/api-reference/tracking-api#bulk-tracking) as soon as a configurable number 
-of requests is queued. By default we will check whether enough requests are queued during a regular tracking request 
-and start processing them right after sending a response to the browser to make sure a user won't have to wait until 
-the queue has finished to process all requests. Have a look at this graph to see how it works: 
+First you should know that multiple tracking requests will be inserted into the database at once using
+[bulk tracking](http://developer.piwik.org/api-reference/tracking-api#bulk-tracking) as soon as a configurable number
+of requests is queued. By default we will check whether enough requests are queued during a regular tracking request
+and start processing them right after sending a response to the browser to make sure a user won't have to wait until
+the queue has finished to process all requests. Have a look at this graph to see how it works:
 
 ![How it works](https://raw.githubusercontent.com/piwik/plugin-QueuedTracking/master/docs/How_it_works.png)
 
 __I do not want to process queued requests within a tracking request, what shall I do?__
 
-Don't worry, if this solution doesn't work out for you for some reason you can disable it and process all queued 
+Don't worry, if this solution doesn't work out for you for some reason you can disable it and process all queued
 requests using the [Piwik console](http://developer.piwik.org/guides/piwik-on-the-command-line). Just follow these steps:
 
 * Disable the setting "Process during tracking request" in the Piwik UI under "Settings => Plugin Settings"
 * Setup a cronjob that executes the command `./console queuedtracking:process` for instance every minute
 * That's it
 
-The `queuedtracking:process` command will make sure to process all queued tracking requests whenever possible and the 
+The `queuedtracking:process` command will make sure to process all queued tracking requests whenever possible and the
 command will exit as soon as there are not enough requests queued anymore. That's why you should setup a cronjob to start
-the command every minute as it will just start processing again as soon as there are enough requests. Be aware that it won't 
-speed up processing queued requests when starting this command multiple times. Only one process will actually replay 
+the command every minute as it will just start processing again as soon as there are enough requests. Be aware that it won't
+speed up processing queued requests when starting this command multiple times. Only one process will actually replay
 queued requests at a time.
 
 Example crontab entry that starts the processor every minute:
@@ -59,11 +58,19 @@ __Can I keep track of the state of the queue?__
 
 Yes, you can. Just execute the command `./console queuedtracking:monitor`. This will show the current state of the queue.
 
+__Can I improve the speed of inserting requests from the Redis queue to the database?__
+
+Yes, you can by adding more workers. By default only one worker is activated at a time and only one worker processes tracking requests from Redis to the database. When inserting tracking requests into the database, at time of writing this, about 80% of the time is spent in PHP and the database might be rather bored. If you have multiple CPUs available on your server you can add more workers. You can do this by going in the Piwik Admin interface to "Plugin Settings". There will be a setting "Number of queue workers". Increase this number to the number of CPUs you want to dedeciate for processing requests. Best practice is to add more workers step by step. So first increase this number to 2 and check if the tracking request insertions is fast enough for you. If not and you have more CPUs available, increase the number again.
+
+When using multiple workers it might be worth to lower the number of "Number of requests to process" to eg 15 in "Plugin Settings". By default 25 requests are inserted in one step by using transactions. This means different workers might have to wait for each other. By lowering that number each worker will block the DB for less time.
+
+If you process requests from the command line via `./console queuedtracking:process` make sure to always start enough workers. Each time you execute this command one worker will be started. If already enough workers are in process no new worker will be started and the command just finishes immediately.
+
 __How should the redis server be configured?__
 
-Make sure to have enough memory to save all tracking requests in the queue. One tracking request in the queue takes about 2KB, 
+Make sure to have enough memory to save all tracking requests in the queue. One tracking request in the queue takes about 2KB,
 20.000 tracking requests take about 50MB. All tracking requests of all websites are stored in the same queue.
-There should be only one Redis server to make sure the data will be replayed in the same order as they were recorded. 
+There should be only one Redis server to make sure the data will be replayed in the same order as they were recorded.
 If you want to configure Redis HA (High Availability) it should be possible to use Redis Cluser, Redis Sentinel, ...
 We currently write into the Redis default database by default but you can configure to use a different one.
 
@@ -75,8 +82,8 @@ it does not contain any important data.
 
 __What if I want to disable the queue?__
 
-You might want to disable the queue at some point but there are still some pending requests in the queue. We recommend to 
-change the "Number of requests to process" in plugin settings to "1" and process all requests using the command 
+You might want to disable the queue at some point but there are still some pending requests in the queue. We recommend to
+change the "Number of requests to process" in plugin settings to "1" and process all requests using the command
 `./console queuedtracking:process` shortly before disabling the queue and directly afterwards.
 
 __How can I access Redis data?__
@@ -86,16 +93,16 @@ In case you are using something like a Redis monitor make sure it is not accessi
 
 __The processor won't start processing again as it things another processor is processing the data already, what can I do?__
 
-First make sure there is actually no processor processing any requests. For example by executing the command 
+First make sure there is actually no processor processing any requests. For example by executing the command
 `./console queuedtracking:monitor`. In case you are using the command line to process tracking requests make sure there
 is no processer running using the Linux command `ps`. If you are sure there is no process running you can release the lock
-by executing the command `./console queuedtracking:lock-status --unlock`. Afterwards everything should work as normal again.
+by executing the command `./console queuedtracking:lock-status`. This will output more information which locks are in use and how to unlock them. Afterwards everything should work as normal again.
 You should actually never have to do this as a lock automatically expires after a while. It just may take a while depending
 on the amount of requests you are importing.
 
 __Are there any known issues?__
 
-* In case you are using bulk tracking the bulk tracking response varies compared to the regular one. We will always return 
+* In case you are using bulk tracking the bulk tracking response varies compared to the regular one. We will always return
  either an image or a 204 HTTP response code in case the parameter `send_image=0` is sent.
 * Anything related with Cookies won't work
 * By design this plugin can delay the insertion of tracking requests causing real time plugins to not show the actual data since
@@ -105,8 +112,9 @@ __Are there any known issues?__
 
 0.1.4
 
-- Monitor does now input information whether a processor is currently processing the queue and for how long a processor has the lock.
-- Added a new command `queuedtracking:lock-status` that outputs only the status of a lock. This command can also unlock the lock by using the option `--unlock`.
+- It is now possible to start multiple workers for faster insertion from Redis to the database. This can be configured in the "Plugin Settings"
+- Monitor does now output information whether a processor is currently processing the queue.
+- Added a new command `queuedtracking:lock-status` that outputs the status of each queue lock. This command can also unlock a queue by using the option `--unlock`.
 
 0.1.2
 
@@ -122,5 +130,5 @@ Please direct any feedback to [hello@piwik.org](mailto:hello@piwik.org)
 
 ## TODO
 
-For usage with multiple redis servers we should lock differently: 
-http://redis.io/topics/distlock eg using https://github.com/ronnylt/redlock-php 
+For usage with multiple redis servers we should lock differently:
+http://redis.io/topics/distlock eg using https://github.com/ronnylt/redlock-php

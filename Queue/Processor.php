@@ -14,7 +14,6 @@ use Piwik\Tracker;
 use Piwik\Tracker\RequestSet;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Processor\Handler;
-use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
 use Exception;
 
 /**
@@ -39,12 +38,9 @@ class Processor
     private $handler;
 
     /**
-     * @var Redis
+     * @var Queue\Manager
      */
-    private $backend;
-
-    private $lockKey = 'trackingProcessorLock';
-    private $lockValue;
+    private $queueManager;
 
     /**
      * The number of batches to process before self-terminating.
@@ -54,17 +50,10 @@ class Processor
      */
     private $numMaxBatchesToProcess = 250;
 
-    private $callbackOnProcessNewSet;
-
-    public function __construct(Backend $backend)
+    public function __construct(Queue\Manager $queueManager)
     {
-        $this->backend = $backend;
+        $this->queueManager = $queueManager;
         $this->handler = new Handler();
-    }
-
-    public function getLockKey()
-    {
-        return $this->lockKey;
     }
 
     public function setNumberOfMaxBatchesToProcess($numBatches)
@@ -72,7 +61,7 @@ class Processor
         $this->numMaxBatchesToProcess = (int) $numBatches;
     }
 
-    public function process(Queue $queue)
+    public function process()
     {
         $tracker = new Tracker();
 
@@ -87,15 +76,11 @@ class Processor
 
         try {
 
-            while ($queue->shouldProcess()) {
+            while ($queue = $this->queueManager->lockNext()) {
                 if ($loops > $this->numMaxBatchesToProcess) {
                     break;
                 } else {
                     $loops++;
-                }
-
-                if ($this->callbackOnProcessNewSet) {
-                    call_user_func($this->callbackOnProcessNewSet, $queue, $tracker);
                 }
 
                 $queuedRequestSets = $queue->getRequestSetsToProcess();
@@ -106,9 +91,12 @@ class Processor
                     $queue->markRequestSetsAsProcessed();
                     // TODO if markR..() fails, we would process them again later
                 }
+
+                $this->queueManager->unlock();
             }
 
         } catch (Exception $e) {
+            $this->queueManager->unlock();
             $request->restoreEnvironment();
             throw $e;
         }
@@ -159,14 +147,6 @@ class Processor
     }
 
     /**
-     * @param \Callable $callback
-     */
-    public function setOnProcessNewRequestSetCallback($callback)
-    {
-        $this->callbackOnProcessNewSet = $callback;
-    }
-
-    /**
      * @param $queuedRequests
      * @return bool true if we still have the lock and if expire was set successfully
      */
@@ -177,7 +157,7 @@ class Processor
 
         $ttl = max($ttl, 20); // lock at least for 20 seconds
 
-        return $this->expireLock($ttl);
+        return $this->queueManager->expireLock($ttl);
     }
 
     /**
@@ -190,33 +170,7 @@ class Processor
         $ttl = $requestSet->getNumberOfRequests() * 2;
         $ttl = max($ttl, 20); // lock for at least 20 seconds
 
-        return $this->expireLock($ttl);
-    }
-
-    public function acquireLock()
-    {
-        if (!$this->lockValue) {
-            $this->lockValue = substr(Common::generateUniqId(), 0, 12);
-        }
-
-        $locked = $this->backend->setIfNotExists($this->lockKey, $this->lockValue, $ttlInSeconds = 60);
-
-        return $locked;
-    }
-
-    public function unlock()
-    {
-        $this->backend->deleteIfKeyHasValue($this->lockKey, $this->lockValue);
-        $this->lockValue = null;
-    }
-
-    private function expireLock($ttlInSeconds)
-    {
-        if ($ttlInSeconds > 0) {
-            return $this->backend->expireIfKeyHasValue($this->lockKey, $this->lockValue, $ttlInSeconds);
-        }
-
-        return false;
+        return $this->queueManager->expireLock($ttl);
     }
 
     private function forceRollbackAndThrowExceptionAsAnotherProcessMightProcessSameRequestSets(Tracker $tracker)

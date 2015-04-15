@@ -157,6 +157,13 @@ end';
         return (bool) $this->redis->eval($script, array($key, $value), 1);
     }
 
+    public function getKeysMatchingPattern($pattern)
+    {
+        $this->connectIfNeeded();
+
+        return $this->redis->keys($pattern);
+    }
+
     public function expireIfKeyHasValue($key, $value, $ttlInSeconds)
     {
         if (empty($value)) {

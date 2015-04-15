@@ -153,6 +153,33 @@ class SettingsTest extends IntegrationTestCase
         $this->settings->redisDatabase->setValue('333333');
     }
 
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage should be an integer
+     */
+    public function test_numQueueWorkers_ShouldFail_IfNotNumeric()
+    {
+        $this->settings->numQueueWorkers->setValue('1f');
+    }
+
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage Only 1-8 workers allowed
+     */
+    public function test_numQueueWorkers_ShouldFail_IfTooHigh()
+    {
+        $this->settings->numQueueWorkers->setValue('9');
+    }
+
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage Only 1-8 workers allowed
+     */
+    public function test_numQueueWorkers_ShouldFail_IfTooLow()
+    {
+        $this->settings->numQueueWorkers->setValue('0');
+    }
+
     public function test_redisDatabase_ShouldWorkAndCastValueToInt_IfAcceptedValue()
     {
         $this->settings->redisDatabase->setValue('14');
@@ -202,6 +229,17 @@ class SettingsTest extends IntegrationTestCase
     {
         $this->settings->numRequestsToProcess->setValue('34');
         $this->assertSame(34, $this->settings->numRequestsToProcess->getValue());
+    }
+
+    public function test_numQueueWorkers_DefaultValue()
+    {
+        $this->assertSame(1, $this->settings->numQueueWorkers->getValue());
+    }
+
+    public function test_numQueueWorkers_ShouldConvertAnyValueToInteger()
+    {
+        $this->settings->numQueueWorkers->setValue('5');
+        $this->assertSame(5, $this->settings->numQueueWorkers->getValue());
     }
 
     public function test_processDuringTrackingRequest_ShouldBeEnabledByDefault()

@@ -11,6 +11,7 @@ namespace Piwik\Plugins\QueuedTracking\tests\Framework\TestCase;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\QueuedTracking;
 use Piwik\Tests\Framework\Mock\Tracker\RequestSet;
+use Piwik\Tracker\RequestSet as PiwikRequestSet;
 use Piwik\Tracker\Request;
 
 /**
@@ -63,6 +64,30 @@ class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTes
         $set->setRequests($requests);
 
         return $set;
+    }
+
+    protected function assertRequestsAreEqual(PiwikRequestSet $expected, PiwikRequestSet $actual)
+    {
+        $eState = $expected->getState();
+        $aState = $actual->getState();
+
+        $eTime = $eState['time'];
+        $aTime = $aState['time'];
+
+        unset($eState['time']);
+        unset($aState['time']);
+
+        if (array_key_exists('REQUEST_TIME_FLOAT', $eState['env']['server'])) {
+            unset($eState['env']['server']['REQUEST_TIME_FLOAT']);
+        }
+
+        if (array_key_exists('REQUEST_TIME_FLOAT', $aState['env']['server'])) {
+            unset($aState['env']['server']['REQUEST_TIME_FLOAT']);
+        }
+
+        $this->assertGreaterThan(100000, $aTime);
+        $this->assertTrue(($aTime - 5 < $eTime) && ($aTime + 5 > $eTime), "$eTime is not nearly $aTime");
+        $this->assertEquals($eState, $aState);
     }
 
     protected function buildRequestSetContainingError($numberOfRequestSets, $indexThatShouldContainError)

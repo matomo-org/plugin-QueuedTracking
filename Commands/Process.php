@@ -26,7 +26,6 @@ class Process extends ConsoleCommand
     {
         $this->setName('queuedtracking:process');
         $this->setDescription('Processes all queued tracking requests in case there are enough requests in the queue and in case they are not already in process by another script. To keep track of the queue use the <comment>--verbose</comment> option or execute the <comment>queuedtracking:monitor</comment> command.');
-        $this->setHelp('Use the <comment>--verbose</comment> parameter if you want to keep track of the live state of the queue while it is being processed. This slows down the tracking performance a tiny bit therefore it is disabled by default and it should not be used when the command is executed as a cronjob. You can still keep track of the queue by using the <comment>queuedtracking:monitor</comment> command if needed.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -38,52 +37,38 @@ class Process extends ConsoleCommand
         Plugin\Manager::getInstance()->setTrackerPluginsNotToLoad(array('Provider'));
         Tracker::loadTrackerEnvironment();
 
-        $backend   = Queue\Factory::makeBackend();
-        $queue     = Queue\Factory::makeQueue($backend);
-        $processor = new Processor($backend);
-        $processor->setNumberOfMaxBatchesToProcess(1000);
+        $backend      = Queue\Factory::makeBackend();
+        $queueManager = Queue\Factory::makeQueueManager($backend);
 
-        $numRequestsQueued = $queue->getNumberOfRequestSetsInQueue();
-
-        if (!$queue->shouldProcess()) {
-            $numRequestsNeeded = $queue->getNumberOfRequestsToProcessAtSameTime();
-            $this->writeSuccessMessage($output, array("Nothing to process. Only $numRequestsQueued request sets are queued, $numRequestsNeeded are needed to start processing the queue."));
-        } elseif (!$processor->acquireLock()) {
-            $this->writeSuccessMessage($output, array("Nothing to proccess. $numRequestsQueued request sets are queued and they are already in process by another script."));
-        } else {
-            $output->writeln("<info>Starting to process $numRequestsQueued request sets, this can take a while</info>");
-
-            register_shutdown_function(function () use ($processor) {
-                $processor->unlock();
-            });
-
-            if ($input->getOption('verbose')) {
-                $this->setProgressCallback($processor, $output, $numRequestsQueued);
-            }
-
-            try {
-                $processor->process($queue);
-                $processor->unlock();
-            } catch (\Exception $e) {
-                $processor->unlock();
-
-                throw $e;
-            }
-
-            $this->writeSuccessMessage($output, array('Queue processed'));
+        if (!$queueManager->canAcquireMoreLocks()) {
+            $this->writeSuccessMessage($output, array("Nothing to proccess. Already max number of workers in process."));
+            return;
         }
-    }
 
-    private function setProgressCallback(Processor $processor, OutputInterface $output, $numRequests)
-    {
-        $processor->setOnProcessNewRequestSetCallback(function (Queue $queue, Tracker $tracker) use ($output, $numRequests) {
-            $message = sprintf('%s requests tracked, %s request sets left in queue        ',
-                               $tracker->getCountOfLoggedRequests(),
-                               $queue->getNumberOfRequestSetsInQueue());
+        $shouldProcess = false;
+        foreach ($queueManager->getAllQueues() as $queue) {
+            if ($queue->shouldProcess()) {
+                $shouldProcess = true;
+                break;
+            }
+        }
 
-            $output->write("\x0D");
-            $output->write($message);
+        if (!$shouldProcess) {
+            $this->writeSuccessMessage($output, array("No queue currently needs processing"));
+            return;
+        }
+
+        $output->writeln("<info>Starting to process request sets, this can take a while</info>");
+
+        register_shutdown_function(function () use ($queueManager) {
+            $queueManager->unlock();
         });
 
+        $processor = new Processor($queueManager);
+        $processor->setNumberOfMaxBatchesToProcess(1000);
+        $processor->process($queueManager);
+
+        $this->writeSuccessMessage($output, array('This worker finished queue processing'));
     }
+
 }

@@ -11,22 +11,36 @@ namespace Piwik\Plugins\QueuedTracking;
 use Piwik\Plugins\QueuedTracking\Queue\Backend;
 use Piwik\Tracker\RequestSet;
 use Piwik\Tracker;
-use Piwik\Translate;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
 
 class Queue
 {
+    const PREFIX = 'trackingQueueV1';
+
     /**
      * @var Redis
      */
     private $backend;
 
-    private $key = 'trackingQueueV1';
+    private $key;
+    private $id;
     private $numRequestsToProcessInBulk = 50;
 
-    public function __construct(Backend $backend)
+    public function __construct(Backend $backend, $id)
     {
         $this->backend = $backend;
+
+        $this->id  = $id;
+        $this->key = self::PREFIX;
+
+        if (!empty($id)) {
+            $this->key .= '_' . $id;
+        }
+    }
+
+    public function getId()
+    {
+        return $this->id;
     }
 
     public function setNumberOfRequestsToProcessAtSameTime($numRequests)
@@ -37,6 +51,11 @@ class Queue
     public function getNumberOfRequestsToProcessAtSameTime()
     {
         return $this->numRequestsToProcessInBulk;
+    }
+
+    public function getNumberOfRequestSetsInQueue()
+    {
+        return $this->backend->getNumValuesInList($this->key);
     }
 
     public function addRequestSet(RequestSet $requests)
@@ -51,16 +70,9 @@ class Queue
         $this->backend->appendValuesToList($this->key, array($value));
     }
 
-    public function shouldProcess()
+    public function delete()
     {
-        $numRequests = $this->getNumberOfRequestSetsInQueue();
-
-        return $numRequests >= $this->numRequestsToProcessInBulk;
-    }
-
-    public function getNumberOfRequestSetsInQueue()
-    {
-        return $this->backend->getNumValuesInList($this->key);
+        return $this->backend->delete($this->key);
     }
 
     /**
@@ -80,6 +92,13 @@ class Queue
         }
 
         return $requests;
+    }
+
+    public function shouldProcess()
+    {
+        $numRequests = $this->getNumberOfRequestSetsInQueue();
+
+        return $numRequests >= $this->numRequestsToProcessInBulk;
     }
 
     public function markRequestSetsAsProcessed()

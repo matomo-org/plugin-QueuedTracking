@@ -49,7 +49,7 @@ class HandlerTest extends IntegrationTestCase
     private $requestSet;
 
     /**
-     * @var Queue
+     * @var Queue\Manager
      */
     private $queue;
 
@@ -63,10 +63,11 @@ class HandlerTest extends IntegrationTestCase
         parent::setUp();
 
         Fixture::createWebsite('2014-01-01 00:00:00');
+        Fixture::createSuperUser();
         Tracker\Cache::deleteTrackerCache();
 
         $this->backend = $this->createRedisBackend();
-        $this->queue   = Queue\Factory::makeQueue($this->backend);
+        $this->queue   = Queue\Factory::makeQueueManager($this->backend);
 
         $this->response = new Response();
         $this->handler  = new Handler();
@@ -200,25 +201,33 @@ class HandlerTest extends IntegrationTestCase
 
     public function test_process_ShouldWriteRequestsToQueue()
     {
-        $this->assertSame(0, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame(0, $this->queue->getNumberOfRequestSetsInAllQueues());
 
         $this->processDummyRequests();
 
-        $this->assertSame(1, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame(1, $this->queue->getNumberOfRequestSetsInAllQueues());
 
         $this->processDummyRequests();
 
-        $this->assertSame(2, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame(2, $this->queue->getNumberOfRequestSetsInAllQueues());
 
         // verify
         $this->queue->setNumberOfRequestsToProcessAtSameTime(2);
-        $requestSet = $this->queue->getRequestSetsToProcess();
+
+        // those requests  will be written into queue 1
+        $requestSet = $this->queue->createQueue($id = 1)->getRequestSetsToProcess();
         $this->assertCount(2, $requestSet);
 
         $requests = $requestSet[0]->getRequests();
         $this->assertCount(2, $requests);
-        $this->assertEquals(array('idsite' => 1, 'url' => 'http://localhost/foo?bar'), $requests[0]->getParams());
-        $this->assertEquals(array('idsite' => 1, 'url' => 'http://localhost'), $requests[1]->getParams());
+
+        $ip = '192.168.33.11';
+        $defaultRequest = array(
+            'idsite' => 1, 'cip' => $ip, 'token_auth' => Fixture::getTokenAuth()
+        );
+
+        $this->assertEquals(array_merge(array('url' => 'http://localhost/foo?bar'), $defaultRequest), $requests[0]->getParams());
+        $this->assertEquals(array_merge(array('url' => 'http://localhost'), $defaultRequest), $requests[1]->getParams());
     }
 
     public function test_process_ShouldDirectlyProcessQueueOnceNumRequestsPresent_IfEnabled()
@@ -226,56 +235,60 @@ class HandlerTest extends IntegrationTestCase
         Queue\Factory::getSettings()->numRequestsToProcess->setValue(2);
         $this->handler->enableProcessingInTrackerMode();
 
-        $this->assertSame(0, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame(0, $this->queue->getNumberOfRequestSetsInAllQueues());
 
         $this->processDummyRequests();
 
-        $this->assertSame(1, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame(1, $this->queue->getNumberOfRequestSetsInAllQueues());
 
         $this->processDummyRequests();
 
-        $this->assertSame(0, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame(0, $this->queue->getNumberOfRequestSetsInAllQueues());
     }
 
     public function test_process_ShouldNotDirectlyProcessQueue_IfDisabled()
     {
         $this->queue->setNumberOfRequestsToProcessAtSameTime(1);
 
-        $this->assertSame(0, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame(0, $this->queue->getNumberOfRequestSetsInAllQueues());
 
         $this->processDummyRequests();
 
-        $this->assertSame(1, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame(1, $this->queue->getNumberOfRequestSetsInAllQueues());
 
         $this->processDummyRequests();
 
-        $this->assertSame(2, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame(2, $this->queue->getNumberOfRequestSetsInAllQueues());
     }
 
     public function test_process_ShouldNotDirectlyProcessQueue_IfAlreadyLocked()
     {
-        $processor = new Queue\Processor($this->backend);
-        $processor->acquireLock();
+        Queue\Factory::getSettings()->numQueueWorkers->setValue(1);
 
-        $this->queue->setNumberOfRequestsToProcessAtSameTime(1);
         $this->handler->enableProcessingInTrackerMode();
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(1);
 
-        $this->assertSame(0, $this->queue->getNumberOfRequestSetsInQueue());
+        // there is only one worker, so make sure that queue is locked
+        $lock = new Queue\Lock($this->backend);
+        $lock->acquireLock(0);
+
+        $this->assertSame(0, $this->queue->getNumberOfRequestSetsInAllQueues());
 
         $this->processDummyRequests();
 
-        $this->assertSame(1, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame(1, $this->queue->getNumberOfRequestSetsInAllQueues());
 
         $this->processDummyRequests();
 
-        $this->assertSame(2, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame(2, $this->queue->getNumberOfRequestSetsInAllQueues());
 
-        $processor->unlock();
+        $this->queue->unlock();
     }
 
     public function test_process_ShouldNotCreateADatabaseConnectionAtAnyTime()
     {
-        $this->setDummyRequests();
+        $this->setDummyRequests(false);
+
         Queue\Factory::getSettings()->queueEnabled->getValue(); // this will cause a db query but will be cached afterwards
         Db::destroyDatabaseObject();
 
@@ -311,11 +324,15 @@ class HandlerTest extends IntegrationTestCase
         $this->handler->process($this->tracker, $this->requestSet);
     }
 
-    private function setDummyRequests()
+    private function setDummyRequests($useTokenAuth = true)
     {
+        if ($useTokenAuth) {
+            $useTokenAuth = Fixture::getTokenAuth();
+        }
+
         $this->requestSet->setRequests(array(
-            array('idsite' => 1, 'url' => 'http://localhost/foo?bar'),
-            array('idsite' => 1, 'url' => 'http://localhost'),
+            array('idsite' => 1, 'url' => 'http://localhost/foo?bar', 'cip' => '192.168.33.11', 'token_auth' => $useTokenAuth),
+            array('idsite' => 1, 'url' => 'http://localhost', 'cip' => '192.168.33.11', 'token_auth' => $useTokenAuth),
         ));
     }
 }

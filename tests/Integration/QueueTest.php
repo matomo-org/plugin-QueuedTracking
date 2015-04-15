@@ -33,15 +33,31 @@ class QueueTest extends IntegrationTestCase
     {
         parent::setUp();
 
+        $this->queue = $this->createQueue($id = '');
+    }
+
+    private function createQueue($id)
+    {
         $redis = $this->createRedisBackend();
-        $this->queue = new Queue($redis);
-        $this->queue->setNumberOfRequestsToProcessAtSameTime(3);
+
+        $queue = new Queue($redis, $id);
+        $queue->setNumberOfRequestsToProcessAtSameTime(3);
+
+        return $queue;
     }
 
     public function tearDown()
     {
         $this->clearRedisDb();
         parent::tearDown();
+    }
+
+    public function test_getId()
+    {
+        $this->assertSame('', $this->queue->getId());
+
+        $this->assertSame('2', $this->createQueue('2')->getId());
+        $this->assertSame(3, $this->createQueue(3)->getId());
     }
 
     public function test_internalBuildRequestsSet_ShouldReturnRequestObjects()
@@ -170,6 +186,23 @@ class QueueTest extends IntegrationTestCase
         $this->assertNumberOfRequestSetsInQueue(2);
     }
 
+    public function test_delete_shouldReturnFalseIfThereAreNoRequestsInQueue()
+    {
+        $this->assertNumberOfRequestSetsInQueue(0);
+
+        $this->assertFalse($this->queue->delete());
+    }
+
+    public function test_delete_shouldRemoveAllEntriesWithinQueue()
+    {
+        $this->addRequestSetsToQueue(2);
+        $this->assertNumberOfRequestSetsInQueue(2);
+
+        $this->assertTrue($this->queue->delete());
+
+        $this->assertNumberOfRequestSetsInQueue(0);
+    }
+
     public function test_getRequestSetsToProcess_shouldReturnAnEmptyArrayIfQueueIsEmpty()
     {
         $this->assertEquals(array(), $this->queue->getRequestSetsToProcess());
@@ -237,6 +270,26 @@ class QueueTest extends IntegrationTestCase
         $this->assertEquals(array(), $this->queue->getRequestSetsToProcess());
     }
 
+    public function test__construct_differentIdShouldHaveSeparateNamespace()
+    {
+        $this->addRequestSetsToQueue(5);
+
+        $this->assertSame(5, $this->queue->getNumberOfRequestSetsInQueue());
+
+        $queue2 = $this->createQueue($id = 2);
+        $queue3 = $this->createQueue($id = 3);
+
+        $this->assertSame(0, $queue2->getNumberOfRequestSetsInQueue());
+        $this->assertSame(0, $queue3->getNumberOfRequestSetsInQueue());
+
+        $queue2->addRequestSet($this->buildRequestSetWithIdSite(2, 1));
+        $queue2->addRequestSet($this->buildRequestSetWithIdSite(1, 1));
+
+        $this->assertSame(5, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame(2, $queue2->getNumberOfRequestSetsInQueue());
+        $this->assertSame(0, $queue3->getNumberOfRequestSetsInQueue());
+    }
+
     /**
      * @param RequestSet[] $expected
      * @param RequestSet[] $actual
@@ -253,30 +306,6 @@ class QueueTest extends IntegrationTestCase
     private function assertNumberOfRequestSetsInQueue($expectedNumRequests)
     {
         $this->assertSame($expectedNumRequests, $this->queue->getNumberOfRequestSetsInQueue());
-    }
-
-    private function assertRequestsAreEqual(RequestSet $expected, RequestSet $actual)
-    {
-        $eState = $expected->getState();
-        $aState = $actual->getState();
-
-        $eTime = $eState['time'];
-        $aTime = $aState['time'];
-
-        unset($eState['time']);
-        unset($aState['time']);
-
-        if (array_key_exists('REQUEST_TIME_FLOAT', $eState['env']['server'])) {
-            unset($eState['env']['server']['REQUEST_TIME_FLOAT']);
-        }
-
-        if (array_key_exists('REQUEST_TIME_FLOAT', $aState['env']['server'])) {
-            unset($aState['env']['server']['REQUEST_TIME_FLOAT']);
-        }
-
-        $this->assertGreaterThan(100000, $aTime);
-        $this->assertTrue(($aTime - 5 < $eTime) && ($aTime + 5 > $eTime), "$eTime is not nearly $aTime");
-        $this->assertEquals($eState, $aState);
     }
 
     private function buildRequestSetWithIdSite($numRequests, $idSite = null)

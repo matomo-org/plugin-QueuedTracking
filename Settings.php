@@ -9,8 +9,8 @@
 namespace Piwik\Plugins\QueuedTracking;
 
 use Piwik\Cache;
-use Piwik\Common;
 use Piwik\Config;
+use Piwik\Plugins\QueuedTracking\Settings\NumWorkers;
 use Piwik\Settings\Storage\StaticStorage;
 use Piwik\Settings\SystemSetting;
 
@@ -41,6 +41,9 @@ class Settings extends \Piwik\Plugin\Settings
     public $numRequestsToProcess;
 
     /** @var SystemSetting */
+    public $numQueueWorkers;
+
+    /** @var SystemSetting */
     public $processDuringTrackingRequest;
 
     private $staticStorage;
@@ -57,6 +60,7 @@ class Settings extends \Piwik\Plugin\Settings
         $this->createRedisDatabaseSetting();
         $this->createRedisPasswordSetting();
         $this->createQueueEnabledSetting();
+        $this->createNumberOfQueueWorkerSetting();
         $this->createNumRequestsToProcessSetting();
         $this->createProcessInTrackingRequestSetting();
     }
@@ -126,6 +130,31 @@ class Settings extends \Piwik\Plugin\Settings
 
         // we do not expose this one to the UI currently. That's on purpose
         $this->redisTimeout->setStorage($this->staticStorage);
+    }
+
+    private function createNumberOfQueueWorkerSetting()
+    {
+        $this->numQueueWorkers = new NumWorkers('numQueueWorkers', 'Number of queue workers');
+        $this->numQueueWorkers->readableByCurrentUser = true;
+        $this->numQueueWorkers->type = static::TYPE_INT;
+        $this->numQueueWorkers->uiControlType = static::CONTROL_TEXT;
+        $this->numQueueWorkers->uiControlAttributes = array('size' => 5);
+        $this->numQueueWorkers->description = 'Number of allowed maximum queue workers';
+        $this->numQueueWorkers->inlineHelp = 'Accepts a number between 1 and 8. Best practice is to set the number of CPUs you want to make available for queue processing. Be aware you need to make sure to start the workers manually.';
+        $this->numQueueWorkers->defaultValue = 1;
+        $this->numQueueWorkers->validate = function ($value) {
+
+            if (!is_numeric($value)) {
+                throw new \Exception('Number of queue workers should be an integer, eg "6"');
+            }
+
+            $value = (int) $value;
+            if ($value > 8 || $value < 1) {
+                throw new \Exception('Only 1-8 workers allowed');
+            }
+        };
+
+        $this->addSetting($this->numQueueWorkers);
     }
 
     private function createRedisPasswordSetting()

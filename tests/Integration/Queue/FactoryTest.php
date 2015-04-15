@@ -21,17 +21,33 @@ use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 class FactoryTest extends IntegrationTestCase
 {
 
-    public function test_makeQueue_shouldReturnAQueueInstance()
+    public function test_makeQueueManager_shouldReturnAQueueInstance()
     {
-        $queue = Factory::makeQueue($this->createRedisBackend());
-        $this->assertTrue($queue instanceof Queue);
+        $queue = Factory::makeQueueManager($this->createRedisBackend());
+        $this->assertTrue($queue instanceof Queue\Manager);
     }
 
-    public function test_makeQueue_shouldConfigureTheNumberOfRequestsToProcess()
+    public function test_makeQueueMananger_shouldConfigureTheNumberOfRequestsToProcess()
     {
-        Factory::getSettings()->numRequestsToProcess->setValue(34);
-        $queue = Factory::makeQueue($this->createRedisBackend());
-        $this->assertSame(34, $queue->getNumberOfRequestsToProcessAtSameTime());
+        Factory::getSettings()->numRequestsToProcess->setValue(31);
+        $queue = Factory::makeQueueManager($this->createRedisBackend());
+        $this->assertSame(31, $queue->getNumberOfRequestsToProcessAtSameTime());
+    }
+
+    public function test_makeQueueMananger_shouldConfigureTheNumberOfWorkers()
+    {
+        $redis = $this->createRedisBackend();
+        Factory::getSettings()->numQueueWorkers->setValue(7);
+
+        $queue = Factory::makeQueueManager($redis);
+        $this->assertSame(7, $queue->getNumberOfAvailableQueues());
+    }
+
+    public function test_makeLock_shouldReturnALockInstance()
+    {
+        $backend = Factory::makeBackend();
+        $lock = Factory::makeLock($backend);
+        $this->assertTrue($lock instanceof Queue\Lock);
     }
 
     public function test_makeBackend_shouldReturnARedisInstance()

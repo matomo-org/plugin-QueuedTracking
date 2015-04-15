@@ -139,7 +139,7 @@ class TrackerTest extends SystemTestCase
         // it sends us the response before actually processing them
 
         $queue = $this->createQueue();
-        while ($queue->getNumberOfRequestSetsInQueue() !== 0) {
+        while ($queue->getNumberOfRequestSetsInAllQueues() !== 0) {
             usleep(100);
         }
 
@@ -182,7 +182,7 @@ class TrackerTest extends SystemTestCase
 
     protected function createQueue()
     {
-        return Queue\Factory::makeQueue($this->createRedisBackend());
+        return Queue\Factory::makeQueueManager($this->createRedisBackend());
     }
 
     protected function clearRedisDb()
@@ -209,6 +209,6 @@ class TrackerTest extends SystemTestCase
     private function assertNumEntriesInQueue($numRequestSets)
     {
         $queue = $this->createQueue();
-        $this->assertSame($numRequestSets, $queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame($numRequestSets, $queue->getNumberOfRequestSetsInAllQueues());
     }
 }

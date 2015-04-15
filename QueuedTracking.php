@@ -34,6 +34,7 @@ class QueuedTracking extends \Piwik\Plugin
             $settings->redisPort->setValue(6379);
             $settings->redisPassword->setValue('');
             $settings->redisDatabase->setValue(15);
+            $settings->numQueueWorkers->setValue(4);
         });
     }
 
