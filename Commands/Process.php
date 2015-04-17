@@ -12,6 +12,7 @@ namespace Piwik\Plugins\QueuedTracking\Commands;
 use Piwik\Access;
 use Piwik\Cache;
 use Piwik\Container\StaticContainer;
+use Piwik\Log;
 use Piwik\Piwik;
 use Piwik\Plugin;
 use Piwik\Plugin\ConsoleCommand;
@@ -79,6 +80,9 @@ class Process extends ConsoleCommand
 
     private function recreateEagerCacheInstanceWhichChangesOnceTrackerModeIsEnabled()
     {
+        StaticContainer::clearContainer();
+        Log::unsetInstance();
+
         $key = 'Piwik\Cache\Eager';
         $container = StaticContainer::getContainer();
         $container->set($key, $container->make($key));
