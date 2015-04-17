@@ -10,6 +10,9 @@
 namespace Piwik\Plugins\QueuedTracking\Commands;
 
 use Piwik\Access;
+use Piwik\Cache;
+use Piwik\Container\StaticContainer;
+use Piwik\Piwik;
 use Piwik\Plugin;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\Queue;
@@ -36,6 +39,7 @@ class Process extends ConsoleCommand
         Access::getInstance()->setSuperUserAccess(false);
         Plugin\Manager::getInstance()->setTrackerPluginsNotToLoad(array('Provider'));
         Tracker::loadTrackerEnvironment();
+        $this->recreateEagerCacheInstanceWhichChangesOnceTrackerModeIsEnabled();
 
         $backend      = Queue\Factory::makeBackend();
         $queueManager = Queue\Factory::makeQueueManager($backend);
@@ -68,7 +72,16 @@ class Process extends ConsoleCommand
         $processor->setNumberOfMaxBatchesToProcess(1000);
         $processor->process($queueManager);
 
+        Piwik::postEvent('Tracker.end');
+
         $this->writeSuccessMessage($output, array('This worker finished queue processing'));
+    }
+
+    private function recreateEagerCacheInstanceWhichChangesOnceTrackerModeIsEnabled()
+    {
+        $key = 'Piwik\Cache\Eager';
+        $container = StaticContainer::getContainer();
+        $container->set($key, $container->make($key));
     }
 
 }
