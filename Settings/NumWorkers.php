@@ -27,9 +27,13 @@ class NumWorkers extends SystemSetting
         parent::setValue($value);
 
         if ($newNumWorkers && $oldNumWorkers) {
-            $manager = Factory::makeQueueManager(Factory::makeBackend());
-            $manager->setNumberOfAvailableQueues($newNumWorkers);
-            $manager->moveSomeQueuesIfNeeded($newNumWorkers, $oldNumWorkers);
+            try {
+                $manager = Factory::makeQueueManager(Factory::makeBackend());
+                $manager->setNumberOfAvailableQueues($newNumWorkers);
+                $manager->moveSomeQueuesIfNeeded($newNumWorkers, $oldNumWorkers);
+            } catch (\Exception $e) {
+                // it is ok if this fails. then it is most likely not enabled etc.
+            }
         }
     }
 }
