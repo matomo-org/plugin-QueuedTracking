@@ -67,7 +67,7 @@ class NumWorkersTest extends IntegrationTestCase
 
         $this->assertSame(4, $manager->getNumberOfRequestSetsInAllQueues());
         $this->assertGreaterThanOrEqual(1, $queues[0]->getNumberOfRequestSetsInQueue());
-        $this->assertGreaterThanOrEqual(3, $queues[1]->getNumberOfRequestSetsInQueue());
+        $this->assertGreaterThanOrEqual(1, $queues[1]->getNumberOfRequestSetsInQueue());
         $this->assertSame(0, $queues[2]->getNumberOfRequestSetsInQueue());
         $this->assertSame(0, $queues[3]->getNumberOfRequestSetsInQueue());
     }
