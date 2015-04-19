@@ -106,6 +106,7 @@ __How can I debug in case something goes wrong?__
 * Use the command `./console queuedtracking:lock-status` to view the current state of all locks
 * Set the option `-vvv` when processing via `./console queuedtracking:process -vvv` to enable the tracker debug mode for this run. This will print detailed information to screen.
 * Enable tracker mode in `config.ini.php` via `[Tracker] debug=1` if processing requests during tracking is enabled.
+* Use the command `./console queuedtracking:print-queued-requests` to view the next requests to process in each queue. If you execute this command twice within 1-10 minutes, and it outputs the same, the queue is not being processed most likely indicating a problem.
 
 __Are there any known issues?__
 
@@ -122,6 +123,7 @@ __Are there any known issues?__
 - It is now possible to start multiple workers for faster insertion from Redis to the database. This can be configured in the "Plugin Settings"
 - Monitor does now output information whether a processor is currently processing the queue.
 - Added a new command `queuedtracking:lock-status` that outputs the status of each queue lock. This command can also unlock a queue by using the option `--unlock`.
+- Added a new command `queuedtracking:print-queued-requests` that outputs the next requests to process in each queue.
 - If someone passes the option `-vvv` to `./console queuedtracking:process` the Tracker debug mode will be enabled and additional information will be printed to the screen.
 
 0.1.2
