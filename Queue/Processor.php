@@ -96,6 +96,8 @@ class Processor
             }
 
         } catch (Exception $e) {
+            Common::printDebug('Failed to process a request set: ' . $e->getMessage());
+
             $this->queueManager->unlock();
             $request->restoreEnvironment();
             throw $e;
