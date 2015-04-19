@@ -42,6 +42,10 @@ class Process extends ConsoleCommand
         Tracker::loadTrackerEnvironment();
         $this->recreateEagerCacheInstanceWhichChangesOnceTrackerModeIsEnabled();
 
+        if (OutputInterface::VERBOSITY_VERY_VERBOSE <= $output->getVerbosity()) {
+            Tracker::setTrackerDebugMode(true);
+        }
+
         $backend      = Queue\Factory::makeBackend();
         $queueManager = Queue\Factory::makeQueueManager($backend);
 

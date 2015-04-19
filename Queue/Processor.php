@@ -78,6 +78,7 @@ class Processor
 
             while ($queue = $this->queueManager->lockNext()) {
                 if ($loops > $this->numMaxBatchesToProcess) {
+                    Common::printDebug('This worker processed ' . $loops . ' times, stopping now.');
                     break;
                 } else {
                     $loops++;
