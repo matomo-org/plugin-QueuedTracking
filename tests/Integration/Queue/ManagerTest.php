@@ -144,9 +144,9 @@ class ManagerTest extends IntegrationTestCase
     {
         $numQueues = $this->manager->getNumberOfAvailableQueues();
 
-        $a = 97 % $numQueues; // 97 = ord('a');
-        $b = 98 % $numQueues; // 98 = ord('b');
-        $c = 99 % $numQueues; // 99 = ord('c');
+        $a = 10 % $numQueues; // 10, 11, 12 is a internal mapping see {Manager::$mappingLettersToNumeric}
+        $b = 11 % $numQueues;
+        $c = 12 % $numQueues;
 
         $this->assertQueueIdForVisitorIdEquals($a, 'a');
         $this->assertQueueIdForVisitorIdEquals($b, 'b');
@@ -267,11 +267,11 @@ class ManagerTest extends IntegrationTestCase
         }
 
         $this->assertSame(26, $this->manager->getNumberOfRequestSetsInAllQueues());
-        $this->assertNumberOfRequestSetsInQueueEquals(6, $queueId = 0);
-        $this->assertNumberOfRequestSetsInQueueEquals(9, $queueId = 1);
-        $this->assertNumberOfRequestSetsInQueueEquals(7, $queueId = 2);
-        $this->assertNumberOfRequestSetsInQueueEquals(4, $queueId = 3);
-        $this->assertNumberOfRequestSetsInQueueEquals(0, $queueId = 4); // this queue is not available
+        $this->assertNumberOfRequestSetsInQueueEquals(5,  $queueId = 0);
+        $this->assertNumberOfRequestSetsInQueueEquals(10, $queueId = 1);
+        $this->assertNumberOfRequestSetsInQueueEquals(1,  $queueId = 2);
+        $this->assertNumberOfRequestSetsInQueueEquals(10, $queueId = 3);
+        $this->assertNumberOfRequestSetsInQueueEquals(0,  $queueId = 4); // this queue is not available
     }
 
     public function test_addRequestSetToQueues_getNumberOfRequestSetsInAllQueues_shouldMoveAllInSameQueue_IfAllHaveSameUID()
@@ -319,7 +319,7 @@ class ManagerTest extends IntegrationTestCase
         $requests[0] = array('idsite' => 1, 'uid' => 1);
         $requests[1] = array('idsite' => 1, 'uid' => 2);
         $requests[2] = array('idsite' => 1, 'uid' => 3);
-        $requests[3] = array('idsite' => 1, 'uid' => 4);
+        $requests[3] = array('idsite' => 1, 'uid' => 5);
         $requests[4] = array('idsite' => 3, 'uid' => 1);
         $requests[5] = array('idsite' => 1, 'uid' => 3);
 
@@ -329,19 +329,20 @@ class ManagerTest extends IntegrationTestCase
         $this->manager->addRequestSetToQueues($req);
 
         $this->assertSame(3, $this->manager->getNumberOfRequestSetsInAllQueues()); // 3 different uid
-        $this->assertNumberOfRequestSetsInQueueEquals(1, $queueId = 0);
+
+        $this->assertNumberOfRequestSetsInQueueEquals(0, $queueId = 0);
         $this->assertNumberOfRequestSetsInQueueEquals(1, $queueId = 1);
-        $this->assertNumberOfRequestSetsInQueueEquals(0, $queueId = 2);
+        $this->assertNumberOfRequestSetsInQueueEquals(1, $queueId = 2);
         $this->assertNumberOfRequestSetsInQueueEquals(1, $queueId = 3);
         $this->assertNumberOfRequestSetsInQueueEquals(0, $queueId = 4);
 
         $req->setRequests(array($requests[1]));
-        $this->assertRequestSetsInQueueEquals($req, 0);
-
-        $req->setRequests(array($requests[2], $requests[3], $requests[5]));
         $this->assertRequestSetsInQueueEquals($req, 1);
 
-        $req->setRequests(array($requests[0], $requests[4]));
+        $req->setRequests(array($requests[3]));
+        $this->assertRequestSetsInQueueEquals($req, 2);
+
+        $req->setRequests(array($requests[0], $requests[2], $requests[4], $requests[5]));
         $this->assertRequestSetsInQueueEquals($req, 3);
     }
 
@@ -390,10 +391,10 @@ class ManagerTest extends IntegrationTestCase
 
         $this->manager->moveSomeQueuesIfNeeded($newNumWorkers, $oldNumWorkers);
 
-        $this->assertNumberOfRequestSetsInQueueEquals(1, $queueId = 0);
+        $this->assertNumberOfRequestSetsInQueueEquals(6, $queueId = 0);
         $this->assertNumberOfRequestSetsInQueueEquals(1, $queueId = 1);
         $this->assertNumberOfRequestSetsInQueueEquals(1, $queueId = 2);
-        $this->assertNumberOfRequestSetsInQueueEquals(6, $queueId = 3);
+        $this->assertNumberOfRequestSetsInQueueEquals(1, $queueId = 3);
         $this->assertNumberOfRequestSetsInQueueEquals(1, $queueId = 4);
         $this->assertNumberOfRequestSetsInQueueEquals(0, $queueId = 5);
         $this->assertNumberOfRequestSetsInQueueEquals(0, $queueId = 6);
