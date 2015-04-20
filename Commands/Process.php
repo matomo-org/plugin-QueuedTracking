@@ -73,13 +73,30 @@ class Process extends ConsoleCommand
             $queueManager->unlock();
         });
 
+        $startTime = microtime(true);
         $processor = new Processor($queueManager);
         $processor->setNumberOfMaxBatchesToProcess(1000);
-        $processor->process($queueManager);
+        $tracker   = $processor->process($queueManager);
+
+        $neededTime = (microtime(true) - $startTime);
+        $requestsPerSecond = $this->getNumberOfRequestsPerSecond($tracker, $neededTime);
 
         Piwik::postEvent('Tracker.end');
 
-        $this->writeSuccessMessage($output, array('This worker finished queue processing'));
+        $this->writeSuccessMessage($output, array(sprintf('This worker finished queue processing with %s requests per second', $requestsPerSecond)));
+    }
+
+    private function getNumberOfRequestsPerSecond(Tracker $tracker, $neededTimeInSeconds)
+    {
+        $numRequestsTracked = $tracker->getCountOfLoggedRequests();
+
+        if (empty($neededTimeInSeconds)) {
+            $requestsPerSecond = $numRequestsTracked;
+        } else {
+            $requestsPerSecond = round($numRequestsTracked / $neededTimeInSeconds, 2);
+        }
+
+        return $requestsPerSecond;
     }
 
     private function recreateEagerCacheInstanceWhichChangesOnceTrackerModeIsEnabled()

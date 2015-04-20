@@ -9,8 +9,6 @@
 
 namespace Piwik\Plugins\QueuedTracking\Commands;
 
-use Piwik\Access;
-use Piwik\Option;
 use Piwik\Plugin;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\Queue;
@@ -52,6 +50,9 @@ class PrintQueuedRequests extends ConsoleCommand
 
             $requests = $queue->getRequestSetsToProcess();
             $output->writeln(var_export($requests, 1));
+
+            $output->writeln(sprintf('<info>These were the requests of queue %s. Use <comment>--queue-id=%s</comment> to print only information for this queue.</info>', $thisQueueId, $thisQueueId));
+
         }
     }
 }
