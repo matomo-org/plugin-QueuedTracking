@@ -79,17 +79,16 @@ class Process extends ConsoleCommand
         $tracker   = $processor->process($queueManager);
 
         $neededTime = (microtime(true) - $startTime);
-        $requestsPerSecond = $this->getNumberOfRequestsPerSecond($tracker, $neededTime);
+        $numRequestsTracked = $tracker->getCountOfLoggedRequests();
+        $requestsPerSecond  = $this->getNumberOfRequestsPerSecond($numRequestsTracked, $neededTime);
 
         Piwik::postEvent('Tracker.end');
 
-        $this->writeSuccessMessage($output, array(sprintf('This worker finished queue processing with %s requests per second', $requestsPerSecond)));
+        $this->writeSuccessMessage($output, array(sprintf('This worker finished queue processing with %sreq/s (%s requests in %02.2f seconds)', $requestsPerSecond, $numRequestsTracked, $neededTime)));
     }
 
-    private function getNumberOfRequestsPerSecond(Tracker $tracker, $neededTimeInSeconds)
+    private function getNumberOfRequestsPerSecond($numRequestsTracked, $neededTimeInSeconds)
     {
-        $numRequestsTracked = $tracker->getCountOfLoggedRequests();
-
         if (empty($neededTimeInSeconds)) {
             $requestsPerSecond = $numRequestsTracked;
         } else {
