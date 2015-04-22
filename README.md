@@ -66,6 +66,10 @@ When using multiple workers it might be worth to lower the number of "Number of 
 
 If you process requests from the command line via `./console queuedtracking:process` make sure to always start enough workers. Each time you execute this command one worker will be started. If already enough workers are in process no new worker will be started and the command just finishes immediately.
 
+__How fast are the requests inserted from Redis to the Database?__
+
+This very much depends on your setup and hardware. With fast CPUs you can achive up to 250req/s with 1 worker, 400req/s with 2 workers and 1500req/s with 8 workers (tested on a AWS c3.x2large instance).
+
 __How should the redis server be configured?__
 
 Make sure to have enough memory to save all tracking requests in the queue. One tracking request in the queue takes about 2KB,
