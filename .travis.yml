@@ -132,3 +132,5 @@ after_script:
 
 after_success:
   - cd $PIWIK_ROOT_DIR
+
+sudo: required
