@@ -38,14 +38,14 @@ class Handler extends Tracker\Handler
     // here we write add the tracking requests to a list
     public function process(Tracker $tracker, RequestSet $requestSet)
     {
-        $queue = $this->getQueue();
-        $queue->addRequestSet($requestSet);
+        $queueManager = $this->getQueueManager();
+        $queueManager->addRequestSetToQueues($requestSet);
         $tracker->setCountOfLoggedRequests($requestSet->getNumberOfRequests());
 
         $this->sendResponseNow($tracker, $requestSet);
 
-        if ($this->isAllowedToProcessInTrackerMode()) {
-            $this->processQueueIfNeeded($queue);
+        if ($this->isAllowedToProcessInTrackerMode() && $queueManager->canAcquireMoreLocks()) {
+            $this->processQueue($queueManager);
         }
     }
 
@@ -70,36 +70,20 @@ class Handler extends Tracker\Handler
         $this->isAllowedToProcessInTrackerMode = true;
     }
 
-    private function processQueueIfNeeded(Queue $queue)
+    private function processQueue(Queue\Manager $queueManager)
     {
-        if ($queue->shouldProcess()) {
-            $backend   = $this->getBackend();
-            $processor = new Processor($backend);
+        Common::printDebug('We are going to process the queue');
+        set_time_limit(0);
 
-            $this->processIfNotLocked($processor, $queue);
+        try {
+            $processor = new Processor($queueManager);
+            $processor->process();
+        } catch (Exception $e) {
+            Common::printDebug('Failed to process queue: ' . $e->getMessage());
+            // TODO how could we report errors better as the response is already sent? also monitoring ...
         }
-    }
 
-    private function processIfNotLocked(Processor $processor, Queue $queue)
-    {
-        if ($processor->acquireLock()) {
-
-            register_shutdown_function(function () use ($processor) {
-                $processor->unlock();
-            });
-
-            Common::printDebug('We are going to process the queue');
-            set_time_limit(0);
-
-            try {
-                $processor->process($queue);
-            } catch (Exception $e) {
-                Common::printDebug('Failed to process queue: ' . $e->getMessage());
-                // TODO how could we report errors better as the response is already sent? also monitoring ...
-            }
-
-            $processor->unlock();
-        }
+        $queueManager->unlock();
     }
 
     private function getBackend()
@@ -111,10 +95,10 @@ class Handler extends Tracker\Handler
         return $this->backend;
     }
 
-    private function getQueue()
+    private function getQueueManager()
     {
         $backend = $this->getBackend();
-        $queue   = Queue\Factory::makeQueue($backend);
+        $queue   = Queue\Factory::makeQueueManager($backend);
 
         return $queue;
     }

@@ -14,7 +14,6 @@ use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Processor;
-use Piwik\Translate;
 
 class TestProcessor extends Processor {
 
@@ -40,7 +39,7 @@ class ProcessorTest extends IntegrationTestCase
     public $processor;
 
     /**
-     * @var Queue
+     * @var Queue\Manager
      */
     private $queue;
 
@@ -49,13 +48,21 @@ class ProcessorTest extends IntegrationTestCase
      */
     private $redis;
 
+    /**
+     * @var Queue\Lock
+     */
+    private $lock;
+
     public function setUp()
     {
         parent::setUp();
 
         $this->redis = $this->createRedisBackend();
 
-        $this->queue = new Queue($this->redis);
+        $this->lock = new Queue\Lock($this->redis);
+
+        $this->queue = new Queue\Manager($this->redis, $this->lock);
+        $this->queue->setNumberOfAvailableQueues(1);
         $this->queue->setNumberOfRequestsToProcessAtSameTime(3);
 
         $this->processor = $this->createProcessor();
@@ -65,33 +72,6 @@ class ProcessorTest extends IntegrationTestCase
     {
         $this->clearRedisDb();
         parent::tearDown();
-    }
-
-    public function test_acquireLock_ShouldLockInCaseItIsNotLockedYet()
-    {
-        $this->assertTrue($this->processor->acquireLock());
-        $this->assertFalse($this->processor->acquireLock());
-
-        $this->processor->unlock();
-
-        $this->assertTrue($this->processor->acquireLock());
-        $this->assertFalse($this->processor->acquireLock());
-    }
-
-    public function test_unlock_anotherProcessShouldNotBeAbleToUnlockALockedCommand()
-    {
-        $this->assertTrue($this->processor->acquireLock());
-
-        $processor = $this->createProcessor();
-        $processor->unlock();
-
-        $this->assertFalse($processor->acquireLock());
-
-        // now unlock the actual process
-        $this->processor->unlock();
-
-        // now it is actually unlocked and possible to lock again
-        $this->assertTrue($processor->acquireLock());
     }
 
     public function test_process_shouldDoNothing_IfQueueIsEmpty()
@@ -116,7 +96,7 @@ class ProcessorTest extends IntegrationTestCase
     {
         $this->addRequestSetsToQueue(3);
 
-        $tracker = $this->lockAndProcess();
+        $tracker = $this->process();
 
         $this->assertSame(3, $tracker->getCountOfLoggedRequests());
         $this->assertNumberOfRequestSetsLeftInQueue(0);
@@ -126,7 +106,7 @@ class ProcessorTest extends IntegrationTestCase
     {
         $this->addRequestSetsToQueue(5);
 
-        $tracker = $this->lockAndProcess();
+        $tracker = $this->process();
 
         $this->assertSame(3, $tracker->getCountOfLoggedRequests());
         $this->assertNumberOfRequestSetsLeftInQueue(2);
@@ -136,24 +116,10 @@ class ProcessorTest extends IntegrationTestCase
     {
         $this->addRequestSetsToQueue(10);
 
-        $tracker = $this->lockAndProcess();
+        $tracker = $this->process();
 
         $this->assertSame(9, $tracker->getCountOfLoggedRequests());
         $this->assertNumberOfRequestSetsLeftInQueue(1);
-    }
-
-    public function test_process_shouldNotProcess_IfLockWasNotAcquired()
-    {
-        $this->addRequestSetsToQueue(10);
-
-        try {
-            $this->processor->process($this->queue);
-            $this->fail('An expected exception was not triggered');
-        } catch (Queue\LockExpiredException $e) {
-
-            $this->assertNumberOfRequestSetsLeftInQueue(10);
-        }
-
     }
 
     public function test_process_shouldNotProcessAnything_IfRecordStatisticsIsDisabled()
@@ -162,47 +128,27 @@ class ProcessorTest extends IntegrationTestCase
 
         $record = TrackerConfig::getConfigValue('record_statistics');
         TrackerConfig::setConfigValue('record_statistics', 0);
-        $tracker = $this->lockAndProcess();
+        $tracker = $this->process();
         TrackerConfig::setConfigValue('record_statistics', $record);
 
         $this->assertSame(0, $tracker->getCountOfLoggedRequests());
 
-        $this->assertSame(8, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame(8, $this->queue->getNumberOfRequestSetsInAllQueues());
     }
 
     public function test_process_shouldProcessEachBulkRequestsWithinRequest()
     {
-        $this->queue->addRequestSet($this->buildRequestSet(1));
-        $this->queue->addRequestSet($this->buildRequestSet(2)); // bulk
-        $this->queue->addRequestSet($this->buildRequestSet(4)); // bulk
-        $this->queue->addRequestSet($this->buildRequestSet(1));
-        $this->queue->addRequestSet($this->buildRequestSet(8)); // bulk
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(2)); // bulk
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(4)); // bulk
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(8)); // bulk
 
-        $tracker = $this->lockAndProcess();
+        $tracker = $this->process();
 
         $this->assertSame(7, $tracker->getCountOfLoggedRequests());
 
         $this->assertNumberOfRequestSetsLeftInQueue(2);
-    }
-
-    public function test_process_shouldCallACallbackMethod_IfSet()
-    {
-        $this->addRequestSetsToQueue(16);
-
-        $called = 0;
-        $self   = $this;
-        $queue  = $this->queue;
-
-        $this->processor->setOnProcessNewRequestSetCallback(function ($passedQueue, Tracker $tracker) use (&$called, $self, $queue) {
-            $self->assertSame($queue, $passedQueue);
-            $self->assertTrue($tracker instanceof $tracker);
-            $self->assertGreaterThanOrEqual(0, $tracker->getCountOfLoggedRequests());
-            $called++;
-        });
-
-        $this->lockAndProcess();
-
-        $this->assertSame(5, $called); // 16 / 3 = 5
     }
 
     /**
@@ -228,7 +174,7 @@ class ProcessorTest extends IntegrationTestCase
             $this->buildRequestSet(3),
         );
 
-        $this->processor->acquireLock();
+        $this->acquireAllQueueLocks();
         $requestSetsToRetry = $this->processor->processRequestSets($tracker, $queuedRequestSets);
 
         $this->assertEquals(array(), $requestSetsToRetry);
@@ -246,7 +192,7 @@ class ProcessorTest extends IntegrationTestCase
             $requestSet5 = $this->buildRequestSetContainingError(4, 2),
         );
 
-        $this->processor->acquireLock();
+        $this->acquireAllQueueLocks();
         $requestSetsToRetry = $this->processor->processRequestSets($tracker, $queuedRequestSets);
 
         $expectedSets = array($requestSet1, $requestSet2, $requestSet4, $requestSet5);
@@ -275,7 +221,7 @@ class ProcessorTest extends IntegrationTestCase
             $this->buildRequestSet(3),
         );
 
-        $this->processor->acquireLock();
+        $this->acquireAllQueueLocks();
         $this->processor->processRequestSets($tracker, $queuedRequestSets);
 
         $this->assertSame(17, $tracker->getCountOfLoggedRequests());
@@ -286,37 +232,30 @@ class ProcessorTest extends IntegrationTestCase
         $this->queue->setNumberOfRequestsToProcessAtSameTime(2);
         // always two request sets at once will be processed
 
-        $this->queue->addRequestSet($this->buildRequestSet(1));
-        $this->queue->addRequestSet($this->buildRequestSet(5));
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(5));
 
         // the first one fails but still should process the first two and the second one
-        $this->queue->addRequestSet($this->buildRequestSetContainingError(4, 2));
-        $this->queue->addRequestSet($this->buildRequestSet(1));
+        $this->queue->addRequestSetToQueues($this->buildRequestSetContainingError(4, 2));
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
 
         // the last one fails completely
-        $this->queue->addRequestSet($this->buildRequestSet(1));
-        $this->queue->addRequestSet($this->buildRequestSetContainingError(1, 0));
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+        $this->queue->addRequestSetToQueues($this->buildRequestSetContainingError(1, 0));
 
         // both fail
-        $this->queue->addRequestSet($this->buildRequestSetContainingError(4, 0));
-        $this->queue->addRequestSet($this->buildRequestSetContainingError(2, 0));
+        $this->queue->addRequestSetToQueues($this->buildRequestSetContainingError(4, 0));
+        $this->queue->addRequestSetToQueues($this->buildRequestSetContainingError(2, 0));
 
         // the first one fails completely
-        $this->queue->addRequestSet($this->buildRequestSetContainingError(1, 0));
-        $this->queue->addRequestSet($this->buildRequestSet(4));
+        $this->queue->addRequestSetToQueues($this->buildRequestSetContainingError(1, 0));
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(4));
 
         $this->assertNumberOfRequestSetsLeftInQueue(10);
-
-        $count = 0;
-        $this->processor->acquireLock();
-        $this->processor->setOnProcessNewRequestSetCallback(function () use (&$count) {
-            $count++;
-        });
 
         $tracker = $this->processor->process($this->queue);
 
         $this->assertSame(1+5+1+2+1+4, $tracker->getCountOfLoggedRequests());
-        $this->assertSame(5, $count);
         $this->assertNumberOfRequestSetsLeftInQueue(0);
     }
 
@@ -325,25 +264,24 @@ class ProcessorTest extends IntegrationTestCase
         $this->queue->setNumberOfRequestsToProcessAtSameTime(2);
         // always two request sets at once will be processed
 
-        $this->queue->addRequestSet($requestSet1 = $this->buildRequestSet(1));
-        $this->queue->addRequestSet($requestSet2 = $this->buildRequestSet(5));
+        $this->queue->addRequestSetToQueues($requestSet1 = $this->buildRequestSet(1));
+        $this->queue->addRequestSetToQueues($requestSet2 = $this->buildRequestSet(5));
 
         // the last one fails completely
-        $this->queue->addRequestSet($requestSet3 = $this->buildRequestSet(1));
-        $this->queue->addRequestSet($requestSet4 = $this->buildRequestSetContainingError(2, 0));
+        $this->queue->addRequestSetToQueues($requestSet3 = $this->buildRequestSet(1));
+        $this->queue->addRequestSetToQueues($requestSet4 = $this->buildRequestSetContainingError(2, 0));
 
         // the last one fails completely
-        $this->queue->addRequestSet($requestSet5 = $this->buildRequestSetContainingError(3, 0));
-        $this->queue->addRequestSet($requestSet6 = $this->buildRequestSetContainingError(1, 0));
+        $this->queue->addRequestSetToQueues($requestSet5 = $this->buildRequestSetContainingError(3, 0));
+        $this->queue->addRequestSetToQueues($requestSet6 = $this->buildRequestSetContainingError(1, 0));
 
         $self = $this;
         $forwardCallToProcessor = function ($tracker, $requestSets) use ($self) {
             return $self->processor->processRequestSets($tracker, $requestSets);
         };
 
-        $self->processor->acquireLock();
-
-        $mock = $this->getMock(get_class($this->processor), array('processRequestSets'), array($this->redis));
+        $this->acquireAllQueueLocks();
+        $mock = $this->getMock(get_class($this->processor), array('processRequestSets'), array($this->queue, $this->lock));
 
         $mock->expects($this->at(0))
              ->method('processRequestSets')
@@ -393,42 +331,42 @@ class ProcessorTest extends IntegrationTestCase
         $this->queue->setNumberOfRequestsToProcessAtSameTime(1);
         $requestSet = $this->buildRequestSet(5);
         $requestSet->setEnvironment(array('server' => array('test' => 1)));
-        $this->queue->addRequestSet($requestSet);
+        $this->queue->addRequestSetToQueues($requestSet);
 
-        $tracker = $this->lockAndProcess();
+        $tracker = $this->process();
 
         $this->assertSame(5, $tracker->getCountOfLoggedRequests());
 
         $this->assertEquals($serverBackup, $_SERVER);
     }
 
-    public function test_getLockKey_shouldReturnTheNameOfTheLockKey()
+    private function acquireAllQueueLocks()
     {
-        $this->assertEquals('trackingProcessorLock', $this->processor->getLockKey());
+        for ($queueId = 0; $queueId < $this->queue->getNumberOfAvailableQueues(); $queueId++) {
+            $this->lock->acquireLock($queueId);
+        }
     }
 
-    private function lockAndProcess()
+    private function process()
     {
-        $this->assertTrue($this->processor->acquireLock());
-
         return $this->processor->process($this->queue);
     }
 
     private function assertNumberOfRequestSetsLeftInQueue($numRequestsLeftInQueue)
     {
-        $this->assertSame($numRequestsLeftInQueue, $this->queue->getNumberOfRequestSetsInQueue());
+        $this->assertSame($numRequestsLeftInQueue, $this->queue->getNumberOfRequestSetsInAllQueues());
     }
 
     private function addRequestSetsToQueue($numRequestSets)
     {
         for ($index = 1; $index <= $numRequestSets; $index++) {
-            $this->queue->addRequestSet($this->buildRequestSet(1));
+            $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
         }
     }
 
     private function createProcessor()
     {
-        return new TestProcessor($this->redis);
+        return new TestProcessor($this->queue);
     }
 
     private function createTracker()

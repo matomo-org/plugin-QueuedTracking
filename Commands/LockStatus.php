@@ -27,8 +27,8 @@ class LockStatus extends ConsoleCommand
     protected function configure()
     {
         $this->setName('queuedtracking:lock-status');
-        $this->setDescription('Outputs information for the status of the processing lock. Also allows to remove a lock.');
-        $this->addOption('unlock', null, InputOption::VALUE_NONE, 'Needed to actually unlock the queue');
+        $this->setDescription('Outputs information for the status of each locked queue. Unlocking a queue is possible as well.');
+        $this->addOption('unlock', null, InputOption::VALUE_REQUIRED, 'If set will unlock the given queue.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -36,23 +36,25 @@ class LockStatus extends ConsoleCommand
         $systemCheck = new SystemCheck();
         $systemCheck->checkRedisIsInstalled();
 
-        $backend   = Queue\Factory::makeBackend();
-        $processor = new Processor($backend);
-        $lockKey   = $processor->getLockKey();
+        $backend = Queue\Factory::makeBackend();
+        $lock    = Queue\Factory::makeLock($backend);
+        $keys    = $lock->getAllAcquiredLockKeys();
 
-        if ($backend->get($lockKey)) {
+        $keyToUnlock = $input->getOption('unlock');
+
+        if ($keyToUnlock && in_array($keyToUnlock, $keys)) {
+            $backend->delete($keyToUnlock);
+            $this->writeSuccessMessage($output, array(sprintf('Key %s unlocked', $keyToUnlock)));
+        } elseif ($keyToUnlock) {
+            $output->writeln(sprintf('<error>%s is not or no longer locked</error>', $keyToUnlock));
+            $output->writeln(' ');
+        }
+
+        foreach ($keys as $lockKey) {
             $time = $backend->getTimeToLive($lockKey);
-
-            $output->writeln(sprintf('Queue is locked for <comment>%d ms</comment>', $time));
-
-            if ($input->getOption('unlock')) {
-                $backend->delete($lockKey);
-                $this->writeSuccessMessage($output, array('Queue unlocked'));
-            } else {
-                $output->writeln('Set option <comment>--unlock</comment> to unlock the queue.');
-            }
-        } else {
-            $output->writeln('Queue is not locked');
+            $output->writeln(sprintf('"%s" is locked for <comment>%d ms</comment>', $lockKey, $time));
+            $output->writeln(sprintf('Set option <comment>--unlock=%s</comment> to unlock the queue.', $lockKey));
+            $output->writeln(' ');
         }
     }
 }

@@ -288,5 +288,33 @@ class RedisTest extends IntegrationTestCase
         $this->assertNotEmpty($memory['used_memory_human']);
     }
 
+    public function test_getKeysMatchingPattern_shouldReturnMatchingKeys()
+    {
+        $backend = $this->createRedisBackend();
+        $backend->setIfNotExists('abcde', 'val0', 100);
+        $backend->setIfNotExists('test1', 'val1', 100);
+        $backend->setIfNotExists('Test3', 'val2', 100);
+        $backend->setIfNotExists('Test1', 'val3', 100);
+        $backend->setIfNotExists('Test2', 'val4', 100);
+
+        $keys = $backend->getKeysMatchingPattern('Test*');
+        sort($keys);
+        $this->assertEquals(array('Test1', 'Test2', 'Test3'), $keys);
+
+        $keys = $backend->getKeysMatchingPattern('test1*');
+        sort($keys);
+        $this->assertEquals(array('test1'), $keys);
+
+        $keys = $backend->getKeysMatchingPattern('*est*');
+        sort($keys);
+        $this->assertEquals(array('Test1', 'Test2', 'Test3', 'test1', 'testMyListTestKey'), $keys);
+    }
+
+    public function test_getKeysMatchingPattern_shouldReturnAnEmptyArrayIfNothingMatches()
+    {
+        $backend = $this->createRedisBackend();
+        $keys    = $backend->getKeysMatchingPattern('*fere*');
+        $this->assertEquals(array(), $keys);
+    }
 
 }

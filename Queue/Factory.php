@@ -27,6 +27,23 @@ class Factory
         return self::makeBackendFromSettings($settings);
     }
 
+    public static function makeQueueManager(Backend $backend)
+    {
+        $settings = self::getSettings();
+
+        $lock    = self::makeLock($backend);
+        $manager = new Manager($backend, $lock);
+        $manager->setNumberOfAvailableQueues($settings->numQueueWorkers->getValue());
+        $manager->setNumberOfRequestsToProcessAtSameTime($settings->numRequestsToProcess->getValue());
+
+        return $manager;
+    }
+
+    public static function makeLock(Backend $backend)
+    {
+        return new Lock($backend);
+    }
+
     public static function getSettings()
     {
         if (is_null(self::$settings)) {
@@ -43,21 +60,6 @@ class Factory
     {
         self::$settings = null;
         SettingsStorage::clearCache();
-    }
-
-    public static function makeQueue(Backend $backend)
-    {
-        $settings = self::getSettings();
-
-        return self::makeQueueFromSettings($settings, $backend);
-    }
-
-    private static function makeQueueFromSettings(Settings $settings, Backend $backend)
-    {
-        $queue = new Queue($backend);
-        $queue->setNumberOfRequestsToProcessAtSameTime($settings->numRequestsToProcess->getValue());
-
-        return $queue;
     }
 
     private static function makeBackendFromSettings(Settings $settings)
