@@ -100,7 +100,7 @@ class TrackerTest extends SystemTestCase
     {
         $response = $this->doTrackNumberOfRequests(2);
 
-        $this->assertEquals('{"status":"success","tracked":2}', $response);
+        Fixture::checkResponse($response);
     }
 
     public function test_response_ShouldActuallyAddRequestsToQueue()
@@ -128,7 +128,7 @@ class TrackerTest extends SystemTestCase
     {
         for ($i = 1; $i < $this->requestProcessLimit; $i++) {
             $response = $this->doTrackNumberOfRequests(2);
-            $this->assertEquals('{"status":"success","tracked":2}', $response);
+            Fixture::checkResponse($response);
             $this->assertNumEntriesInQueue($i);
         }
 

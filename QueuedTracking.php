@@ -10,7 +10,6 @@ namespace Piwik\Plugins\QueuedTracking;
 
 use Piwik\Access;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
-use Piwik\Plugins\QueuedTracking\Tracker\BulkTrackerResponse;
 use Piwik\Plugins\QueuedTracking\Tracker\Handler;
 
 class QueuedTracking extends \Piwik\Plugin
@@ -43,13 +42,8 @@ class QueuedTracking extends \Piwik\Plugin
         $settings = Queue\Factory::getSettings();
 
         if ($settings->queueEnabled->getValue()) {
-            $isBulkTracking = ($handler instanceof \Piwik\Plugins\BulkTracking\Tracker\Handler);
 
             $handler = new Handler();
-
-            if ($isBulkTracking) {
-                $handler->setResponse(new BulkTrackerResponse());
-            }
 
             if ($settings->processDuringTrackingRequest->getValue()) {
                 $handler->enableProcessingInTrackerMode();
