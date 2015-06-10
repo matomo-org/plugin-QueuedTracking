@@ -8,6 +8,7 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Settings;
 
+use Piwik\Container\StaticContainer;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Plugins\QueuedTracking\Settings;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
@@ -31,7 +32,7 @@ class NumWorkersTest extends IntegrationTestCase
         parent::setUp();
         $this->clearRedisDb();
 
-        $this->settings = new Settings();
+        $this->settings = self::$fixture->piwikEnvironment->getContainer()->get('Piwik\Plugins\QueuedTracking\Settings');
     }
 
     public function tearDown()

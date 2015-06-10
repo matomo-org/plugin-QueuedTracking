@@ -33,13 +33,6 @@ class QueuedTrackingTest extends IntegrationTestCase
         Factory::getSettings()->queueEnabled->setValue(true);
     }
 
-    public function tearDown()
-    {
-        Factory::clearSettings();
-
-        parent::tearDown();
-    }
-
     public function test_replaceHandler_ShouldReplaceHandlerWithQueueHandler_IfEnabled()
     {
         $handler = null;

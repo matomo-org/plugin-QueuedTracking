@@ -20,20 +20,6 @@ use Piwik\Tracker\Request;
  */
 class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTestCase
 {
-    public function setUp()
-    {
-        parent::setUp();
-
-        $this->configureRedisTestInstance();
-    }
-
-    public static function tearDownAfterClass()
-    {
-        Queue\Factory::clearSettings();
-
-        parent::tearDownAfterClass();
-    }
-
     protected function clearRedisDb()
     {
         $backend = $this->createRedisBackend();
@@ -42,14 +28,7 @@ class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTes
 
     protected function createRedisBackend()
     {
-        $this->configureRedisTestInstance();
         return Queue\Factory::makeBackend();
-    }
-
-    private function configureRedisTestInstance()
-    {
-        $queuedTracking = new QueuedTracking();
-        $queuedTracking->configureQueueTestBackend();
     }
 
     protected function buildRequestSet($numberOfRequestSets)

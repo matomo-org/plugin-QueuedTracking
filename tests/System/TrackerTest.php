@@ -49,7 +49,6 @@ class TrackerTest extends SystemTestCase
         }
 
         $queuedTracking = new QueuedTracking();
-        $queuedTracking->configureQueueTestBackend();
 
         $this->tracker = Fixture::getTracker($idSite, $dateTime, $defaultInit = true);
         $this->enableQueue();
@@ -58,7 +57,6 @@ class TrackerTest extends SystemTestCase
     public function tearDown()
     {
         $this->createRedisBackend()->flushAll();
-        Queue\Factory::clearSettings();
 
         self::$fixture->performTearDown();
 
