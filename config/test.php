@@ -8,6 +8,8 @@ return array(
         $settings->redisPassword->setValue('');
         $settings->redisDatabase->setValue(15);
         $settings->numQueueWorkers->setValue(4);
+
+        return $settings;
     }),
 
 );
