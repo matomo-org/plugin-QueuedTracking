@@ -49,7 +49,7 @@ class Redis implements Backend
         $server = $this->redis->info('server');
 
         if (empty($server)) {
-            return array();
+            return '';
         }
 
         $version = $server['redis_version'];
