@@ -122,6 +122,10 @@ __Are there any known issues?__
 
 ## Changelog
 
+0.1.5
+
+- Fixed a notice in case an incompatible Redis version is used.
+
 0.1.4
 
 - It is now possible to start multiple workers for faster insertion from Redis to the database. This can be configured in the "Plugin Settings"
