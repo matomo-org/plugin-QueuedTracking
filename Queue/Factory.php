@@ -9,6 +9,7 @@
 
 namespace Piwik\Plugins\QueuedTracking\Queue;
 
+use Piwik\Container\StaticContainer;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Settings;
 use Piwik\Tracker\SettingsStorage;
@@ -18,8 +19,6 @@ use Piwik\Tracker\SettingsStorage;
  */
 class Factory
 {
-    private static $settings;
-
     public static function makeBackend()
     {
         $settings = self::getSettings();
@@ -46,20 +45,7 @@ class Factory
 
     public static function getSettings()
     {
-        if (is_null(self::$settings)) {
-            self::$settings = new Settings(); // for performance reasons... saves as a few ms per request not having to init each setting all the time
-        }
-
-        return self::$settings;
-    }
-
-    /**
-     * @internal
-     */
-    public static function clearSettings()
-    {
-        self::$settings = null;
-        SettingsStorage::clearCache();
+        return StaticContainer::get('Piwik\Plugins\QueuedTracking\Settings');
     }
 
     private static function makeBackendFromSettings(Settings $settings)

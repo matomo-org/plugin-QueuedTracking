@@ -8,8 +8,6 @@
  */
 namespace Piwik\Plugins\QueuedTracking;
 
-use Piwik\Access;
-use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Plugins\QueuedTracking\Tracker\Handler;
 
 class QueuedTracking extends \Piwik\Plugin
@@ -20,21 +18,8 @@ class QueuedTracking extends \Piwik\Plugin
     public function getListHooksRegistered()
     {
         return array(
-            'Tracker.newHandler' => 'replaceHandlerIfQueueIsEnabled',
-            'TestingEnvironment.addHooks' => 'configureQueueTestBackend'
+            'Tracker.newHandler' => 'replaceHandlerIfQueueIsEnabled'
         );
-    }
-
-    public function configureQueueTestBackend()
-    {
-        Access::doAsSuperUser(function () {
-            $settings = Factory::getSettings();
-            $settings->redisHost->setValue('127.0.0.1');
-            $settings->redisPort->setValue(6379);
-            $settings->redisPassword->setValue('');
-            $settings->redisDatabase->setValue(15);
-            $settings->numQueueWorkers->setValue(4);
-        });
     }
 
     public function replaceHandlerIfQueueIsEnabled(&$handler)
