@@ -50,8 +50,6 @@ class Settings extends \Piwik\Plugin\Settings
 
     protected function init()
     {
-        $this->setIntroduction('Here you can specify the settings for queued tracking.');
-
         $this->staticStorage = new StaticStorage('QueuedTracking');
 
         $this->createRedisHostSetting();
@@ -72,9 +70,8 @@ class Settings extends \Piwik\Plugin\Settings
         $this->redisHost->type = static::TYPE_STRING;
         $this->redisHost->uiControlType = static::CONTROL_TEXT;
         $this->redisHost->uiControlAttributes = array('size' => 300);
-        $this->redisHost->description = 'Remote host of the Redis server';
         $this->redisHost->defaultValue = '127.0.0.1';
-        $this->redisHost->inlineHelp = 'Max 300 characters are allowed.';
+        $this->redisHost->inlineHelp = 'Remote host of the Redis server. Max 300 characters are allowed.';
         $this->redisHost->validate = function ($value) {
             if (strlen($value) > 300) {
                 throw new \Exception('Max 300 characters allowed');
@@ -91,9 +88,8 @@ class Settings extends \Piwik\Plugin\Settings
         $this->redisPort->type = static::TYPE_INT;
         $this->redisPort->uiControlType = static::CONTROL_TEXT;
         $this->redisPort->uiControlAttributes = array('size' => 5);
-        $this->redisPort->description = 'Port the Redis server is running on';
         $this->redisPort->defaultValue = '6379';
-        $this->redisPort->inlineHelp = 'Value should be between 1 and 65535.';
+        $this->redisPort->inlineHelp = 'Port the Redis server is running on. Value should be between 1 and 65535.';
         $this->redisPort->validate = function ($value) {
             if ($value < 1) {
                 throw new \Exception('Port has to be at least 1');
@@ -114,8 +110,7 @@ class Settings extends \Piwik\Plugin\Settings
         $this->redisTimeout->type = static::TYPE_FLOAT;
         $this->redisTimeout->uiControlType = static::CONTROL_TEXT;
         $this->redisTimeout->uiControlAttributes = array('size' => 5);
-        $this->redisTimeout->description = 'Redis connection timeout in seconds';
-        $this->redisTimeout->inlineHelp = '"0.0" meaning unlimited. Can be a float eg "2.5" for a connection timeout of 2.5 seconds.';
+        $this->redisTimeout->inlineHelp = 'Redis connection timeout in seconds. "0.0" meaning unlimited. Can be a float eg "2.5" for a connection timeout of 2.5 seconds.';
         $this->redisTimeout->defaultValue = 0.0;
         $this->redisTimeout->validate = function ($value) {
 
@@ -139,8 +134,7 @@ class Settings extends \Piwik\Plugin\Settings
         $this->numQueueWorkers->type = static::TYPE_INT;
         $this->numQueueWorkers->uiControlType = static::CONTROL_TEXT;
         $this->numQueueWorkers->uiControlAttributes = array('size' => 5);
-        $this->numQueueWorkers->description = 'Number of allowed maximum queue workers';
-        $this->numQueueWorkers->inlineHelp = 'Accepts a number between 1 and 8. Best practice is to set the number of CPUs you want to make available for queue processing. Be aware you need to make sure to start the workers manually. DO NOT USE more than 1 worker if you make use the UserId feature when tracking see https://github.com/piwik/piwik/issues/7691';
+        $this->numQueueWorkers->inlineHelp = 'Number of allowed maximum queue workers. Accepts a number between 1 and 8. Best practice is to set the number of CPUs you want to make available for queue processing. Be aware you need to make sure to start the workers manually. DO NOT USE more than 1 worker if you make use the UserId feature when tracking see https://github.com/piwik/piwik/issues/7691';
         $this->numQueueWorkers->defaultValue = 1;
         $this->numQueueWorkers->validate = function ($value) {
 
@@ -164,8 +158,7 @@ class Settings extends \Piwik\Plugin\Settings
         $this->redisPassword->type = static::TYPE_STRING;
         $this->redisPassword->uiControlType = static::CONTROL_PASSWORD;
         $this->redisPassword->uiControlAttributes = array('size' => 100);
-        $this->redisPassword->description = 'Password set on the Redis server, if any';
-        $this->redisPassword->inlineHelp = 'Redis can be instructed to require a password before allowing clients to execute commands.';
+        $this->redisPassword->inlineHelp = 'Password set on the Redis server, if any. Redis can be instructed to require a password before allowing clients to execute commands.';
         $this->redisPassword->defaultValue = '';
         $this->redisPassword->validate = function ($value) {
             if (strlen($value) > 100) {
@@ -205,7 +198,6 @@ class Settings extends \Piwik\Plugin\Settings
         $this->queueEnabled->readableByCurrentUser = true;
         $this->queueEnabled->type = static::TYPE_BOOL;
         $this->queueEnabled->uiControlType = static::CONTROL_CHECKBOX;
-        $this->queueEnabled->description = 'Enable writing all tracking requests into a queue';
         $this->queueEnabled->inlineHelp = 'If enabled, all tracking requests will be written into a queue instead of the directly into the database. Requires a Redis server and phpredis PHP extension.';
         $this->queueEnabled->defaultValue = false;
         $this->queueEnabled->validate = function ($value) use ($self) {
@@ -228,12 +220,11 @@ class Settings extends \Piwik\Plugin\Settings
 
     private function createNumRequestsToProcessSetting()
     {
-        $this->numRequestsToProcess = new SystemSetting('numRequestsToProcess', 'Number of requests to process');
+        $this->numRequestsToProcess = new SystemSetting('numRequestsToProcess', 'Number of requests that are processed in one batch');
         $this->numRequestsToProcess->readableByCurrentUser = true;
         $this->numRequestsToProcess->type  = static::TYPE_INT;
         $this->numRequestsToProcess->uiControlType = static::CONTROL_TEXT;
         $this->numRequestsToProcess->uiControlAttributes = array('size' => 3);
-        $this->numRequestsToProcess->description = 'Number of requests needed to start processing queue';
         $this->numRequestsToProcess->inlineHelp = 'Defines how many requests will be picked out of the queue and processed at once. Enter a number which is >= 1.';
         $this->numRequestsToProcess->defaultValue = 25;
         $this->numRequestsToProcess->validate = function ($value, $setting) {
