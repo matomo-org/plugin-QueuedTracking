@@ -9,6 +9,7 @@
 
 namespace Piwik\Plugins\QueuedTracking\Queue\Processor;
 
+use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Backend;
@@ -41,8 +42,12 @@ class Handler
         $this->count = 0;
 
         foreach ($requestSet->getRequests() as $request) {
-            $tracker->trackRequest($request);
-            $this->count++;
+            try {
+                $tracker->trackRequest($request);
+                $this->count++;
+            } catch (UnexpectedWebsiteFoundException $ex) {
+                // empty
+            }
         }
 
         $this->requestSetsToRetry[] = $requestSet;
