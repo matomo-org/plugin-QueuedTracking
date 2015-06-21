@@ -61,9 +61,9 @@ class Processor
         $this->numMaxBatchesToProcess = (int) $numBatches;
     }
 
-    public function process()
+    public function process(Tracker $tracker = null)
     {
-        $tracker = new Tracker();
+        $tracker = $tracker ?: new Tracker();
 
         if (!$tracker->shouldRecordStatistics()) {
             return $tracker;

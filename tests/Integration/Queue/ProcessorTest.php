@@ -76,7 +76,7 @@ class ProcessorTest extends IntegrationTestCase
 
     public function test_process_shouldDoNothing_IfQueueIsEmpty()
     {
-        $tracker = $this->processor->process($this->queue);
+        $tracker = $this->processor->process();
 
         $this->assertSame(0, $tracker->getCountOfLoggedRequests());
         $this->assertNumberOfRequestSetsLeftInQueue(0);
@@ -86,7 +86,7 @@ class ProcessorTest extends IntegrationTestCase
     {
         $this->addRequestSetsToQueue(2);
 
-        $tracker = $this->processor->process($this->queue);
+        $tracker = $this->processor->process();
 
         $this->assertSame(0, $tracker->getCountOfLoggedRequests());
         $this->assertNumberOfRequestSetsLeftInQueue(2);
@@ -253,7 +253,7 @@ class ProcessorTest extends IntegrationTestCase
 
         $this->assertNumberOfRequestSetsLeftInQueue(10);
 
-        $tracker = $this->processor->process($this->queue);
+        $tracker = $this->processor->process($this->createTracker());
 
         $this->assertSame(1+5+1+2+1+4, $tracker->getCountOfLoggedRequests());
         $this->assertNumberOfRequestSetsLeftInQueue(0);
@@ -321,7 +321,7 @@ class ProcessorTest extends IntegrationTestCase
              ->with($this->anything(), $this->equalTo(array()))
              ->will($this->returnCallback($forwardCallToProcessor));
 
-        $mock->process($this->queue);
+        $mock->process($this->createTracker());
     }
 
     public function test_process_shouldRestoreEnvironmentAfterTrackingRequests()
@@ -349,7 +349,7 @@ class ProcessorTest extends IntegrationTestCase
 
     private function process()
     {
-        return $this->processor->process($this->queue);
+        return $this->processor->process();
     }
 
     private function assertNumberOfRequestSetsLeftInQueue($numRequestsLeftInQueue)
@@ -371,7 +371,7 @@ class ProcessorTest extends IntegrationTestCase
 
     private function createTracker()
     {
-        $tracker = new \Piwik\Tests\Framework\Mock\Tracker();
+        $tracker = new \Piwik\Plugins\QueuedTracking\tests\Framework\Mock\Tracker();
         return $tracker;
     }
 }

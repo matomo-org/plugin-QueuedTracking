@@ -7,10 +7,12 @@
  */
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue\Processor;
+
 use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Plugins\QueuedTracking\Queue\Processor\Handler;
+use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\ForcedException;
+use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\Tracker;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
-use Piwik\Tests\Framework\Mock\Tracker;
 use Piwik\Tests\Framework\Mock\Tracker\RequestSet;
 
 class TestHandler extends Handler {
@@ -123,10 +125,17 @@ class HandlerTest extends IntegrationTestCase
         try {
             $this->handler->process($this->tracker, $this->buildRequestSetContainingError(7, 4));
             $this->fail('An expected exception was not triggered');
-        } catch (UnexpectedWebsiteFoundException $e) {
+        } catch (ForcedException $e) {
         }
 
         $this->assertSame(4, $this->tracker->getCountOfLoggedRequests());
+    }
+
+    public function test_process_ShouldIgnoreInvalidIdSiteRequests_LikeBulkTrackingPlugin()
+    {
+        $this->handler->process($this->tracker, $this->buildRequestSetContainingError(7, 4, $invalidSiteException = true));
+
+        $this->assertSame(6, $this->tracker->getCountOfLoggedRequests());
     }
 
     public function test_onException_shouldRemoveAllInvalidRequestsFromValidRequests()
@@ -136,7 +145,7 @@ class HandlerTest extends IntegrationTestCase
         try {
             $this->handler->process($this->tracker, $requestSet);
             $this->fail('An expected exception was not triggered');
-        } catch (UnexpectedWebsiteFoundException $e) {
+        } catch (ForcedException $e) {
             $this->handler->onException($requestSet, $e);
         }
 
@@ -167,7 +176,7 @@ class HandlerTest extends IntegrationTestCase
         try {
             $this->handler->process($this->tracker, $requestSet4);
             $this->fail('An expected exception was not triggered');
-        } catch (UnexpectedWebsiteFoundException $e) {
+        } catch (ForcedException $e) {
             $this->handler->onException($requestSet4, $e);
         }
 
@@ -211,7 +220,7 @@ class HandlerTest extends IntegrationTestCase
         try {
             $this->handler->process($this->tracker, $requestSet2);
             $this->fail('An expected exception was not triggered');
-        } catch (UnexpectedWebsiteFoundException $e) {
+        } catch (ForcedException $e) {
             $this->handler->onException($requestSet2, $e);
         }
 
@@ -230,7 +239,7 @@ class HandlerTest extends IntegrationTestCase
         try {
             $this->handler->process($this->tracker, $requestSet);
             $this->fail('An expected exception was not triggered');
-        } catch (UnexpectedWebsiteFoundException $e) {
+        } catch (ForcedException $e) {
             $this->handler->onException($requestSet, $e);
         }
 

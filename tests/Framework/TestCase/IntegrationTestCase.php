@@ -69,13 +69,17 @@ class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTes
         $this->assertEquals($eState, $aState);
     }
 
-    protected function buildRequestSetContainingError($numberOfRequestSets, $indexThatShouldContainError)
+    protected function buildRequestSetContainingError($numberOfRequestSets, $indexThatShouldContainError, $useInvalidSiteError = false)
     {
         $requests = array();
 
         for ($i = 0; $i < $numberOfRequestSets; $i++) {
             if ($i === $indexThatShouldContainError) {
-                $requests[] = new Request(array('idsite' => '0', 'index' => $i));
+                if ($useInvalidSiteError) {
+                    $requests[] = new Request(array('idsite' => '0', 'index' => $i));
+                } else {
+                    $requests[] = new Request(array('idsite' => '1', 'index' => $i, 'forceThrow' => 1));
+                }
             } else {
                 $requests[] = new Request(array('idsite' => '1', 'index' => $i));
             }
