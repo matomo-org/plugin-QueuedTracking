@@ -122,6 +122,10 @@ __Are there any known issues?__
 
 ## Changelog
 
+0.1.6
+ 
+- For bulk requests we do no longer skip all tracking requests after a tracking request that has an invalid `idSite` set. The same behaviour was changed in Piwik 2.14 for regular bulk requests.
+
 0.1.5
 
 - Fixed a notice in case an incompatible Redis version is used.
