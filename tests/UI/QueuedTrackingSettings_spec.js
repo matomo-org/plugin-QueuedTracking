@@ -10,7 +10,8 @@
 describe("QueuedTrackingSettings", function () {
     this.timeout(0);
 
-    var selector = '#QueuedTracking,#QueuedTracking + .pluginIntroduction,#QueuedTracking + .pluginIntroduction + .adminTable';
+    var selector = '#QueuedTracking,#QueuedTracking + .pluginIntroduction,#QueuedTracking + .pluginIntroduction + .adminTable'
+                 + ',#pluginSettings[data-pluginname=QueuedTracking]';
     var url = "?module=CoreAdminHome&action=adminPluginSettings&idSite=1&period=day&date=yesterday";
 
     it("should display the settings page", function (done) {
