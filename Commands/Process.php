@@ -9,10 +9,8 @@
 
 namespace Piwik\Plugins\QueuedTracking\Commands;
 
-use Piwik\Access;
+use Piwik\Application\Environment;
 use Piwik\Cache;
-use Piwik\Container\StaticContainer;
-use Piwik\Log;
 use Piwik\Piwik;
 use Piwik\Plugin;
 use Piwik\Plugin\ConsoleCommand;
@@ -37,13 +35,15 @@ class Process extends ConsoleCommand
         $systemCheck = new SystemCheck();
         $systemCheck->checkRedisIsInstalled();
 
-        Access::getInstance()->setSuperUserAccess(false);
-        Plugin\Manager::getInstance()->setTrackerPluginsNotToLoad(array('Provider'));
+        $trackerEnvironment = new Environment('tracker');
+        $trackerEnvironment->init();
+
+        $trackerEnvironment->getContainer()->get('Piwik\Access')->setSuperUserAccess(false);
+        $trackerEnvironment->getContainer()->get('Piwik\Plugin\Manager')->setTrackerPluginsNotToLoad(array('Provider'));
         Tracker::loadTrackerEnvironment();
-        $this->recreateEagerCacheInstanceWhichChangesOnceTrackerModeIsEnabled();
 
         if (OutputInterface::VERBOSITY_VERY_VERBOSE <= $output->getVerbosity()) {
-            Tracker::setTrackerDebugMode(true);
+            $GLOBALS['PIWIK_TRACKER_DEBUG'] = true;
         }
 
         $backend      = Queue\Factory::makeBackend();
@@ -97,15 +97,4 @@ class Process extends ConsoleCommand
 
         return $requestsPerSecond;
     }
-
-    private function recreateEagerCacheInstanceWhichChangesOnceTrackerModeIsEnabled()
-    {
-        StaticContainer::clearContainer();
-        Log::unsetInstance();
-
-        $key = 'Piwik\Cache\Eager';
-        $container = StaticContainer::getContainer();
-        $container->set($key, $container->make($key));
-    }
-
 }
