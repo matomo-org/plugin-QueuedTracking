@@ -50,6 +50,8 @@ class Process extends ConsoleCommand
         $queueManager = Queue\Factory::makeQueueManager($backend);
 
         if (!$queueManager->canAcquireMoreLocks()) {
+            $trackerEnvironment->destroy();
+
             $this->writeSuccessMessage($output, array("Nothing to proccess. Already max number of workers in process."));
             return;
         }
@@ -63,6 +65,8 @@ class Process extends ConsoleCommand
         }
 
         if (!$shouldProcess) {
+            $trackerEnvironment->destroy();
+
             $this->writeSuccessMessage($output, array("No queue currently needs processing"));
             return;
         }
@@ -76,13 +80,15 @@ class Process extends ConsoleCommand
         $startTime = microtime(true);
         $processor = new Processor($queueManager);
         $processor->setNumberOfMaxBatchesToProcess(1000);
-        $tracker   = $processor->process($queueManager);
+        $tracker   = $processor->process();
 
         $neededTime = (microtime(true) - $startTime);
         $numRequestsTracked = $tracker->getCountOfLoggedRequests();
         $requestsPerSecond  = $this->getNumberOfRequestsPerSecond($numRequestsTracked, $neededTime);
 
         Piwik::postEvent('Tracker.end');
+
+        $trackerEnvironment->destroy();
 
         $this->writeSuccessMessage($output, array(sprintf('This worker finished queue processing with %sreq/s (%s requests in %02.2f seconds)', $requestsPerSecond, $numRequestsTracked, $neededTime)));
     }
