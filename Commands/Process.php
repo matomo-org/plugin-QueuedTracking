@@ -11,6 +11,8 @@ namespace Piwik\Plugins\QueuedTracking\Commands;
 
 use Piwik\Application\Environment;
 use Piwik\Cache;
+use Piwik\Container\StaticContainer;
+use Piwik\Log;
 use Piwik\Piwik;
 use Piwik\Plugin;
 use Piwik\Plugin\ConsoleCommand;
@@ -38,6 +40,7 @@ class Process extends ConsoleCommand
         $trackerEnvironment = new Environment('tracker');
         $trackerEnvironment->init();
 
+        Log::unsetInstance();
         $trackerEnvironment->getContainer()->get('Piwik\Access')->setSuperUserAccess(false);
         $trackerEnvironment->getContainer()->get('Piwik\Plugin\Manager')->setTrackerPluginsNotToLoad(array('Provider'));
         Tracker::loadTrackerEnvironment();
