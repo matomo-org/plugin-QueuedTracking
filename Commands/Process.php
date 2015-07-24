@@ -9,10 +9,8 @@
 
 namespace Piwik\Plugins\QueuedTracking\Commands;
 
-use Piwik\Access;
+use Piwik\Application\Environment;
 use Piwik\Cache;
-use Piwik\Container\StaticContainer;
-use Piwik\Log;
 use Piwik\Piwik;
 use Piwik\Plugin;
 use Piwik\Plugin\ConsoleCommand;
@@ -37,19 +35,23 @@ class Process extends ConsoleCommand
         $systemCheck = new SystemCheck();
         $systemCheck->checkRedisIsInstalled();
 
-        Access::getInstance()->setSuperUserAccess(false);
-        Plugin\Manager::getInstance()->setTrackerPluginsNotToLoad(array('Provider'));
+        $trackerEnvironment = new Environment('tracker');
+        $trackerEnvironment->init();
+
+        $trackerEnvironment->getContainer()->get('Piwik\Access')->setSuperUserAccess(false);
+        $trackerEnvironment->getContainer()->get('Piwik\Plugin\Manager')->setTrackerPluginsNotToLoad(array('Provider'));
         Tracker::loadTrackerEnvironment();
-        $this->recreateEagerCacheInstanceWhichChangesOnceTrackerModeIsEnabled();
 
         if (OutputInterface::VERBOSITY_VERY_VERBOSE <= $output->getVerbosity()) {
-            Tracker::setTrackerDebugMode(true);
+            $GLOBALS['PIWIK_TRACKER_DEBUG'] = true;
         }
 
         $backend      = Queue\Factory::makeBackend();
         $queueManager = Queue\Factory::makeQueueManager($backend);
 
         if (!$queueManager->canAcquireMoreLocks()) {
+            $trackerEnvironment->destroy();
+
             $this->writeSuccessMessage($output, array("Nothing to proccess. Already max number of workers in process."));
             return;
         }
@@ -63,6 +65,8 @@ class Process extends ConsoleCommand
         }
 
         if (!$shouldProcess) {
+            $trackerEnvironment->destroy();
+
             $this->writeSuccessMessage($output, array("No queue currently needs processing"));
             return;
         }
@@ -76,13 +80,15 @@ class Process extends ConsoleCommand
         $startTime = microtime(true);
         $processor = new Processor($queueManager);
         $processor->setNumberOfMaxBatchesToProcess(1000);
-        $tracker   = $processor->process($queueManager);
+        $tracker   = $processor->process();
 
         $neededTime = (microtime(true) - $startTime);
         $numRequestsTracked = $tracker->getCountOfLoggedRequests();
         $requestsPerSecond  = $this->getNumberOfRequestsPerSecond($numRequestsTracked, $neededTime);
 
         Piwik::postEvent('Tracker.end');
+
+        $trackerEnvironment->destroy();
 
         $this->writeSuccessMessage($output, array(sprintf('This worker finished queue processing with %sreq/s (%s requests in %02.2f seconds)', $requestsPerSecond, $numRequestsTracked, $neededTime)));
     }
@@ -97,15 +103,4 @@ class Process extends ConsoleCommand
 
         return $requestsPerSecond;
     }
-
-    private function recreateEagerCacheInstanceWhichChangesOnceTrackerModeIsEnabled()
-    {
-        StaticContainer::clearContainer();
-        Log::unsetInstance();
-
-        $key = 'Piwik\Cache\Eager';
-        $container = StaticContainer::getContainer();
-        $container->set($key, $container->make($key));
-    }
-
 }
