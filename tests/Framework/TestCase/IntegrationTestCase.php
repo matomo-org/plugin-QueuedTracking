@@ -22,11 +22,16 @@ class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTes
 {
     public function setUp()
     {
-        if (!class_exists('\Redis', false) || !extension_loaded('redis')) {
+        if (!self::isRedisAvailable()) {
             $this->markTestSkipped('Redis extension is not installed, skipping test');
         }
 
         parent::setUp();
+    }
+
+    public static function isRedisAvailable()
+    {
+        return class_exists('\Redis', false) && extension_loaded('redis');
     }
 
     protected function clearRedisDb()

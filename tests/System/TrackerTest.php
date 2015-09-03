@@ -13,6 +13,7 @@ use Piwik\Db;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\QueuedTracking;
 use Piwik\Plugins\QueuedTracking\Settings;
+use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 use Piwik\Tests\Framework\Fixture;
 use Piwik\Tests\Framework\TestCase\SystemTestCase;
 
@@ -34,6 +35,10 @@ class TrackerTest extends SystemTestCase
     public function setUp()
     {
         parent::setUp();
+
+        if (!IntegrationTestCase::isRedisAvailable()) {
+            $this->markTestSkipped('Redis extension is not installed, skipping test');
+        }
 
         if (self::isTravisCI() && self::isPhpVersion53()) {
             $this->markTestSkipped('Redis seems to be not enabled in nginx on Travis + PHP 5.3.3');
