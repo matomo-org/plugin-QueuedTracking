@@ -9,7 +9,7 @@
 namespace Piwik\Plugins\QueuedTracking\tests\Integration;
 
 use Piwik\Plugins\QueuedTracking\Settings;
-use Piwik\Tests\Framework\TestCase\IntegrationTestCase;
+use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 
 /**
  * @group QueuedTracking

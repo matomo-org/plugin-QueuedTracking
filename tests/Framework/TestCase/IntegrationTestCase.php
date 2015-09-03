@@ -20,6 +20,15 @@ use Piwik\Tracker\Request;
  */
 class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTestCase
 {
+    public function setUp()
+    {
+        if (!class_exists('\Redis', false) || !extension_loaded('redis')) {
+            $this->markTestSkipped('Redis extension is not installed, skipping test');
+        }
+
+        parent::setUp();
+    }
+
     protected function clearRedisDb()
     {
         $backend = $this->createRedisBackend();
