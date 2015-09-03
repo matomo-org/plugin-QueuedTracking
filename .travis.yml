@@ -62,6 +62,8 @@ install:
 
   - ./tests/travis/checkout_test_against_branch.sh
 
+  - '[ "$PLUGIN_NAME" == "" ] || [ ! -f ./tests/travis/check_plugin_compatible_with_piwik.php ] || php ./tests/travis/check_plugin_compatible_with_piwik.php "$PLUGIN_NAME"'
+
   - '[ ! -f ./tests/travis/install_mysql_5.6.sh ] || ./tests/travis/install_mysql_5.6.sh'
 
   # Make sure we use Python 2.6
