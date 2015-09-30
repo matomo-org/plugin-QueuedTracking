@@ -112,6 +112,10 @@ __How can I debug in case something goes wrong?__
 * Enable tracker mode in `config.ini.php` via `[Tracker] debug=1` if processing requests during tracking is enabled.
 * Use the command `./console queuedtracking:print-queued-requests` to view the next requests to process in each queue. If you execute this command twice within 1-10 minutes, and it outputs the same, the queue is not being processed most likely indicating a problem.
 
+__I am using the Log Importer in combination with Queued Tracking, is there something to consider?__
+
+Yes, we recommend to set the "Number of requests to process" to `1` as the log importer usually sends multiple requests at once using bulk tracking already.
+
 __Are there any known issues?__
 
 * In case you are using bulk tracking the bulk tracking response varies compared to the regular one. We will always return
