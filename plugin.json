@@ -7,7 +7,7 @@
     "license": "GPL v3+",
     "homepage": "http://piwik.org",
     "require": {
-        "piwik": ">=2.14.2"
+        "piwik": ">=2.15.0-b15"
     },
     "authors": [
         {
