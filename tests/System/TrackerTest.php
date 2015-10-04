@@ -74,7 +74,7 @@ class TrackerTest extends SystemTestCase
 
         $response = $this->doTrackNumberOfRequests(2);
 
-        $this->assertEquals('{"status":"success","tracked":2,"invalid":0,"invalid_indices":[]}', $response);
+        $this->assertEquals('{"status":"success","tracked":2,"invalid":0}', $response);
 
         // verify nothing in queue
         $this->assertNumEntriesInQueue(0);
