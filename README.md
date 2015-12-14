@@ -104,6 +104,13 @@ by executing the command `./console queuedtracking:lock-status`. This will outpu
 You should actually never have to do this as a lock automatically expires after a while. It just may take a while depending
 on the amount of requests you are importing.
 
+__How can I test my Redis / QueuedTracking setup in case I'm getting errors?__
+
+There is a command to test some the connection to Redis as well as some needed features: `./console queuedtracking:test`.
+
+It might directly give you an error message if something goes wrong that helps you to resolve the issue. If your queue
+is always locked you might be as well interested in executing `.console queuedtracking:lock-status`.
+
 __How can I debug in case something goes wrong?__
 
 * Use the command `./console queuedtracking:monitor` to view the current state of all workers
@@ -126,9 +133,14 @@ __Are there any known issues?__
 
 ## Changelog
 
+0.2.2
+
+- Improved output for the new `test` command
+- New FAQ entries
+
 0.2.1
 
-- Added a new command to test the connection to Redis
+- Added a new command to test the connection to Redis. To test yor connection use `./console queuedtracking:test`
 
 0.2.0
 
@@ -160,7 +172,9 @@ __Are there any known issues?__
 
 ## Support
 
-Please direct any feedback to [hello@piwik.org](mailto:hello@piwik.org)
+Please direct any feedback to [hello@piwik.org](mailto:hello@piwik.org). In case of any issues with the plugin or
+feature wishes create a new issues here: https://github.com/piwik/plugin-QueuedTracking/issues . In case you experience
+any problems please post the output of `./console queuedtracking:test` in the issue.
 
 ## TODO
 
