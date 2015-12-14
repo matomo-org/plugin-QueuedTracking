@@ -131,6 +131,15 @@ class Redis implements Backend
 
     /**
      * @internal for tests only
+     * @return \Redis
+     */
+    public function getConnection()
+    {
+        return $this->redis;
+    }
+
+    /**
+     * @internal for tests only
      */
     public function delete($key)
     {

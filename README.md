@@ -126,6 +126,10 @@ __Are there any known issues?__
 
 ## Changelog
 
+0.2.1
+
+- Added a new command to test the connection to Redis
+
 0.2.0
 
 - Compatibility w/ Piwik 2.15.
