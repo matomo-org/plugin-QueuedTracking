@@ -81,7 +81,7 @@ class Test extends ConsoleCommand
 
         $backend = Queue\Factory::makeBackend();
         $output->writeln('Redis version: ' . $backend->getServerVersion());
-        $output->writeln('Memory: ' . $backend->getMemoryStats());
+        $output->writeln('Memory: ' . var_export($backend->getMemoryStats(), 1));
 
         $output->writeln('');
         $output->writeln('<comment>Performing some tests:</comment>');
@@ -147,7 +147,7 @@ class Test extends ConsoleCommand
         } else {
             $output->writeln('<error>List feature seems to not work fine: ' . $redis->getLastError() . '</error>');
         }
-        
+
         $output->writeln('');
         $output->writeln('<comment>Done</comment>');
     }
