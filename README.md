@@ -88,7 +88,8 @@ __What if I want to disable the queue?__
 
 You might want to disable the queue at some point but there are still some pending requests in the queue. We recommend to
 change the "Number of requests to process" in plugin settings to "1" and process all requests using the command
-`./console queuedtracking:process` shortly before disabling the queue and directly afterwards.
+`./console queuedtracking:process` shortly before disabling the queue and directly afterwards. It is still possible to
+process remaining request once the queue is disabled but new tracking requests won't be written into the queue.
 
 __How can I access Redis data?__
 
@@ -133,9 +134,13 @@ __Are there any known issues?__
 
 ## Changelog
 
+0.2.4
+
+- The command `queuedtracking:monitor` will now work even when the queue is disabled
+
 0.2.3
 
-- Added more tests and information to the `test` command
+- Added more tests and information to the `queuedtracking:test` command
 - It is now possible to configure up to 16 workers
 
 0.2.2

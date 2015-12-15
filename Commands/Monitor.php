@@ -33,12 +33,11 @@ class Monitor extends ConsoleCommand
 
         $settings = Queue\Factory::getSettings();
 
-        if (!$settings->queueEnabled->getValue()) {
-            $output->writeln('Queue is disabled');
-            return;
+        if ($settings->queueEnabled->getValue()) {
+            $output->writeln('Queue is enabled');
+        } else {
+            $output->writeln('<comment>' . strtoupper('Queue is disabled: ') . 'No new requests will be written into the queue, processing the remaining requests is still possible.</comment>');
         }
-
-        $output->writeln('Queue is enabled');
 
         $backend = Queue\Factory::makeBackend();
         $manager = Queue\Factory::makeQueueManager($backend);
