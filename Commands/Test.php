@@ -83,10 +83,21 @@ class Test extends ConsoleCommand
         $output->writeln('Redis version: ' . $backend->getServerVersion());
         $output->writeln('Memory: ' . var_export($backend->getMemoryStats(), 1));
 
+        $redis = $backend->getConnection();
+
+        $evictionPolicy = $this->getRedisConfig($redis, 'maxmemory-policy');
+        $output->writeln('MaxMemory Eviction Policy config: ' . $evictionPolicy);
+
+        if ($evictionPolicy !== 'allkeys-lru' && $evictionPolicy !== 'noeviction') {
+            $output->writeln('<error>The eviction policy can likely lead to errors when memory is low. We recommend to use eviction policy <comment>allkeys-lru</comment> or alternatively <comment>noeviction</comment>. Read more here: http://redis.io/topics/lru-cache</error>');
+        }
+
+        $evictionPolicy = $this->getRedisConfig($redis, 'maxmemory');
+        $output->writeln('MaxMemory config: ' . $evictionPolicy);
+
         $output->writeln('');
         $output->writeln('<comment>Performing some tests:</comment>');
 
-        $redis = $backend->getConnection();
         if (method_exists($redis, 'isConnected')) {
             $output->writeln('Redis is connected: ' . (int) $redis->isConnected());
         }
@@ -150,6 +161,14 @@ class Test extends ConsoleCommand
 
         $output->writeln('');
         $output->writeln('<comment>Done</comment>');
+    }
+
+    private function getRedisConfig(\Redis $redis, $configName)
+    {
+        $config = $redis->config('GET', $configName);
+        $value = strtolower(array_shift($config));
+
+        return $value;
     }
 
     private function testRedis(\Redis $redis, $method, $params, $keyToCleanUp, OutputInterface $output)
