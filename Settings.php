@@ -134,7 +134,7 @@ class Settings extends \Piwik\Plugin\Settings
         $this->numQueueWorkers->type = static::TYPE_INT;
         $this->numQueueWorkers->uiControlType = static::CONTROL_TEXT;
         $this->numQueueWorkers->uiControlAttributes = array('size' => 5);
-        $this->numQueueWorkers->inlineHelp = 'Number of allowed maximum queue workers. Accepts a number between 1 and 8. Best practice is to set the number of CPUs you want to make available for queue processing. Be aware you need to make sure to start the workers manually. DO NOT USE more than 1 worker if you make use the UserId feature when tracking see https://github.com/piwik/piwik/issues/7691';
+        $this->numQueueWorkers->inlineHelp = 'Number of allowed maximum queue workers. Accepts a number between 1 and 16. Best practice is to set the number of CPUs you want to make available for queue processing. Be aware you need to make sure to start the workers manually. We recommend to not use 9-15 workers, rather use 8 or 16 as the queue might not be distributed evenly into different queues. DO NOT USE more than 1 worker if you make use the UserId feature when tracking see https://github.com/piwik/piwik/issues/7691';
         $this->numQueueWorkers->defaultValue = 1;
         $this->numQueueWorkers->validate = function ($value) {
 
@@ -143,8 +143,8 @@ class Settings extends \Piwik\Plugin\Settings
             }
 
             $value = (int) $value;
-            if ($value > 8 || $value < 1) {
-                throw new \Exception('Only 1-8 workers allowed');
+            if ($value > 16 || $value < 1) {
+                throw new \Exception('Only 1-16 workers allowed');
             }
         };
 

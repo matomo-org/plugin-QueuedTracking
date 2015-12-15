@@ -133,6 +133,11 @@ __Are there any known issues?__
 
 ## Changelog
 
+0.2.3
+
+- Added more tests and information to the `test` command
+- It is now possible to configure up to 16 workers
+
 0.2.2
 
 - Improved output for the new `test` command
