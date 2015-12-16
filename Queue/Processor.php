@@ -125,7 +125,7 @@ class Processor
 
         foreach ($queuedRequestSets as $index => $requestSet) {
             if (!$this->extendLockExpireToMakeSureWeCanProcessARequestSet($requestSet)) {
-                $this->forceRollbackAndThrowExceptionAsAnotherProcessMightProcessSameRequestSets($tracker);
+                $this->forceRollbackAndThrowExceptionAsAnotherProcessMightProcessSameRequestSets($tracker, 'processing');
             }
 
             try {
@@ -137,7 +137,7 @@ class Processor
         }
 
         if (!$this->extendLockExpireToMakeSureWeCanFinishQueuedRequests($queuedRequestSets)) {
-            $this->forceRollbackAndThrowExceptionAsAnotherProcessMightProcessSameRequestSets($tracker);
+            $this->forceRollbackAndThrowExceptionAsAnotherProcessMightProcessSameRequestSets($tracker, 'finishing');
         }
 
         if ($this->handler->hasErrors()) {
@@ -176,10 +176,10 @@ class Processor
         return $this->queueManager->expireLock($ttl);
     }
 
-    private function forceRollbackAndThrowExceptionAsAnotherProcessMightProcessSameRequestSets(Tracker $tracker)
+    private function forceRollbackAndThrowExceptionAsAnotherProcessMightProcessSameRequestSets(Tracker $tracker, $activity)
     {
         $this->handler->rollBack($tracker);
-        throw new LockExpiredException('Rolled back as we no longer have lock or the lock was never acquired');
+        throw new LockExpiredException(sprintf("Rolled back during %s as we no longer have lock or the lock was never acquired. So far tracker processed %s requests", $activity, $tracker->getCountOfLoggedRequests()));
     }
 
 }
