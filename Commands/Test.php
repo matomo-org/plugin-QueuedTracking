@@ -115,9 +115,16 @@ class Test extends ConsoleCommand
         $this->testRedis($redis, 'set', array('testKeyWithEx', 'value', array('ex' => 5)), 'testKeyWithEx', $output);
 
         $backend->delete('foo');
-        if (!$backend->setIfNotExists('foo', 'bar', 1)) {
+        if (!$backend->setIfNotExists('foo', 'bar', 5)) {
             $output->writeln("setIfNotExists(foo, bar, 1) does not work, most likely we won't be able to acquire a lock:" . $redis->getLastError());
         } else{
+            $initialTtl = $redis->ttl('foo');
+            if ($initialTtl > 3 && $initialTtl <= 5) {
+                $output->writeln('Initial expire seems to be set correctly');
+            } else {
+                $output->writeln('<error>Initial expire seems to be not set correctly: ' . $initialTtl . ' </error>');
+            }
+
             if ($backend->get('foo') == 'bar') {
                 $output->writeln('setIfNotExists works fine');
             } else {
@@ -130,8 +137,24 @@ class Test extends ConsoleCommand
                 $output->writeln('<error>There might be a problem with expireIfKeyHasValue: ' . $redis->getLastError() . '</error>');
             }
 
+            $extendedTtl = $redis->ttl('foo');
+            if ($extendedTtl > 8 && $extendedTtl <= 10) {
+                $output->writeln('Extending expire seems to be set correctly');
+            } else {
+                $output->writeln('<error>Extending expire seems to be not set correctly: ' . $extendedTtl . ' </error>');
+            }
+
             if ($backend->expireIfKeyHasValue('foo', 'invalidValue', 10)) {
                 $output->writeln('<error>expireIfKeyHasValue expired a key which it should not have since values does not match</error>');
+            } else {
+                $output->writeln('expireIfKeyHasValue correctly expires only when the value is correct');
+            }
+
+            $extendedTtl = $redis->ttl('foo');
+            if ($extendedTtl > 7 && $extendedTtl <= 10) {
+                $output->writeln('Expire is still set which is correct');
+            } else {
+                $output->writeln('<error>Expire missing after a wrong extendExpire: ' . $extendedTtl . ' </error>');
             }
 
             if ($backend->deleteIfKeyHasValue('foo', 'bar')) {
