@@ -223,6 +223,23 @@ class Manager
         return $this->lock->getNumberOfAcquiredLocks() < $this->numQueuesAvailable;
     }
 
+    private function getRandomQueueId()
+    {
+        static $useMtRand;
+
+        if (!isset($useMtRand)) {
+            $useMtRand = function_exists('mt_rand');
+        }
+
+        if ($useMtRand) {
+            $rand = mt_rand(0, $this->numQueuesAvailable - 1);
+        } else {
+            $rand = rand(0, $this->numQueuesAvailable - 1);
+        }
+
+        return $rand;
+    }
+
     /**
      * @return Queue
      */
@@ -232,7 +249,7 @@ class Manager
 
         if ($this->currentQueueId < 0) {
             // we just want to avoid to always start looking for the queue at position 0
-            $this->currentQueueId = rand(0, $this->numQueuesAvailable - 1);
+            $this->currentQueueId = $this->getRandomQueueId();
         }
 
         // here we look for all available queues whether at least one should and can be processed

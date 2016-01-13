@@ -134,6 +134,10 @@ __Are there any known issues?__
 
 ## Changelog
 
+0.2.5
+
+- Use a better random number generator if available on the system to more evenly process queues.
+
 0.2.4
 
 - The command `queuedtracking:monitor` will now work even when the queue is disabled
