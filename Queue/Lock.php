@@ -11,12 +11,11 @@ namespace Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Common;
 use Piwik\Plugins\QueuedTracking\Queue\Backend;
 use Piwik\Tracker;
-use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
 
 class Lock
 {
     /**
-     * @var Redis
+     * @var Backend
      */
     private $backend;
 

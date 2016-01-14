@@ -13,12 +13,11 @@ use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Backend;
 use Piwik\Tracker\RequestSet;
 use Piwik\Tracker;
-use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
 
 class Manager
 {
     /**
-     * @var Redis
+     * @var Backend
      */
     private $backend;
 

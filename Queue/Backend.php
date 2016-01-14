@@ -32,4 +32,6 @@ interface Backend
     public function expireIfKeyHasValue($key, $value, $ttlInSeconds);
 
     public function get($key);
+
+    public function getKeysMatchingPattern($pattern);
 }
