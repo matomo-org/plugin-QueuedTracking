@@ -171,7 +171,7 @@ class Processor
     {
         // 2 seconds per tracking request should give it enough time to process it
         $ttl = $requestSet->getNumberOfRequests() * 2;
-        $ttl = max($ttl, 20); // lock for at least 20 seconds
+        $ttl = max($ttl, 30); // lock for at least 30 seconds
 
         return $this->queueManager->expireLock($ttl);
     }
