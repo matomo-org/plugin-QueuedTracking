@@ -9,6 +9,7 @@
 
 namespace Piwik\Plugins\QueuedTracking\Queue\Processor;
 
+use Piwik\Common;
 use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue;
@@ -43,7 +44,15 @@ class Handler
 
         foreach ($requestSet->getRequests() as $request) {
             try {
+                $startMs = round(microtime(true) * 1000);
+
                 $tracker->trackRequest($request);
+
+                $diffInMs = round(microtime(true) * 1000) - $startMs;
+                if ($diffInMs > 2000) {
+                    Common::printDebug(sprintf('The following request took more than 2 seconds (%d ms) to be tracked: %s', $diffInMs, var_export($request->getParams(), 1)));
+                }
+
                 $this->count++;
             } catch (UnexpectedWebsiteFoundException $ex) {
                 // empty

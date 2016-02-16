@@ -134,6 +134,9 @@ __Are there any known issues?__
 
 ## Changelog
 
+0.2.6
+- When a request takes more than 2 seconds and debug tracker mode is enabled, log information about the request.
+
 0.2.5
 
 - Use a better random number generator if available on the system to more evenly process queues.
