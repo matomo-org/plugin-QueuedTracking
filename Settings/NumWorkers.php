@@ -10,30 +10,24 @@ namespace Piwik\Plugins\QueuedTracking\Settings;
 
 use Piwik\Cache;
 use Piwik\Config;
-use Piwik\Plugins\QueuedTracking\Queue\Factory;
-use Piwik\Settings\SystemSetting;
+use Piwik\Settings\Plugin\SystemSetting;
 
 /**
  * Defines Settings for QueuedTracking.
  */
 class NumWorkers extends SystemSetting
 {
+    private $oldValue;
+
+    public function getOldValue()
+    {
+        return $this->oldValue;
+    }
 
     public function setValue($value)
     {
-        $newNumWorkers = $value;
-        $oldNumWorkers = $this->getValue();
+        $this->oldValue = $this->getValue();
 
         parent::setValue($value);
-
-        if ($newNumWorkers && $oldNumWorkers) {
-            try {
-                $manager = Factory::makeQueueManager(Factory::makeBackend());
-                $manager->setNumberOfAvailableQueues($newNumWorkers);
-                $manager->moveSomeQueuesIfNeeded($newNumWorkers, $oldNumWorkers);
-            } catch (\Exception $e) {
-                // it is ok if this fails. then it is most likely not enabled etc.
-            }
-        }
     }
 }

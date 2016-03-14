@@ -10,7 +10,7 @@ namespace Piwik\Plugins\QueuedTracking\tests\Integration\Settings;
 
 use Piwik\Container\StaticContainer;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
-use Piwik\Plugins\QueuedTracking\Settings;
+use Piwik\Plugins\QueuedTracking\PluginSettings;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 use Piwik\Tracker\RequestSet;
 
@@ -23,7 +23,7 @@ use Piwik\Tracker\RequestSet;
 class NumWorkersTest extends IntegrationTestCase
 {
     /**
-     * @var Settings
+     * @var PluginSettings
      */
     private $settings;
 
@@ -32,7 +32,7 @@ class NumWorkersTest extends IntegrationTestCase
         parent::setUp();
         $this->clearRedisDb();
 
-        $this->settings = self::$fixture->piwikEnvironment->getContainer()->get('Piwik\Plugins\QueuedTracking\Settings');
+        $this->settings = self::$fixture->piwikEnvironment->getContainer()->get('Piwik\Plugins\QueuedTracking\PluginSettings');
     }
 
     public function tearDown()

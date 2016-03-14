@@ -8,7 +8,7 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration;
 
-use Piwik\Plugins\QueuedTracking\Settings;
+use Piwik\Plugins\QueuedTracking\PluginSettings;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 
 /**
@@ -20,7 +20,7 @@ use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 class SettingsTest extends IntegrationTestCase
 {
     /**
-     * @var Settings
+     * @var PluginSettings
      */
     private $settings;
 
@@ -28,7 +28,7 @@ class SettingsTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $this->settings = new Settings();
+        $this->settings = new PluginSettings();
     }
 
     public function tearDown()

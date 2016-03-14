@@ -11,8 +11,7 @@ namespace Piwik\Plugins\QueuedTracking\Queue;
 
 use Piwik\Container\StaticContainer;
 use Piwik\Plugins\QueuedTracking\Queue;
-use Piwik\Plugins\QueuedTracking\Settings;
-use Piwik\Tracker\SettingsStorage;
+use Piwik\Plugins\QueuedTracking\PluginSettings;
 
 /**
  * This class represents a page view, tracking URL, page title and generation time.
@@ -45,10 +44,10 @@ class Factory
 
     public static function getSettings()
     {
-        return StaticContainer::get('Piwik\Plugins\QueuedTracking\Settings');
+        return StaticContainer::get('Piwik\Plugins\QueuedTracking\PluginSettings');
     }
 
-    private static function makeBackendFromSettings(Settings $settings)
+    private static function makeBackendFromSettings(PluginSettings $settings)
     {
         $host     = $settings->redisHost->getValue();
         $port     = $settings->redisPort->getValue();

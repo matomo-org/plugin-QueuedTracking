@@ -10,7 +10,7 @@ namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue;
 
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
-use Piwik\Plugins\QueuedTracking\Settings;
+use Piwik\Plugins\QueuedTracking\PluginSettings;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 
 /**
@@ -65,7 +65,7 @@ class FactoryTest extends IntegrationTestCase
     public function test_getSettings_shouldReturnARedisInstance()
     {
         $settings = Factory::getSettings();
-        $this->assertTrue($settings instanceof Settings);
+        $this->assertTrue($settings instanceof PluginSettings);
     }
 
     public function test_getSettings_shouldReturnASingleton()

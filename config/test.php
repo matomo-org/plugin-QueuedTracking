@@ -2,7 +2,7 @@
 
 return array(
 
-    'Piwik\Plugins\QueuedTracking\Settings' => DI\decorate(function (\Piwik\Plugins\QueuedTracking\Settings $settings) {
+    'Piwik\Plugins\QueuedTracking\PluginSettings' => DI\decorate(function (\Piwik\Plugins\QueuedTracking\PluginSettings $settings) {
         if ($settings->redisHost->isWritableByCurrentUser()) {
             $settings->redisHost->setValue('127.0.0.1');
             $settings->redisPort->setValue(6379);
