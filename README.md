@@ -75,7 +75,7 @@ __How should the redis server be configured?__
 Make sure to have enough memory to save all tracking requests in the queue. One tracking request in the queue takes about 2KB,
 20.000 tracking requests take about 50MB. All tracking requests of all websites are stored in the same queue.
 There should be only one Redis server to make sure the data will be replayed in the same order as they were recorded.
-If you want to configure Redis HA (High Availability) it should be possible to use Redis Cluser, Redis Sentinel, ...
+If you want to configure Redis HA (High Availability) it is possible to use Redis Sentinel see further down.
 We currently write into the Redis default database by default but you can configure to use a different one.
 
 __Why do some tests fail on my local Piwik instance?__
@@ -124,6 +124,17 @@ __I am using the Log Importer in combination with Queued Tracking, is there some
 
 Yes, we recommend to set the "Number of requests to process" to `1` as the log importer usually sends multiple requests at once using bulk tracking already.
 
+__How can I configure the QueuedTracking plugin to use Sentinel?__
+
+Add the following configuration to your `config/config.ini.php` to enable Sentinel feature:
+
+```
+[QueuedTracking]
+backend=sentinel
+```
+
+In this case the `phpredis` extension is not needed as it uses a PHP class to connect to your Redis. Please note that calls to Redis might be a little bit slower.
+
 __Are there any known issues?__
 
 * In case you are using bulk tracking the bulk tracking response varies compared to the regular one. We will always return
@@ -134,7 +145,12 @@ __Are there any known issues?__
 
 ## Changelog
 
+0.3.0
+
+- Added support to use Redis Sentinel for automatic failover
+
 0.2.6
+
 - When a request takes more than 2 seconds and debug tracker mode is enabled, log information about the request.
 
 0.2.5
