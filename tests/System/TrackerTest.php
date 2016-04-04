@@ -12,7 +12,7 @@ use Piwik\Common;
 use Piwik\Db;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\QueuedTracking;
-use Piwik\Plugins\QueuedTracking\PluginSettings;
+use Piwik\Plugins\QueuedTracking\SystemSettings;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 use Piwik\Tests\Framework\Fixture;
 use Piwik\Tests\Framework\TestCase\SystemTestCase;
@@ -170,7 +170,7 @@ class TrackerTest extends SystemTestCase
 
     protected function enableQueue()
     {
-        $settings = new PluginSettings();
+        $settings = new SystemSettings();
         $settings->queueEnabled->setValue(true);
         $settings->numRequestsToProcess->setValue($this->requestProcessLimit);
         $settings->save();
@@ -178,7 +178,7 @@ class TrackerTest extends SystemTestCase
 
     protected function disableQueue()
     {
-        $settings = new PluginSettings();
+        $settings = new SystemSettings();
         $settings->queueEnabled->setValue(false);
         $settings->save();
     }
