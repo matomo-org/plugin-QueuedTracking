@@ -8,6 +8,7 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue;
 
+use Piwik\Config;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Plugins\QueuedTracking\SystemSettings;
@@ -54,6 +55,15 @@ class FactoryTest extends IntegrationTestCase
     {
         $backend = Factory::makeBackend();
         $this->assertTrue($backend instanceof Queue\Backend\Redis);
+        $this->assertFalse($backend instanceof Queue\Backend\Sentinel);
+    }
+
+    public function test_makeBackend_shouldReturnASentinelInstanceIfConfigured()
+    {
+        Config::getInstance()->QueuedTracking = array('backend' => 'sentinel');
+        $backend = Factory::makeBackend();
+        Config::getInstance()->QueuedTracking = array();
+        $this->assertTrue($backend instanceof Queue\Backend\Sentinel);
     }
 
     public function test_makeBackend_shouldConfigureRedis()

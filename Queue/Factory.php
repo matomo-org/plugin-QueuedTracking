@@ -9,6 +9,7 @@
 
 namespace Piwik\Plugins\QueuedTracking\Queue;
 
+use Piwik\Config;
 use Piwik\Container\StaticContainer;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\SystemSettings;
@@ -47,6 +48,11 @@ class Factory
         return StaticContainer::get('Piwik\Plugins\QueuedTracking\SystemSettings');
     }
 
+    private static function getConfig()
+    {
+        return Config::getInstance();
+    }
+
     private static function makeBackendFromSettings(SystemSettings $settings)
     {
         $host     = $settings->redisHost->getValue();
@@ -55,7 +61,13 @@ class Factory
         $password = $settings->redisPassword->getValue();
         $database = $settings->redisDatabase->getValue();
 
-        $redis = new Queue\Backend\Redis();
+        $queuedTracking = self::getConfig()->QueuedTracking;
+        if (!empty($queuedTracking['backend']) && $queuedTracking['backend'] === 'sentinel') {
+            $redis = new Queue\Backend\Sentinel();
+        } else {
+            $redis = new Queue\Backend\Redis();
+        }
+
         $redis->setConfig($host, $port, $timeout, $password);
         $redis->setDatabase($database);
 

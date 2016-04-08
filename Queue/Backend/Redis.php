@@ -11,23 +11,22 @@ namespace Piwik\Plugins\QueuedTracking\Queue\Backend;
 use Piwik\Log;
 use Piwik\Plugins\QueuedTracking\Queue\Backend;
 use Piwik\Tracker;
-use Piwik\Translate;
 
 class Redis implements Backend
 {
     /**
      * @var \Redis
      */
-    private $redis;
-    private $host;
-    private $port;
-    private $timeout;
-    private $password;
+    protected $redis;
+    protected $host;
+    protected $port;
+    protected $timeout;
+    protected $password;
 
     /**
      * @var int
      */
-    private $database;
+    protected $database;
 
     public function testConnection()
     {
@@ -162,8 +161,14 @@ class Redis implements Backend
 else
     return 0
 end';
+
         // ideally we would use evalSha to reduce bandwidth!
-        return (bool) $this->redis->eval($script, array($key, $value), 1);
+        return (bool) $this->evalScript($script, array($key), array($value));
+    }
+
+    protected function evalScript($script, $keys, $args)
+    {
+        return $this->redis->eval($script, array_merge($keys, $args), count($keys));
     }
 
     public function getKeysMatchingPattern($pattern)
@@ -187,7 +192,7 @@ else
     return 0
 end';
         // ideally we would use evalSha to reduce bandwidth!
-        return (bool) $this->redis->eval($script, array($key, $value, (int) $ttlInSeconds), 1);
+        return (bool) $this->evalScript($script, array($key), array($value, (int) $ttlInSeconds));
     }
 
     public function get($key)
@@ -213,7 +218,7 @@ end';
         }
     }
 
-    private function connect()
+    protected function connect()
     {
         $this->redis = new \Redis();
         $success = $this->redis->connect($this->host, $this->port, $this->timeout, null, 100);
@@ -235,8 +240,11 @@ end';
 
         $this->host = $host;
         $this->port = $port;
-        $this->timeout  = $timeout;
-        $this->password = $password;
+        $this->timeout = $timeout;
+
+        if (!empty($password)) {
+            $this->password = $password;
+        }
     }
 
     private function disconnect()
