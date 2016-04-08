@@ -81,6 +81,7 @@ class FactoryTest extends IntegrationTestCase
     public function test_getSettings_shouldReturnASingleton()
     {
         $settings = Factory::getSettings();
+        $settings->redisTimeout->setIsWritableByCurrentUser(true);
         $settings->redisTimeout->setValue(0.7);
 
         // it would not return the same value usually as $settings->save() is not called

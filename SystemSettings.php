@@ -13,7 +13,6 @@ use Piwik\Config;
 use Piwik\Plugins\QueuedTracking\Settings\NumWorkers;
 use Piwik\Settings\Setting;
 use Piwik\Settings\FieldConfig;
-use Piwik\Settings\Storage\Storage;
 use Piwik\Settings\Storage\Backend;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
 
@@ -49,12 +48,8 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     /** @var Setting */
     public $numRequestsToProcess;
 
-    private $staticStorage;
-
     protected function init()
     {
-        $this->staticStorage = new Storage(new Backend\Null('QueuedTracking'));
-
         $this->redisHost = $this->createRedisHostSetting();
         $this->redisPort = $this->createRedisPortSetting();
         $this->redisTimeout = $this->createRedisTimeoutSetting();
