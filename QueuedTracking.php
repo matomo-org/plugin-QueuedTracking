@@ -22,12 +22,16 @@ class QueuedTracking extends \Piwik\Plugin
         );
     }
 
+    public function isTrackerPlugin()
+    {
+        return true;
+    }
+
     public function replaceHandlerIfQueueIsEnabled(&$handler)
     {
         $settings = Queue\Factory::getSettings();
 
         if ($settings->queueEnabled->getValue()) {
-
             $handler = new Handler();
 
             if ($settings->processDuringTrackingRequest->getValue()) {
