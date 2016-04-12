@@ -8,8 +8,8 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Framework\TestCase;
 
+use Piwik\Config;
 use Piwik\Plugins\QueuedTracking\Queue;
-use Piwik\Plugins\QueuedTracking\QueuedTracking;
 use Piwik\Tests\Framework\Mock\Tracker\RequestSet;
 use Piwik\Tracker\RequestSet as PiwikRequestSet;
 use Piwik\Tracker\Request;
@@ -27,6 +27,8 @@ class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTes
         }
 
         parent::setUp();
+
+        Config::getInstance()->QueuedTracking = array();
     }
 
     public static function isRedisAvailable()

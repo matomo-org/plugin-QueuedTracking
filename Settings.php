@@ -10,6 +10,7 @@ namespace Piwik\Plugins\QueuedTracking;
 
 use Piwik\Cache;
 use Piwik\Config;
+use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Plugins\QueuedTracking\Settings\NumWorkers;
 use Piwik\Settings\Storage\StaticStorage;
 use Piwik\Settings\SystemSetting;
@@ -61,6 +62,25 @@ class Settings extends \Piwik\Plugin\Settings
         $this->createNumberOfQueueWorkerSetting();
         $this->createNumRequestsToProcessSetting();
         $this->createProcessInTrackingRequestSetting();
+    }
+
+    public function isUsingSentinelBackend()
+    {
+        $queuedTracking = $this->getQueuedTrackingConfig();
+        return !empty($queuedTracking['backend']) && $queuedTracking['backend'] === 'sentinel';
+    }
+
+    public function getSentinelMasterName()
+    {
+        $queuedTracking = $this->getQueuedTrackingConfig();
+        if (!empty($queuedTracking['sentinel_master_name'])) {
+            return $queuedTracking['sentinel_master_name'];
+        }
+    }
+
+    private function getQueuedTrackingConfig()
+    {
+        return Config::getInstance()->QueuedTracking;
     }
 
     private function createRedisHostSetting()
@@ -204,14 +224,15 @@ class Settings extends \Piwik\Plugin\Settings
             $value = (bool) $value;
 
             if ($value) {
-                $host = $self->redisHost->getValue();
-                $port = $self->redisPort->getValue();
-                $timeout = $self->redisTimeout->getValue();
-                $password = $self->redisPassword->getValue();
-
                 $systemCheck = new SystemCheck();
-                $systemCheck->checkRedisIsInstalled();
-                $systemCheck->checkConnectionDetails($host, $port, $timeout, $password);
+
+                if (!$self->isUsingSentinelBackend()) {
+                    $systemCheck->checkRedisIsInstalled();
+                }
+
+                $backend = Factory::makeBackendFromSettings($self);
+                $systemCheck->checkConnectionDetails($backend);
+
             }
         };
 

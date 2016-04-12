@@ -1,6 +1,6 @@
 {
     "name": "QueuedTracking",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "Scale your large traffic Piwik service by queuing tracking requests in Redis for better performance. ",
     "theme": false,
     "keywords": ["tracker", "tracking", "queue", "redis"],

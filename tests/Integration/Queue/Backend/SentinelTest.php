@@ -21,9 +21,27 @@ use Piwik\Plugins\QueuedTracking\Queue\Factory;
 class SentinelTest extends RedisTest
 {
 
+    public function tearDown()
+    {
+        Config::getInstance()->QueuedTracking = array();
+        parent::tearDown();
+    }
+
     protected function createRedisBackend()
     {
-        Config::getInstance()->QueuedTracking = array('backend' => 'sentinel');
+        $settings = Factory::getSettings();
+
+        Config::getInstance()->QueuedTracking = array();
+
+        $this->assertFalse($settings->isUsingSentinelBackend());
+        $this->assertNull($settings->getSentinelMasterName());
+
+        Config::getInstance()->QueuedTracking = array('backend' => 'sentinel', 'sentinel_master_name' => 'mymaster');
+
+        $this->assertTrue($settings->isUsingSentinelBackend());
+        $this->assertSame('mymaster', $settings->getSentinelMasterName());
+
+        $settings->redisPort->setValue(26379);
 
         $sentinel = Factory::makeBackend();
 

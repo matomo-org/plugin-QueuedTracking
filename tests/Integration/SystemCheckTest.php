@@ -8,6 +8,8 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration;
 
+use Piwik\Config;
+use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 
@@ -43,7 +45,8 @@ class SystemCheckTest extends IntegrationTestCase
      */
     public function test_checkConnectionDetails_shouldFailIfServerIsWrong()
     {
-        $this->systemCheck->checkConnectionDetails('192.168.123.234', 6379, 0.2, null);
+        $backend = $this->makeBackend('192.168.123.234', 6379, 0.2, null);
+        $this->systemCheck->checkConnectionDetails($backend);
     }
 
     /**
@@ -52,13 +55,26 @@ class SystemCheckTest extends IntegrationTestCase
      */
     public function test_checkConnectionDetails_shouldFailIfPortIsWrong()
     {
-        $this->systemCheck->checkConnectionDetails('127.0.0.1', 6370, 0.2, null);
+        $backend = $this->makeBackend('127.0.0.1', 6370, 0.2, null);
+        $this->systemCheck->checkConnectionDetails($backend);
     }
 
     public function test_checkConnectionDetails_shouldNotFailIfConnectionDataIsCorrect()
     {
-        $this->systemCheck->checkConnectionDetails('127.0.0.1', 6379, 0.2, null);
+        $backend = $this->makeBackend('127.0.0.1', 6379, 0.2, null);
+        $this->systemCheck->checkConnectionDetails($backend);
         $this->assertTrue(true);
+    }
+
+    private function makeBackend($host, $port, $timeout, $password)
+    {
+        $settings = Factory::getSettings();
+        $settings->redisHost->setValue($host);
+        $settings->redisPort->setValue($port);
+        $settings->redisTimeout->setValue($timeout);
+        $settings->redisPassword->setValue($password);
+
+        return Factory::makeBackendFromSettings($settings);
     }
 
 }

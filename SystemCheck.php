@@ -21,16 +21,13 @@ class SystemCheck
         }
     }
 
-    public function checkConnectionDetails($host, $port, $timeout, $password)
+    public function checkConnectionDetails(Redis $backend)
     {
-        $redis = new Redis();
-        $redis->setConfig($host, $port, $timeout, $password);
-
-        if (!$redis->testConnection()) {
+        if (!$backend->testConnection()) {
             throw new \Exception('Connection to Redis failed. Please verify Redis host and port');
         };
 
-        $version = $redis->getServerVersion();
+        $version = $backend->getServerVersion();
 
         if (version_compare($version, '2.8.0') < 0) {
             throw new \Exception('At least Redis server 2.8.0 is required');

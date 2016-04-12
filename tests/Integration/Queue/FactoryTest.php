@@ -58,9 +58,19 @@ class FactoryTest extends IntegrationTestCase
         $this->assertFalse($backend instanceof Queue\Backend\Sentinel);
     }
 
-    public function test_makeBackend_shouldReturnASentinelInstanceIfConfigured()
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage You must configure a sentinel master name
+     */
+    public function test_makeBackend_shouldFailToCreateASentinelInstance_IfNotFullyConfigured()
     {
         Config::getInstance()->QueuedTracking = array('backend' => 'sentinel');
+        Factory::makeBackend();
+    }
+
+    public function test_makeBackend_shouldReturnASentinelInstanceIfConfigured()
+    {
+        Config::getInstance()->QueuedTracking = array('backend' => 'sentinel', 'sentinel_master_name' => 'mymaster');
         $backend = Factory::makeBackend();
         Config::getInstance()->QueuedTracking = array();
         $this->assertTrue($backend instanceof Queue\Backend\Sentinel);

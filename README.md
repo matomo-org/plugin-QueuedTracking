@@ -131,6 +131,7 @@ Add the following configuration to your `config/config.ini.php` to enable Sentin
 ```
 [QueuedTracking]
 backend=sentinel
+sentinel_master_name="mymaster"
 ```
 
 In this case the `phpredis` extension is not needed as it uses a PHP class to connect to your Redis. Please note that calls to Redis might be a little bit slower.
@@ -144,6 +145,11 @@ __Are there any known issues?__
  under load tracking requests may take a while until they are replayed.
 
 ## Changelog
+
+0.3.1
+
+- Fixed a bug with sentinel. To use sentinel you must configure a `[QueuedTracking]sentinel_master_name="mymaster"`
+  config entry in `config/config.ini.php`.
 
 0.3.0
 
