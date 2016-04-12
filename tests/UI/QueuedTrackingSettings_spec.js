@@ -14,6 +14,20 @@ describe("QueuedTrackingSettings", function () {
                  + ',#pluginSettings[data-pluginname=QueuedTracking]';
     var url = "?module=CoreAdminHome&action=adminPluginSettings&idSite=1&period=day&date=yesterday";
 
+    beforeEach(function () {
+        if (testEnvironment.configOverride.QueuedTracking) {
+            delete testEnvironment.configOverride.QueuedTracking;
+        }
+        testEnvironment.save();
+    });
+
+    after(function () {
+        if (testEnvironment.configOverride.QueuedTracking) {
+            delete testEnvironment.configOverride.QueuedTracking;
+        }
+        testEnvironment.save();
+    });
+
     it("should display the settings page", function (done) {
         expect.screenshot('settings_page').to.be.captureSelector(selector, function (page) {
             page.load(url);
@@ -28,4 +42,17 @@ describe("QueuedTrackingSettings", function () {
             page.wait(1000);
         }, done);
     });
+
+    it("should display the settings page with sentinel enabled", function (done) {
+
+        testEnvironment.overrideConfig('QueuedTracking', {
+            useSentinelBackend: '1'
+        });
+        testEnvironment.save();
+
+        expect.screenshot('settings_page_sentinel').to.be.captureSelector(selector, function (page) {
+            page.load(url);
+        }, done);
+    });
+
 });

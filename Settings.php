@@ -10,10 +10,12 @@ namespace Piwik\Plugins\QueuedTracking;
 
 use Piwik\Cache;
 use Piwik\Config;
+use Piwik\Piwik;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Plugins\QueuedTracking\Settings\NumWorkers;
 use Piwik\Settings\Storage\StaticStorage;
 use Piwik\Settings\SystemSetting;
+use Exception;
 
 /**
  * Defines Settings for QueuedTracking.
@@ -47,11 +49,20 @@ class Settings extends \Piwik\Plugin\Settings
     /** @var SystemSetting */
     public $processDuringTrackingRequest;
 
+    /** @var SystemSetting */
+    public $useSentinelBackend;
+
+    /** @var SystemSetting */
+    public $sentinelMasterName;
+
     private $staticStorage;
 
     protected function init()
     {
         $this->staticStorage = new StaticStorage('QueuedTracking');
+
+        $this->createUseSentinelBackend();
+        $this->createSetSentinelMasterName();
 
         $this->createRedisHostSetting();
         $this->createRedisPortSetting();
@@ -66,36 +77,41 @@ class Settings extends \Piwik\Plugin\Settings
 
     public function isUsingSentinelBackend()
     {
-        $queuedTracking = $this->getQueuedTrackingConfig();
-        return !empty($queuedTracking['backend']) && $queuedTracking['backend'] === 'sentinel';
+        return $this->useSentinelBackend->getValue();
     }
 
     public function getSentinelMasterName()
     {
-        $queuedTracking = $this->getQueuedTrackingConfig();
-        if (!empty($queuedTracking['sentinel_master_name'])) {
-            return $queuedTracking['sentinel_master_name'];
-        }
-    }
-
-    private function getQueuedTrackingConfig()
-    {
-        return Config::getInstance()->QueuedTracking;
+        return $this->sentinelMasterName->getValue();
     }
 
     private function createRedisHostSetting()
     {
+        $self = $this;
         $this->redisHost = new SystemSetting('redisHost', 'Redis host');
         $this->redisHost->readableByCurrentUser = true;
         $this->redisHost->type = static::TYPE_STRING;
         $this->redisHost->uiControlType = static::CONTROL_TEXT;
-        $this->redisHost->uiControlAttributes = array('size' => 300);
+        $this->redisHost->uiControlAttributes = array('size' => 500);
         $this->redisHost->defaultValue = '127.0.0.1';
-        $this->redisHost->inlineHelp = 'Remote host of the Redis server. Max 300 characters are allowed.';
-        $this->redisHost->validate = function ($value) {
-            if (strlen($value) > 300) {
-                throw new \Exception('Max 300 characters allowed');
+        $this->redisHost->inlineHelp = 'Remote host of the Redis server. Max 500 characters are allowed.';
+
+        if ($this->isUsingSentinelBackend()) {
+            $this->redisHost->inlineHelp .= $this->getInlineHelpSentinelMultipleServers('hosts');
+        }
+
+        $this->redisHost->validate = function ($value) use ($self) {
+            $self->checkMultipleServersOnlyConfiguredWhenSentinelIsEnabled($value);
+
+            if (strlen($value) > 500) {
+                throw new \Exception('Max 500 characters allowed in total');
             }
+        };
+
+        $this->redisHost->transform = function ($value) use ($self) {
+            $hosts = $self->convertCommaSeparatedValueToArray($value);
+
+            return implode(',', $hosts);
         };
 
         $this->addSetting($this->redisHost);
@@ -103,24 +119,78 @@ class Settings extends \Piwik\Plugin\Settings
 
     private function createRedisPortSetting()
     {
+        $self = $this;
         $this->redisPort = new SystemSetting('redisPort', 'Redis port');
         $this->redisPort->readableByCurrentUser = true;
-        $this->redisPort->type = static::TYPE_INT;
+        $this->redisPort->type = static::TYPE_STRING;
         $this->redisPort->uiControlType = static::CONTROL_TEXT;
-        $this->redisPort->uiControlAttributes = array('size' => 5);
+        $this->redisPort->uiControlAttributes = array('size' => 100);
         $this->redisPort->defaultValue = '6379';
         $this->redisPort->inlineHelp = 'Port the Redis server is running on. Value should be between 1 and 65535.';
-        $this->redisPort->validate = function ($value) {
-            if ($value < 1) {
-                throw new \Exception('Port has to be at least 1');
-            }
 
-            if ($value >= 65535) {
-                throw new \Exception('Port should be max 65535');
+        if ($this->isUsingSentinelBackend()) {
+            $this->redisPort->inlineHelp .= $this->getInlineHelpSentinelMultipleServers('ports');
+            $this->redisPort->defaultValue = '26379';
+        }
+
+        $this->redisPort->validate = function ($value) use ($self) {
+            $self->checkMultipleServersOnlyConfiguredWhenSentinelIsEnabled($value);
+            $ports = $self->convertCommaSeparatedValueToArray($value);
+
+            foreach ($ports as $port) {
+                if (!is_numeric($port)) {
+                    throw new \Exception('A port has to be a number');
+                }
+
+                $port = (int) $port;
+
+                if ($port < 1) {
+                    throw new \Exception('Port has to be at least 1');
+                }
+
+                if ($port >= 65535) {
+                    throw new \Exception('Port should be max 65535');
+                }
             }
+        };
+        $this->redisPort->transform = function ($value) use ($self) {
+            $ports = $self->convertCommaSeparatedValueToArray($value);
+            $ports = array_map('intval', $ports);
+
+            return implode(',', $ports);
         };
 
         $this->addSetting($this->redisPort);
+    }
+
+    private function getInlineHelpSentinelMultipleServers($nameOfSetting)
+    {
+        return 'As you are using Redis Sentinel, you can define multiple ' . $nameOfSetting . ' comma separated. Make sure to specify as many hosts as you have specified ports. For example to configure two servers "127.0.0.1:26379" and "127.0.0.2:26879" specify "127.0.0.1,127.0.0.2" as host and "26379,26879" as ports.';
+    }
+
+    public function checkMultipleServersOnlyConfiguredWhenSentinelIsEnabled($value)
+    {
+        if ($this->isUsingSentinelBackend()) {
+            return;
+        }
+
+        $values = $this->convertCommaSeparatedValueToArray($value);
+
+        if (count($values) > 1) {
+            throw new Exception(Piwik::translate('QueuedTracking_MultipleServersOnlyConfigurableIfSentinelEnabled'));
+        }
+    }
+
+    public function convertCommaSeparatedValueToArray($value)
+    {
+        if ($value === '' || $value === false || $value === null) {
+            return array();
+        }
+
+        $values = explode(',', $value);
+        $values = array_map('trim', $values);
+
+        return $values;
     }
 
     private function createRedisTimeoutSetting()
@@ -224,6 +294,8 @@ class Settings extends \Piwik\Plugin\Settings
             $value = (bool) $value;
 
             if ($value) {
+                $self->checkMatchHostsAndPorts();
+
                 $systemCheck = new SystemCheck();
 
                 if (!$self->isUsingSentinelBackend()) {
@@ -272,6 +344,61 @@ class Settings extends \Piwik\Plugin\Settings
         $this->processDuringTrackingRequest->defaultValue = true;
 
         $this->addSetting($this->processDuringTrackingRequest);
+    }
+
+    private function createUseSentinelBackend()
+    {
+        $this->useSentinelBackend = new SystemSetting('useSentinelBackend', 'Enable Redis Sentinel');
+        $this->useSentinelBackend->readableByCurrentUser = true;
+        $this->useSentinelBackend->type = static::TYPE_BOOL;
+        $this->useSentinelBackend->uiControlType = static::CONTROL_CHECKBOX;
+        $this->useSentinelBackend->inlineHelp = 'If enabled will use Redis Sentinel feature. Make sure to update host and port if needed. You can specify multiple Redis Sentinel servers once enabled.';
+        $this->useSentinelBackend->defaultValue = false;
+
+        $this->addSetting($this->useSentinelBackend);
+    }
+
+    private function createSetSentinelMasterName()
+    {
+        $this->sentinelMasterName = new SystemSetting('sentinelMasterName', 'Redis Sentinel Master name');
+        $this->sentinelMasterName->readableByCurrentUser = true;
+        $this->sentinelMasterName->type = static::TYPE_STRING;
+        $this->sentinelMasterName->defaultValue = 'mymaster';
+        $this->sentinelMasterName->uiControlType = static::CONTROL_TEXT;
+        $this->sentinelMasterName->uiControlAttributes = array('size' => 200);
+        $this->sentinelMasterName->inlineHelp = 'The sentinel master name only needs to be configured if Sentinel is enabled.';
+        $this->sentinelMasterName->validate = function ($value) {
+            if (!empty($value) && strlen($value) > 200) {
+                throw new \Exception('Max 200 characters are allowed');
+            }
+        };
+        $this->sentinelMasterName->transform = function ($value) {
+            if (empty($value)) {
+                return '';
+            }
+            return trim($value);
+        };
+
+        $this->addSetting($this->sentinelMasterName);
+    }
+
+    public function checkMatchHostsAndPorts()
+    {
+        $hosts = $this->redisHost->getValue();
+        $ports = $this->redisPort->getValue();
+        $numHosts = count(explode(',', $hosts));
+        $numPorts = count(explode(',', $ports));
+
+        if (($hosts || $ports) && $numHosts !== $numPorts) {
+            throw new Exception(Piwik::translate('QueuedTracking_NumHostsNotMatchNumPorts'));
+        }
+    }
+
+    public function save()
+    {
+        $this->checkMatchHostsAndPorts();
+
+        parent::save();
     }
 
 }

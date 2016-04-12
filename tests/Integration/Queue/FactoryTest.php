@@ -64,13 +64,13 @@ class FactoryTest extends IntegrationTestCase
      */
     public function test_makeBackend_shouldFailToCreateASentinelInstance_IfNotFullyConfigured()
     {
-        Config::getInstance()->QueuedTracking = array('backend' => 'sentinel');
+        Config::getInstance()->QueuedTracking = array('useSentinelBackend' => '1', 'sentinelMasterName' => '');
         Factory::makeBackend();
     }
 
     public function test_makeBackend_shouldReturnASentinelInstanceIfConfigured()
     {
-        Config::getInstance()->QueuedTracking = array('backend' => 'sentinel', 'sentinel_master_name' => 'mymaster');
+        Config::getInstance()->QueuedTracking = array('useSentinelBackend' => '1', 'sentinelMasterName' => 'mymaster');
         $backend = Factory::makeBackend();
         Config::getInstance()->QueuedTracking = array();
         $this->assertTrue($backend instanceof Queue\Backend\Sentinel);

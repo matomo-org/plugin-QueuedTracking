@@ -31,23 +31,48 @@ class SentinelTest extends RedisTest
     {
         $settings = Factory::getSettings();
 
-        Config::getInstance()->QueuedTracking = array();
-
-        $this->assertFalse($settings->isUsingSentinelBackend());
-        $this->assertNull($settings->getSentinelMasterName());
-
-        Config::getInstance()->QueuedTracking = array('backend' => 'sentinel', 'sentinel_master_name' => 'mymaster');
-
+        $this->enableRedisSentinel();
         $this->assertTrue($settings->isUsingSentinelBackend());
-        $this->assertSame('mymaster', $settings->getSentinelMasterName());
 
-        $settings->redisPort->setValue(26379);
+        $settings->redisPort->setValue('26379');
 
         $sentinel = Factory::makeBackend();
 
         $this->assertTrue($sentinel instanceof Sentinel);
 
         return $sentinel;
+    }
+
+    public function test_canCreateInstanceWithMultipleSentinelAndFallback()
+    {
+        $settings = Factory::getSettings();
+
+        $this->enableRedisSentinel();
+        $this->assertTrue($settings->isUsingSentinelBackend());
+
+        $settings->redisHost->setValue('127.0.0.1,127.0.0.2,127.0.0.1');
+        $settings->redisPort->setValue('26378,26379,26379');
+
+        $sentinel = Factory::makeBackendFromSettings($settings);
+        $this->assertTrue($sentinel->testConnection());
+    }
+
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage QueuedTracking_NumHostsNotMatchNumPorts
+     */
+    public function test_connect_ShouldThrowException_IfNotExactSameHostAndPortNumbersGiven()
+    {
+        $this->enableRedisSentinel();
+
+        $settings = Factory::getSettings();
+        $this->assertTrue($settings->isUsingSentinelBackend());
+
+        $settings->redisHost->setValue('127.0.0.1,127.0.0.1');
+        $settings->redisPort->setValue('26378,26379,26379');
+
+        $sentinel = Factory::makeBackendFromSettings($settings);
+        $sentinel->get('test');
     }
 
 }
