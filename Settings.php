@@ -352,7 +352,7 @@ class Settings extends \Piwik\Plugin\Settings
         $this->useSentinelBackend->readableByCurrentUser = true;
         $this->useSentinelBackend->type = static::TYPE_BOOL;
         $this->useSentinelBackend->uiControlType = static::CONTROL_CHECKBOX;
-        $this->useSentinelBackend->inlineHelp = 'If enabled will use Redis Sentinel feature. Make sure to update host and port if needed. You can specify multiple Redis Sentinel servers once enabled.';
+        $this->useSentinelBackend->inlineHelp = 'If enabled, the Redis Sentinel feature will be used. Make sure to update host and port if needed. Once you have enabled and saved the change, you will be able to specify multiple hosts and ports comma separated.';
         $this->useSentinelBackend->defaultValue = false;
 
         $this->addSetting($this->useSentinelBackend);
