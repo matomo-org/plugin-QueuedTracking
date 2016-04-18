@@ -20,6 +20,13 @@ use Piwik\Plugins\QueuedTracking\Queue\Factory;
  */
 class SentinelTest extends RedisTest
 {
+    public function setUp()
+    {
+        if (self::isTravisCI()) {
+            $this->markTestSkipped('Sentinel is not installed on travis');
+        }
+        parent::setUp();
+    }
 
     public function tearDown()
     {
