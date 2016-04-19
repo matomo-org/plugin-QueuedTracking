@@ -124,16 +124,15 @@ __I am using the Log Importer in combination with Queued Tracking, is there some
 
 Yes, we recommend to set the "Number of requests to process" to `1` as the log importer usually sends multiple requests at once using bulk tracking already.
 
-__How can I configure the QueuedTracking plugin to use Sentinel?__
+__How can I configure the QueuedTracking plugin to use Redis Sentinel?__
 
-Add the following configuration to your `config/config.ini.php` to enable Sentinel feature:
+You can enable the Sentinel in the plugin settings. Make sure to specify the correct Sentinel "master" name.
 
-```
-[QueuedTracking]
-backend=sentinel
-```
+When using Sentinel, the `phpredis` extension is not needed as it uses a PHP class to connect to your Redis. Please note that calls to Redis might be a little bit slower.
 
-In this case the `phpredis` extension is not needed as it uses a PHP class to connect to your Redis. Please note that calls to Redis might be a little bit slower.
+__Can I configure multiple Sentinel servers?__
+
+Yes, once Sentinel is enabled you can configure multiple servers by specifying multiple hosts and ports comma separated via the UI.
 
 __Are there any known issues?__
 
@@ -144,6 +143,11 @@ __Are there any known issues?__
  under load tracking requests may take a while until they are replayed.
 
 ## Changelog
+
+0.3.1
+
+- Fixed Redis Sentinel was not working properly. Sentinel can be now configured via the UI and not via config. Also
+  multiple servers can be configured now.
 
 0.3.0
 
