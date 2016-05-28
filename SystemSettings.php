@@ -332,7 +332,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
 
     private function createUseSentinelBackend()
     {
-        return $this->makeSetting('useSentinelBackend', $default = true, FieldConfig::TYPE_BOOL, function (FieldConfig $field) {
+        return $this->makeSetting('useSentinelBackend', $default = false, FieldConfig::TYPE_BOOL, function (FieldConfig $field) {
             $field->title = 'Enable Redis Sentinel\'';
             $field->uiControl = FieldConfig::UI_CONTROL_CHECKBOX;
             $field->uiControlAttributes = array('size' => 3);
