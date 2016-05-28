@@ -11,7 +11,7 @@ describe("QueuedTrackingSettings", function () {
     this.timeout(0);
 
     var selector = '#QueuedTracking,#QueuedTracking + .pluginIntroduction,#QueuedTracking + .pluginIntroduction + .adminTable'
-                 + ',#pluginSettings[data-pluginname=QueuedTracking]';
+                 + ',#pluginSettings[piwik-plugin-name=QueuedTracking]';
     var url = "?module=CoreAdminHome&action=generalSettings&idSite=1&period=day&date=yesterday";
 
     it("should display the settings page", function (done) {
