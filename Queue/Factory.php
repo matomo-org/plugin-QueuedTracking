@@ -9,10 +9,10 @@
 
 namespace Piwik\Plugins\QueuedTracking\Queue;
 
-use Piwik\Config;
 use Piwik\Container\StaticContainer;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\SystemSettings;
+use Exception;
 
 /**
  * This class represents a page view, tracking URL, page title and generation time.
@@ -48,12 +48,7 @@ class Factory
         return StaticContainer::get('Piwik\Plugins\QueuedTracking\SystemSettings');
     }
 
-    private static function getConfig()
-    {
-        return Config::getInstance();
-    }
-
-    private static function makeBackendFromSettings(SystemSettings $settings)
+    public static function makeBackendFromSettings(SystemSettings $settings)
     {
         $host     = $settings->redisHost->getValue();
         $port     = $settings->redisPort->getValue();
@@ -61,9 +56,14 @@ class Factory
         $password = $settings->redisPassword->getValue();
         $database = $settings->redisDatabase->getValue();
 
-        $queuedTracking = self::getConfig()->QueuedTracking;
-        if (!empty($queuedTracking['backend']) && $queuedTracking['backend'] === 'sentinel') {
-            $redis = new Queue\Backend\Sentinel();
+        if ($settings->isUsingSentinelBackend()) {
+            $masterName = $settings->getSentinelMasterName();
+            if (empty($masterName)) {
+                throw new Exception('You must configure a sentinel master name via `sentinel_master_name="mymaster"` to use the sentinel backend');
+            } else {
+                $redis = new Queue\Backend\Sentinel();
+                $redis->setSentinelMasterName($masterName);
+            }
         } else {
             $redis = new Queue\Backend\Redis();
         }

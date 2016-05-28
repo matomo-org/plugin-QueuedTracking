@@ -8,8 +8,11 @@
  */
 namespace Piwik\Plugins\QueuedTracking\Queue\Backend;
 
+use Piwik\Log;
+use Piwik\Piwik;
 use Piwik\Plugins\QueuedTracking\Queue\Backend;
 use Piwik\Tracker;
+use Exception;
 
 include_once PIWIK_INCLUDE_PATH . '/plugins/QueuedTracking/libs/credis/Client.php';
 include_once PIWIK_INCLUDE_PATH . '/plugins/QueuedTracking/libs/credis/Cluster.php';
@@ -17,15 +20,46 @@ include_once PIWIK_INCLUDE_PATH . '/plugins/QueuedTracking/libs/credis/Sentinel.
 
 class Sentinel extends Redis
 {
+    private $masterName = '';
+
     protected function connect()
     {
-        $client = new \Credis_Client($this->host, $this->port, $this->timeout, $persistent = false, $this->database, $this->password);
-        $this->redis = new \Credis_Sentinel($client);
-        $client->connect();
+        $hosts = explode(',', $this->host);
+        $ports = explode(',', $this->port);
 
-        $this->redis = $client;
+        if (count($hosts) !== count($ports)) {
+            throw new Exception(Piwik::translate('QueuedTracking_NumHostsNotMatchNumPorts'));
+        }
 
-        return true;
+        foreach ($hosts as $index => $host) { // Sort or randomize as appropriate
+            try {
+                $configuredClient = new \Credis_Client($host, $ports[$index], $timeout = 0.5, $persistent = false);
+                $configuredClient->forceStandalone();
+                $configuredClient->connect();
+                $configuredSentinel = new \Credis_Sentinel($configuredClient);
+                $master = $configuredSentinel->getMasterAddressByName($this->masterName);
+
+                if (!empty($master)) {
+
+                    $client = new \Credis_Client($master[0], $master[1], $this->timeout, $persistent = false, $this->database, $this->password);
+                    $client->connect();
+
+                    $this->redis = $client;
+
+                    return true;
+                }
+
+            } catch (Exception $e) {
+                Log::debug($e->getMessage());
+            }
+        }
+
+        throw new Exception('Could not receive an actual master from sentinel');
+    }
+
+    public function setSentinelMasterName($name)
+    {
+        $this->masterName = $name;
     }
 
     protected function evalScript($script, $keys, $args)
