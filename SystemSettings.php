@@ -337,16 +337,6 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
             $field->uiControl = FieldConfig::UI_CONTROL_CHECKBOX;
             $field->uiControlAttributes = array('size' => 3);
             $field->inlineHelp = 'If enabled, the Redis Sentinel feature will be used. Make sure to update host and port if needed. Once you have enabled and saved the change, you will be able to specify multiple hosts and ports comma separated.';
-            $field->validate = function ($value, $setting) {
-
-                if (!is_numeric($value)) {
-                    throw new \Exception('Value should be a number');
-                }
-
-                if ((int) $value < 1) {
-                    throw new \Exception('Number should be 1 or higher');
-                }
-            };
         });
     }
 
