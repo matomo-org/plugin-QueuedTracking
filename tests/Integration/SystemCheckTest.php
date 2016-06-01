@@ -8,6 +8,7 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration;
 
+use Piwik\Access;
 use Piwik\Config;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
@@ -71,6 +72,7 @@ class SystemCheckTest extends IntegrationTestCase
         $settings = Factory::getSettings();
         $settings->redisHost->setValue($host);
         $settings->redisPort->setValue($port);
+        $settings->redisTimeout->setIsWritableByCurrentUser(true);
         $settings->redisTimeout->setValue($timeout);
         $settings->redisPassword->setValue($password);
 
