@@ -281,7 +281,10 @@ class ProcessorTest extends IntegrationTestCase
         };
 
         $this->acquireAllQueueLocks();
-        $mock = $this->getMock(get_class($this->processor), array('processRequestSets'), array($this->queue, $this->lock));
+        $mock = $this->getMockBuilder(get_class($this->processor))
+                     ->setMethods(array('processRequestSets'))
+                     ->setConstructorArgs(array($this->queue, $this->lock))
+                     ->getMock();
 
         $mock->expects($this->at(0))
              ->method('processRequestSets')

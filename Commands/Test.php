@@ -50,8 +50,15 @@ class Test extends ConsoleCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $systemCheck = new SystemCheck();
-        $systemCheck->checkRedisIsInstalled();
+        try {
+            $systemCheck = new SystemCheck();
+            $systemCheck->checkRedisIsInstalled();
+
+            $extension = new \ReflectionExtension('redis');
+            $output->writeln('PHPRedis version: ' . $extension->getVersion());
+        } catch(\Exception $e) {
+            $output->writeln('No PHPRedis extension (not a problem if sentinel is used):' . $e->getMessage());
+        }
 
         $trackerEnvironment = new Environment('tracker');
         $trackerEnvironment->init();
@@ -69,6 +76,8 @@ class Test extends ConsoleCommand
         $output->writeln('NumRequestsToProcess: ' . $settings->numRequestsToProcess->getValue());
         $output->writeln('ProcessDuringTrackingRequest: ' . (int) $settings->processDuringTrackingRequest->getValue());
         $output->writeln('QueueEnabled: ' . (int) $settings->queueEnabled->getValue());
+        $output->writeln('UseSentinelBackend: ' . (int) $settings->useSentinelBackend->getValue());
+        $output->writeln('SentinelMasterName: ' . $settings->sentinelMasterName->getValue());
 
         $output->writeln('');
         $output->writeln('<comment>Version / stats:</comment>');
@@ -76,10 +85,12 @@ class Test extends ConsoleCommand
         $output->writeln('PHP version: ' . phpversion());
         $output->writeln('Uname: ' . php_uname());
 
-        $extension = new \ReflectionExtension('redis');
-        $output->writeln('PHPRedis version: ' . $extension->getVersion());
-
         $backend = Queue\Factory::makeBackend();
+
+        if ($backend instanceof Queue\Backend\Sentinel) {
+            $output->writeln('Backend is using sentinel');
+        }
+
         $output->writeln('Redis version: ' . $backend->getServerVersion());
         $output->writeln('Memory: ' . var_export($backend->getMemoryStats(), 1));
 
