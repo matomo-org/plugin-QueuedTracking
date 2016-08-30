@@ -13,7 +13,7 @@ use Piwik\Plugins\QueuedTracking\Tracker\Handler;
 class QueuedTracking extends \Piwik\Plugin
 {
     /**
-     * @see Piwik\Plugin::getListHooksRegistered
+     * @see \Piwik\Plugin::getListHooksRegistered
      */
     public function getListHooksRegistered()
     {
