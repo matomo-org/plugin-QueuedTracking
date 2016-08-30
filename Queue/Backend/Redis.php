@@ -74,7 +74,19 @@ class Redis implements Backend
     {
         $this->connectIfNeeded();
 
-        return $this->redis->pttl($key);
+        $ttl = $this->redis->pttl($key);
+
+        if ($ttl == -1) {
+            // key exists but has no associated expire
+            return 99999999;
+        }
+
+        if ($ttl == -2) {
+            // key does not exist
+            return 0;
+        }
+
+        return $ttl;
     }
 
     public function appendValuesToList($key, $values)
