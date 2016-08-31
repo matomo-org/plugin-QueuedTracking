@@ -144,6 +144,10 @@ __Are there any known issues?__
 
 ## Changelog
 
+0.3.2
+
+- Fixes a bug in the lock-status command where it may report a queue as locked while it was not
+
 0.3.1
 
 - Fixed Redis Sentinel was not working properly. Sentinel can be now configured via the UI and not via config. Also
