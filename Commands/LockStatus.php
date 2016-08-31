@@ -52,9 +52,11 @@ class LockStatus extends ConsoleCommand
 
         foreach ($keys as $lockKey) {
             $time = $backend->getTimeToLive($lockKey);
-            $output->writeln(sprintf('"%s" is locked for <comment>%d ms</comment>', $lockKey, $time));
-            $output->writeln(sprintf('Set option <comment>--unlock=%s</comment> to unlock the queue.', $lockKey));
-            $output->writeln(' ');
+            if (!empty($time)) {
+                $output->writeln(sprintf('"%s" is locked for <comment>%d ms</comment>', $lockKey, $time));
+                $output->writeln(sprintf('Set option <comment>--unlock=%s</comment> to unlock the queue.', $lockKey));
+                $output->writeln(' ');
+            }
         }
     }
 }
