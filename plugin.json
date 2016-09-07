@@ -9,6 +9,13 @@
     "require": {
         "piwik": ">=3.0.0-b1,<4.0.0-b1"
     },
+    "support": {
+        "email": "hello@piwik.org",
+        "issues": "https://github.com/piwik/plugin-QueuedTracking/issues",
+        "forum": "https://forum.piwik.org",
+        "source": "https://github.com/piwik/plugin-QueuedTracking",
+        "wiki": "https://github.com/piwik/plugin-QueuedTracking/wiki"
+    },
     "authors": [
         {
             "name": "Piwik",
