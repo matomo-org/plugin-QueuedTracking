@@ -1,5 +1,9 @@
 ## Changelog
 
+3.0.0
+
+- Compatibility with Piwik 3.0
+
 0.3.2
 
 - Fixes a bug in the lock-status command where it may report a queue as locked while it was not
