@@ -13,13 +13,18 @@ use Piwik\Plugins\QueuedTracking\Tracker\Handler;
 class QueuedTracking extends \Piwik\Plugin
 {
     /**
-     * @see \Piwik\Plugin::getListHooksRegistered
+     * @see \Piwik\Plugin::registerEvents
      */
-    public function getListHooksRegistered()
+    public function registerEvents()
     {
         return array(
             'Tracker.newHandler' => 'replaceHandlerIfQueueIsEnabled'
         );
+    }
+
+    public function isTrackerPlugin()
+    {
+        return true;
     }
 
     public function replaceHandlerIfQueueIsEnabled(&$handler)
@@ -27,7 +32,6 @@ class QueuedTracking extends \Piwik\Plugin
         $settings = Queue\Factory::getSettings();
 
         if ($settings->queueEnabled->getValue()) {
-
             $handler = new Handler();
 
             if ($settings->processDuringTrackingRequest->getValue()) {

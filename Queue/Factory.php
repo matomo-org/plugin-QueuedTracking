@@ -9,10 +9,9 @@
 
 namespace Piwik\Plugins\QueuedTracking\Queue;
 
-use Piwik\Config;
 use Piwik\Container\StaticContainer;
 use Piwik\Plugins\QueuedTracking\Queue;
-use Piwik\Plugins\QueuedTracking\Settings;
+use Piwik\Plugins\QueuedTracking\SystemSettings;
 use Exception;
 
 /**
@@ -46,10 +45,10 @@ class Factory
 
     public static function getSettings()
     {
-        return StaticContainer::get('Piwik\Plugins\QueuedTracking\Settings');
+        return StaticContainer::get('Piwik\Plugins\QueuedTracking\SystemSettings');
     }
 
-    public static function makeBackendFromSettings(Settings $settings)
+    public static function makeBackendFromSettings(SystemSettings $settings)
     {
         $host     = $settings->redisHost->getValue();
         $port     = $settings->redisPort->getValue();

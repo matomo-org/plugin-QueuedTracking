@@ -8,7 +8,7 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration;
 
-use Piwik\Plugins\QueuedTracking\Settings;
+use Piwik\Plugins\QueuedTracking\SystemSettings;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 
 /**
@@ -20,7 +20,7 @@ use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 class SettingsTest extends IntegrationTestCase
 {
     /**
-     * @var Settings
+     * @var SystemSettings
      */
     private $settings;
 
@@ -28,7 +28,7 @@ class SettingsTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $this->settings = new Settings();
+        $this->settings = new SystemSettings();
     }
 
     public function tearDown()
@@ -69,6 +69,7 @@ class SettingsTest extends IntegrationTestCase
      */
     public function test_redisTimeout_ShouldFail_IfTooLong()
     {
+        $this->settings->redisTimeout->setIsWritableByCurrentUser(true);
         $this->settings->redisTimeout->setValue('333.43');
     }
 
@@ -78,6 +79,7 @@ class SettingsTest extends IntegrationTestCase
      */
     public function test_redisTimeout_ShouldFail_IfNotNumeric()
     {
+        $this->settings->redisTimeout->setIsWritableByCurrentUser(true);
         $this->settings->redisTimeout->setValue('33d3.43');
     }
 
@@ -208,11 +210,17 @@ class SettingsTest extends IntegrationTestCase
 
     public function test_redisTimeout_ShouldConvertAValueToFloat()
     {
+        $this->settings->redisTimeout->setIsWritableByCurrentUser(true);
         $this->settings->redisTimeout->setValue('4.45');
         $this->assertSame(4.45, $this->settings->redisTimeout->getValue());
     }
 
-    public function test_redisPort_ShouldConvertAValueToIntButTypeString()
+    public function test_redisTimeout_ShouldNotBeWritableByDefault()
+    {
+        $this->assertFalse($this->settings->redisTimeout->isWritableByCurrentUser());
+    }
+
+    public function test_redisPort_ShouldConvertAValueToInt()
     {
         $this->settings->redisPort->setValue('4.45');
         $this->assertSame('4', $this->settings->redisPort->getValue());
@@ -329,7 +337,7 @@ class SettingsTest extends IntegrationTestCase
 
     public function test_processDuringTrackingRequest_ShouldConvertAnyValueToBoolean()
     {
-        $this->settings->processDuringTrackingRequest->setValue('y');
+        $this->settings->processDuringTrackingRequest->setValue('1');
         $this->assertTrue($this->settings->processDuringTrackingRequest->getValue());
     }
 

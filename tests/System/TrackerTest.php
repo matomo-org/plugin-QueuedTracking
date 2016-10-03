@@ -11,8 +11,7 @@ namespace Piwik\Plugins\QueuedTracking\tests\System;
 use Piwik\Common;
 use Piwik\Db;
 use Piwik\Plugins\QueuedTracking\Queue;
-use Piwik\Plugins\QueuedTracking\QueuedTracking;
-use Piwik\Plugins\QueuedTracking\Settings;
+use Piwik\Plugins\QueuedTracking\SystemSettings;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 use Piwik\Tests\Framework\Fixture;
 use Piwik\Tests\Framework\TestCase\SystemTestCase;
@@ -52,8 +51,6 @@ class TrackerTest extends SystemTestCase
         if (!Fixture::siteCreated($idSite)) {
             Fixture::createWebsite($dateTime);
         }
-
-        $queuedTracking = new QueuedTracking();
 
         $this->tracker = Fixture::getTracker($idSite, $dateTime, $defaultInit = true);
         $this->enableQueue();
@@ -170,22 +167,29 @@ class TrackerTest extends SystemTestCase
 
     protected function enableQueue()
     {
-        $settings = new Settings();
+        $settings = Queue\Factory::getSettings();
         $settings->queueEnabled->setValue(true);
         $settings->numRequestsToProcess->setValue($this->requestProcessLimit);
+        $settings->processDuringTrackingRequest->setValue(true);
+        $settings->numQueueWorkers->setValue(1);
+        $settings->redisDatabase->setValue(15);
+        $settings->redisHost->setValue('127.0.0.1');
+        $settings->redisPort->setValue(6379);
         $settings->save();
     }
 
     protected function disableQueue()
     {
-        $settings = new Settings();
+        $settings = new SystemSettings();
         $settings->queueEnabled->setValue(false);
         $settings->save();
     }
 
     protected function createQueue()
     {
-        return Queue\Factory::makeQueueManager($this->createRedisBackend());
+        $backend = $this->createRedisBackend();
+
+        return Queue\Factory::makeQueueManager($backend);
     }
 
     protected function clearRedisDb()

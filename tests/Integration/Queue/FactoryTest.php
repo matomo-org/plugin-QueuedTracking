@@ -11,7 +11,7 @@ namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue;
 use Piwik\Config;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
-use Piwik\Plugins\QueuedTracking\Settings;
+use Piwik\Plugins\QueuedTracking\SystemSettings;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 
 /**
@@ -85,12 +85,13 @@ class FactoryTest extends IntegrationTestCase
     public function test_getSettings_shouldReturnARedisInstance()
     {
         $settings = Factory::getSettings();
-        $this->assertTrue($settings instanceof Settings);
+        $this->assertTrue($settings instanceof SystemSettings);
     }
 
     public function test_getSettings_shouldReturnASingleton()
     {
         $settings = Factory::getSettings();
+        $settings->redisTimeout->setIsWritableByCurrentUser(true);
         $settings->redisTimeout->setValue(0.7);
 
         // it would not return the same value usually as $settings->save() is not called

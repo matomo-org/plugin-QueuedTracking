@@ -11,8 +11,8 @@ describe("QueuedTrackingSettings", function () {
     this.timeout(0);
 
     var selector = '#QueuedTracking,#QueuedTracking + .pluginIntroduction,#QueuedTracking + .pluginIntroduction + .adminTable'
-                 + ',#pluginSettings[data-pluginname=QueuedTracking]';
-    var url = "?module=CoreAdminHome&action=adminPluginSettings&idSite=1&period=day&date=yesterday";
+                 + ',#pluginSettings[piwik-plugin-name=QueuedTracking]';
+    var url = "?module=CoreAdminHome&action=generalSettings&idSite=1&period=day&date=yesterday";
 
     beforeEach(function () {
         if (testEnvironment.configOverride.QueuedTracking) {
