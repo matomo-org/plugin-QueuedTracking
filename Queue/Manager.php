@@ -66,7 +66,7 @@ class Manager
         return true;
     }
 
-    private function moveRequestsIntoAnotherQueue($queueIdsToMove)
+    public function moveRequestsIntoAnotherQueue($queueIdsToMove)
     {
         foreach ($queueIdsToMove as $queueId) {
             $queue = $this->createQueue($queueId);
