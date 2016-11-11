@@ -81,15 +81,20 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         return $this->sentinelMasterName->getValue();
     }
 
+    public function isUsingUnixSocket()
+    {
+        return substr($this->redisHost->getValue(), 0, 1) === '/';
+    }
+
     private function createRedisHostSetting()
     {
         $self = $this;
 
         return $this->makeSetting('redisHost', $default = '127.0.0.1', FieldConfig::TYPE_STRING, function (FieldConfig $field) use ($self) {
-            $field->title = 'Redis host';
+            $field->title = 'Redis host or unix socket';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 500);
-            $field->inlineHelp = 'Remote host of the Redis server. Max 500 characters are allowed.';
+            $field->inlineHelp = 'Remote host or unix socket of the Redis server. Max 500 characters are allowed.';
 
             if ($self->isUsingSentinelBackend()) {
                 $field->inlineHelp .= $self->getInlineHelpSentinelMultipleServers('hosts');
@@ -124,7 +129,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
             $field->title = 'Redis port';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 100);
-            $field->inlineHelp = 'Port the Redis server is running on. Value should be between 1 and 65535.';
+            $field->inlineHelp = 'Port the Redis server is running on. Value should be between 1 and 65535. Use 0 if you are using unix socket to connect to Redis server.';
 
             if ($self->isUsingSentinelBackend()) {
                 $field->inlineHelp .= $self->getInlineHelpSentinelMultipleServers('ports');
@@ -141,7 +146,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
 
                     $port = (int) $port;
 
-                    if ($port < 1) {
+                    if ($port < 1 && !$this->isUsingUnixSocket()) {
                         throw new \Exception('Port has to be at least 1');
                     }
 
@@ -264,7 +269,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
                         $systemCheck->checkRedisIsInstalled();
                     }
                     $backend = Factory::makeBackendFromSettings($self);
-                    
+
                     $systemCheck->checkConnectionDetails($backend);
                 }
             };
