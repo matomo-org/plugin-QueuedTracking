@@ -1,5 +1,9 @@
 ## Changelog
 
+3.0.1
+
+- Added possibility to define a unix socket instead of a host and path.
+
 3.0.0
 
 - Compatibility with Piwik 3.0
