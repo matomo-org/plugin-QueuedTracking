@@ -10,8 +10,7 @@
 describe("QueuedTrackingSettings", function () {
     this.timeout(0);
 
-    var selector = '#QueuedTracking,#QueuedTracking + .pluginIntroduction,#QueuedTracking + .pluginIntroduction + .adminTable'
-                 + ',#pluginSettings[piwik-plugin-name=QueuedTracking]';
+    var selector = '.card-content:contains(\'QueuedTracking\')';
     var url = "?module=CoreAdminHome&action=generalSettings&idSite=1&period=day&date=yesterday";
 
     beforeEach(function () {
@@ -35,11 +34,16 @@ describe("QueuedTrackingSettings", function () {
     });
 
     it("should show an error if queue is enabled and redis connection is wrong", function (done) {
-        expect.screenshot('settings_save_error').to.be.captureSelector(selector + ',#ajaxErrorPluginSettings', function (page) {
-            page.click('input[name=queueEnabled]');
+        expect.screenshot('settings_save_error').to.be.captureSelector(selector + ',#notificationContainer', function (page) {
+            page.click('label[for=queueEnabled]');
             page.sendKeys('input[name=redisPort]', '1');
-            page.click('.pluginsSettingsSubmit');
-            page.wait(1000);
+            page.click('.card-content:contains(\'QueuedTracking\') .pluginsSettingsSubmit');
+            page.wait(750);
+            // hide all cards, except of QueueTracking
+            page.evaluate(function(){
+                $('.card-content').hide();
+                $('.card-content:contains(\'QueuedTracking\')').show();
+            });
         }, done);
     });
 
