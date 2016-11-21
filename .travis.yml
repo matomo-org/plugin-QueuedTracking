@@ -27,22 +27,25 @@ env:
   global:
     - PLUGIN_NAME=QueuedTracking
     - PIWIK_ROOT_DIR=$TRAVIS_BUILD_DIR/piwik
-    - PIWIK_LATEST_STABLE_TEST_TARGET=2.16.2-b1
-    - secure: "XQHscVt/CuHd76xBnglzXyqB7jkYmab2sx7e4aEbCBfoTrEWGfd4w3IpV6NtGu2HcjvcLB3HNz0v5CyWCt8XFbABVMeqdWKF18MGyAn4pPYXh1F95PL5eRmcU1lcHFlAspUjVk6uy59YPomqElNfR474DQAMvk24MngyXhH81o4="
-    - secure: "MjZyWq/VgNCiIAHSJsENV6JzgGlljwjhXWauzp5xf8Le79XtCr5QTe1J540h0D9d0e3X28uIGqTvuZlZy+RPOdvsmcCaAdKk9j7cgfyzPPKNVPJcARfaB4W0mAalorn4CwZIZx+P2IdrZ8wqH+IwYaNEElcT0KBzEq8IuP1yeYU="
+    # this variable controls the version of Piwik your tests will run against.
+    # by default it will run against the maximum support version read from plugin.json
+    # (PIWIK_TEST_TARGET=maximum_supported_piwik).
+    # You can also specify a specific Piwik version
+    # (PIWIK_TEST_TARGET=2.16.0-b1).
+    - PIWIK_TEST_TARGET=maximum_supported_piwik
   matrix:
-    - TEST_SUITE=PluginTests MYSQL_ADAPTER=PDO_MYSQL TEST_AGAINST_PIWIK_BRANCH=$PIWIK_LATEST_STABLE_TEST_TARGET
+    - TEST_SUITE=PluginTests MYSQL_ADAPTER=PDO_MYSQL TEST_AGAINST_PIWIK_BRANCH=$PIWIK_TEST_TARGET
     - TEST_SUITE=PluginTests MYSQL_ADAPTER=PDO_MYSQL TEST_AGAINST_CORE=minimum_required_piwik
-    - TEST_SUITE=UITests MYSQL_ADAPTER=PDO_MYSQL TEST_AGAINST_PIWIK_BRANCH=$PIWIK_LATEST_STABLE_TEST_TARGET
+    - TEST_SUITE=UITests MYSQL_ADAPTER=PDO_MYSQL TEST_AGAINST_PIWIK_BRANCH=$PIWIK_TEST_TARGET
 
 matrix:
   exclude:
-    # execute latest stable tests only w/ PHP 5.6
+    # execute latest stable tests only w/ PHP 5.5
     - php: 5.5
       env: TEST_SUITE=PluginTests MYSQL_ADAPTER=PDO_MYSQL TEST_AGAINST_CORE=minimum_required_piwik
     # execute UI tests only w/ PHP 5.6
     - php: 5.5
-      env: TEST_SUITE=UITests MYSQL_ADAPTER=PDO_MYSQL TEST_AGAINST_PIWIK_BRANCH=$PIWIK_LATEST_STABLE_TEST_TARGET
+      env: TEST_SUITE=UITests MYSQL_ADAPTER=PDO_MYSQL TEST_AGAINST_PIWIK_BRANCH=$PIWIK_TEST_TARGET
 
 sudo: required
 
@@ -132,6 +135,7 @@ before_script:
 
   - ./tests/travis/prepare.sh
   - ./tests/travis/setup_webserver.sh
+  - if [[ "$TRAVIS_PHP_VERSION" != 5.3* ]]; then ./tests/travis/install_phantomjs.sh; export PATH=$PWD/travis_phantomjs/phantomjs-2.1.1-linux-x86_64/bin:$PATH; fi
 
   - cd tests/PHPUnit
 
