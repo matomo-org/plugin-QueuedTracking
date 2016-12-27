@@ -1,0 +1,6 @@
+{
+    "QueuedTracking": {
+        "NumHostsNotMatchNumPorts": "Broj hostova se ne poklapa sa brojem portova.",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Višestruki hostovi i portovi se mogu podesiti samo kada se omogući Redis Sentinel. Pogledajte dokumentaciju dodatka kako biste saznali kako se omogućuje Sentinel."
+    }
+}

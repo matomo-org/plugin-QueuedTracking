@@ -1,0 +1,6 @@
+{
+    "QueuedTracking": {
+        "NumHostsNotMatchNumPorts": "Počet nakonfigurovaných hostů neodpovídá počtu nakonfigurovaných portů.",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Více hostů či portů lze nakonfigurovat pouze při povolení modulu Redis Sentinel. Více informací, jak Sentinel povolit, najdete v souboru readme tohoto modulu."
+    }
+}

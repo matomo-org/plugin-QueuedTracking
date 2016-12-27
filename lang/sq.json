@@ -1,0 +1,6 @@
+{
+    "QueuedTracking": {
+        "NumHostsNotMatchNumPorts": "Numri i strehëve të formësuara nuk përputhet me numrin e portave të formësuara.",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Mund të formësohen shumë strehë ose porta vetëm kur Redis Sentinel është i aktivizuar. Që të mësoni si të aktivizoni Sentinel-in, hidhini një sy kartelës readme të shtojcës."
+    }
+}

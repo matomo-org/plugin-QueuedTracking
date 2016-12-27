@@ -1,0 +1,6 @@
+{
+    "QueuedTracking": {
+        "NumHostsNotMatchNumPorts": "Số máy chủ không phù hợp với số cổng đã cấu hình.",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Các máy chủ hoặc cổng chỉ được cấu hình khi plugin Redis Sentinel được kích hoạt. Để kích hoạt plugin Sentinel, hãy đọc qua tập tin readme."
+    }
+}
