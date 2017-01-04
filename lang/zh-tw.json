@@ -1,0 +1,6 @@
+{
+    "QueuedTracking": {
+        "NumHostsNotMatchNumPorts": "設定的域名數量和端口數量不相符。",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "只有在 Redis Sentinel 啟用時才能設定多個域名及端口。看看外掛的 readme 檔案來了解如何啟用 Sentinel。"
+    }
+}
