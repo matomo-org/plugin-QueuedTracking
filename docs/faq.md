@@ -81,7 +81,7 @@ __How can I access Redis data?__
 You can either acccess data on the command line via `redis-cli` or use a Redis monitor like [phpRedisAdmin](https://github.com/ErikDubbelboer/phpRedisAdmin).
 In case you are using something like a Redis monitor make sure it is not accessible by everyone.
 
-__The processor won't start processing again as it things another processor is processing the data already, what can I do?__
+__The processor won't start processing again as it thinks another processor is processing the data already, what can I do?__
 
 First make sure there is actually no processor processing any requests. For example by executing the command
 `./console queuedtracking:monitor`. In case you are using the command line to process tracking requests make sure there
