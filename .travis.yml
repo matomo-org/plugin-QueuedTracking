@@ -52,8 +52,6 @@ sudo: required
 script: $PIWIK_ROOT_DIR/tests/travis/travis.sh
 
 before_install:
-  # do not use the Zend allocator on PHP 5.3 since it will randomly segfault after program execution
-  - '[[ "$TRAVIS_PHP_VERSION" == 5.3* ]] && export USE_ZEND_ALLOC=0 || true'
 
 install:
   # move all contents of current repo (which contains the plugin) to a new directory
@@ -79,9 +77,6 @@ install:
   - '[ "$PLUGIN_NAME" == "" ] || [ ! -f ./tests/travis/check_plugin_compatible_with_piwik.php ] || php ./tests/travis/check_plugin_compatible_with_piwik.php "$PLUGIN_NAME"'
 
   - ./tests/travis/configure_git.sh
-
-  # disable tls for php 5.3 as openssl isn't available
-  - '[[ "$TRAVIS_PHP_VERSION" == 5.3* ]] && composer config -g -- disable-tls true || true'
 
   # travis now complains about this failing 9 times out of 10, so removing it
   #- travis_retry composer self-update
@@ -135,7 +130,7 @@ before_script:
 
   - ./tests/travis/prepare.sh
   - ./tests/travis/setup_webserver.sh
-  - if [[ "$TRAVIS_PHP_VERSION" != 5.3* ]]; then ./tests/travis/install_phantomjs.sh; export PATH=$PWD/travis_phantomjs/phantomjs-2.1.1-linux-x86_64/bin:$PATH; fi
+  - ./tests/travis/install_phantomjs.sh; export PATH=$PWD/travis_phantomjs/phantomjs-2.1.1-linux-x86_64/bin:$PATH;
 
   - cd tests/PHPUnit
 
