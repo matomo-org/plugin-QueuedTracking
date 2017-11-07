@@ -103,4 +103,9 @@ class Handler extends Tracker\Handler
         return $queue;
     }
 
+    public function finish(Tracker $tracker, RequestSet $requestSet)
+    {
+        $this->redirectIfNeeded($requestSet);
+        return $this->getResponse()->getOutput();
+    }
 }
