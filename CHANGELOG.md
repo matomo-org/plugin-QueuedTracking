@@ -1,5 +1,9 @@
 ## Changelog
 
+3.0.2
+
+- Ensure do not track cookie works
+
 3.0.1
 
 - Added possibility to define a unix socket instead of a host and path.

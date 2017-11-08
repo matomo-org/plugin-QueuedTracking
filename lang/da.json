@@ -1,0 +1,6 @@
+{
+    "QueuedTracking": {
+        "NumHostsNotMatchNumPorts": "Antallet af konfigurerede hosts passer ikke til antallet at konfigurerede porte",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Flere hosts og porte kan kun konfigureres når Redis Sentinel er aktiveret. Læs ReadMe filen for programtilføjelsen for at lære hvordan du aktiverer Sentinel"
+    }
+}

@@ -99,7 +99,7 @@ class HandlerTest extends IntegrationTestCase
 
         $this->assertFalse($this->response->isInit);
         $this->assertFalse($this->response->isExceptionOutput);
-        $this->assertTrue($this->response->isResponseOutput);
+        $this->assertFalse($this->response->isResponseOutput);
         $this->assertTrue($this->response->isSend);
     }
 
