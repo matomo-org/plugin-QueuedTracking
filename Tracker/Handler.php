@@ -42,6 +42,11 @@ class Handler extends Tracker\Handler
         $queueManager->addRequestSetToQueues($requestSet);
         $tracker->setCountOfLoggedRequests($requestSet->getNumberOfRequests());
 
+        $requests = $requestSet->getRequests();
+        foreach ($requests as $request) {
+            $request->setThirdPartyCookie($request->getVisitorId());
+        }
+
         $this->sendResponseNow($tracker, $requestSet);
 
         if ($this->isAllowedToProcessInTrackerMode() && $queueManager->canAcquireMoreLocks()) {

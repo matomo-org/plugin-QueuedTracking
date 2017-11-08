@@ -330,10 +330,11 @@ class ProcessorTest extends IntegrationTestCase
     public function test_process_shouldRestoreEnvironmentAfterTrackingRequests()
     {
         $serverBackup = $_SERVER;
+        $cookieBackup = $_COOKIE;
 
         $this->queue->setNumberOfRequestsToProcessAtSameTime(1);
         $requestSet = $this->buildRequestSet(5);
-        $requestSet->setEnvironment(array('server' => array('test' => 1)));
+        $requestSet->setEnvironment(array('server' => array('test' => 1), 'cookie' => array('testcookie'=> 7)));
         $this->queue->addRequestSetToQueues($requestSet);
 
         $tracker = $this->process();
@@ -341,6 +342,7 @@ class ProcessorTest extends IntegrationTestCase
         $this->assertSame(5, $tracker->getCountOfLoggedRequests());
 
         $this->assertEquals($serverBackup, $_SERVER);
+        $this->assertEquals($cookieBackup, $_COOKIE);
     }
 
     private function acquireAllQueueLocks()

@@ -268,15 +268,18 @@ class HandlerTest extends IntegrationTestCase
     public function test_process_ShouldRestoreTheEnvironmentOfARequest()
     {
         $serverBackup = $_SERVER;
+        $cookieBackup = $_COOKIE;
 
         $requestSet = $this->buildRequestSet(2);
-        $requestSet->setEnvironment(array('server' => array('myserver' => 0)));
+        $requestSet->setEnvironment(array('server' => array('myserver' => 0), 'cookie' => array('testcookie'=> 7)));
 
         $this->handler->process($this->tracker, $requestSet);
 
         $this->assertEquals(array('myserver' => 0), $_SERVER);
+        $this->assertEquals(array('testcookie'=> 7), $_COOKIE);
 
         $_SERVER = $serverBackup;
+        $_COOKIE = $cookieBackup;
     }
 
     private function createHandler()
