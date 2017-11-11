@@ -9,12 +9,14 @@
 namespace Piwik\Plugins\QueuedTracking\tests\System;
 
 use Piwik\Common;
+use Piwik\Config;
 use Piwik\Db;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\SystemSettings;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 use Piwik\Tests\Framework\Fixture;
 use Piwik\Tests\Framework\TestCase\SystemTestCase;
+use Piwik\Tests\Framework\TestingEnvironmentVariables;
 
 /**
  * @group QueuedTracking
@@ -101,6 +103,38 @@ class TrackerTest extends SystemTestCase
         $response = $this->doTrackNumberOfRequests(2);
 
         Fixture::checkResponse($response);
+    }
+
+    public function test_response_ShouldSetThirdPartyCookieIfEnabled()
+    {
+        $this->enableThirdPartyCookie();
+
+        $response = $this->doTrackNumberOfRequests(1);
+
+        $this->disableThirdPartyCookie();
+
+        $cookieName = $this->getThirdPartyCookieName();
+        $this->assertNotEmpty($this->tracker->getIncomingTrackerCookie($cookieName));
+    }
+
+    public function test_response_ShouldAcceptThirdPartyCookieIfPresent()
+    {
+        $this->enableThirdPartyCookie();
+
+        $cookieName = $this->getThirdPartyCookieName();
+
+        $response = $this->doTrackNumberOfRequests(1);
+        $cookieValueOne = $this->tracker->getIncomingTrackerCookie($cookieName);
+
+        $this->tracker->setNewVisitorId();
+        $this->tracker->setOutgoingTrackerCookie($cookieName, $cookieValueOne);
+
+        $response = $this->doTrackNumberOfRequests(1);
+        $cookieValueTwo = $this->tracker->getIncomingTrackerCookie($cookieName);
+
+        $this->disableThirdPartyCookie();
+
+        $this->assertEquals($cookieValueOne, $cookieValueTwo);
     }
 
     public function test_response_ShouldActuallyAddRequestsToQueue()
@@ -190,6 +224,25 @@ class TrackerTest extends SystemTestCase
         $backend = $this->createRedisBackend();
 
         return Queue\Factory::makeQueueManager($backend);
+    }
+
+    protected function enableThirdPartyCookie()
+    {
+        $testingEnvironment = new TestingEnvironmentVariables();
+        $testingEnvironment->overrideConfig('Tracker', 'use_third_party_id_cookie', 1);
+        $testingEnvironment->save();
+    }
+
+    protected function disableThirdPartyCookie()
+    {
+        $testingEnvironment = new TestingEnvironmentVariables();
+        $testingEnvironment->overrideConfig('Tracker', 'use_third_party_id_cookie', 0);
+        $testingEnvironment->save();
+    }
+
+    protected function getThirdPartyCookieName()
+    {
+        return Config::getInstance()->Tracker['cookie_name'];
     }
 
     protected function clearRedisDb()
