@@ -1,13 +1,13 @@
 {
     "name": "QueuedTracking",
-    "version": "3.0.1",
+    "version": "3.1.0",
     "description": "Scale your large traffic Piwik service by queuing tracking requests in Redis for better performance. ",
     "theme": false,
     "keywords": ["tracker", "tracking", "queue", "redis"],
     "license": "GPL v3+",
     "homepage": "http://piwik.org",
     "require": {
-        "piwik": ">=3.0.0-b1,<4.0.0-b1"
+        "piwik": ">=3.2.1-b1,<4.0.0-b1"
     },
     "support": {
         "email": "hello@piwik.org",
