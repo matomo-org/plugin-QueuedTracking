@@ -22,6 +22,9 @@ addons:
       - realpath
       - lftp
 
+git:
+  lfs_skip_smudge: true
+
 # Separate different test suites
 env:
   global:
@@ -47,9 +50,9 @@ matrix:
     - php: 5.5
       env: TEST_SUITE=UITests MYSQL_ADAPTER=PDO_MYSQL TEST_AGAINST_PIWIK_BRANCH=$PIWIK_TEST_TARGET
 
-dist: precise
+dist: trusty
 
-sudo: required
+sudo: false
 
 script: $PIWIK_ROOT_DIR/tests/travis/travis.sh
 
@@ -71,7 +74,7 @@ install:
   - '[ -d ./tests/travis/.git ] || sh -c "rm -rf ./tests/travis && git clone https://github.com/piwik/travis-scripts.git ./tests/travis"'
   - cd ./tests/travis ; git checkout master ; cd ../..
 
-  - export GENERATE_TRAVIS_YML_COMMAND="php ./tests/travis/generator/main.php generate:travis-yml --plugin=\"QueuedTracking\" --verbose"
+  - export GENERATE_TRAVIS_YML_COMMAND="php ./tests/travis/generator/main.php generate:travis-yml --plugin=\"QueuedTracking\" --dist-trusty --sudo-false --verbose"
   - '[[ "$TRAVIS_JOB_NUMBER" != *.1 || "$TRAVIS_PULL_REQUEST" != "false" ]] || ./tests/travis/autoupdate_travis_yml.sh'
 
   - ./tests/travis/checkout_test_against_branch.sh
