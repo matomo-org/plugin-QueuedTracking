@@ -113,7 +113,7 @@ class HandlerTest extends IntegrationTestCase
             $this->handler->process($this->tracker, $this->requestSet);
             $this->fail('An expected exception was not thrown');
         } catch (Exception $e) {
-            $this->assertContains('Piwik would redirect you to this URL: ' . $_GET['redirecturl'], $e->getMessage());
+            $this->assertContains('Matomo would redirect you to this URL: ' . $_GET['redirecturl'], $e->getMessage());
             unset($_GET['redirecturl']);
         }
     }
@@ -128,7 +128,7 @@ class HandlerTest extends IntegrationTestCase
             $this->handler->process($this->tracker, $this->requestSet);
             $this->fail('An expected exception was not thrown');
         } catch (Exception $e) {
-            $this->assertContains('Piwik would redirect you to this URL: http://piwik.net/', $e->getMessage());
+            $this->assertContains('Matomo would redirect you to this URL: http://piwik.net/', $e->getMessage());
             unset($_GET['redirecturl']);
         }
     }
