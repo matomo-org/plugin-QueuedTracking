@@ -1,0 +1,6 @@
+{
+    "QueuedTracking": {
+        "NumHostsNotMatchNumPorts": "Asetettujen osoitteiden määrä ei täsmää porttien määrään.",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Redis Sentinel täytyy olla asennettuna, jotta useita osoitteita tai portteja voi ottaa käyttöön. Löydät lisätietoa lisäosan readme-tiedostosta."
+    }
+}
