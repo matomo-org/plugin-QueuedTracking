@@ -123,6 +123,5 @@ __Are there any known issues?__
 
 * In case you are using bulk tracking the bulk tracking response varies compared to the regular one. We will always return
  either an image or a 204 HTTP response code in case the parameter `send_image=0` is sent.
-* Anything related with [Third Party Cookies](https://piwik.org/faq/how-to/faq_118/) won't work
 * By design this plugin can delay the insertion of tracking requests causing real time plugins to not show the actual data since
  under load tracking requests may take a while until they are replayed.
