@@ -16,6 +16,8 @@ use Piwik\Plugins\QueuedTracking\Queue\Backend;
 
 class MySQL implements Backend
 {
+    const QUEUED_TRACKING_TABLE_PREFIX = 'queuedtracking_';
+
     private $table = 'queuedtracking_queue';
     private $tableListPrefix = 'queuedtracking_list_';
     private $tablePrefixed;
