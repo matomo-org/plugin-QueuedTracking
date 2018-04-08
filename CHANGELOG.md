@@ -1,5 +1,8 @@
 ## Changelog
 
+3.2.0
+- Added possibility to use a MySQL backend instead of redis
+
 3.0.2
 
 - Ensure do not track cookie works

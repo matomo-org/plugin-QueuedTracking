@@ -8,6 +8,7 @@
  */
 namespace Piwik\Plugins\QueuedTracking;
 
+use Piwik\Plugins\QueuedTracking\Queue\Backend\MySQL;
 use Piwik\Plugins\QueuedTracking\Tracker\Handler;
 
 class QueuedTracking extends \Piwik\Plugin
@@ -20,6 +21,12 @@ class QueuedTracking extends \Piwik\Plugin
         return array(
             'Tracker.newHandler' => 'replaceHandlerIfQueueIsEnabled'
         );
+    }
+
+    public function install()
+    {
+        $mysql = new MySQL();
+        $mysql->install();
     }
 
     public function isTrackerPlugin()

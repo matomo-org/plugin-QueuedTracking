@@ -34,8 +34,11 @@ class Process extends ConsoleCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $systemCheck = new SystemCheck();
-        $systemCheck->checkRedisIsInstalled();
+        $settings = Queue\Factory::getSettings();
+        if ($settings->isRedisBackend()) {
+            $systemCheck = new SystemCheck();
+            $systemCheck->checkRedisIsInstalled();
+        }
 
         $trackerEnvironment = new Environment('tracker');
         $trackerEnvironment->init();

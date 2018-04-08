@@ -56,6 +56,13 @@ class Redis implements Backend
         return $version;
     }
 
+    public function getLastError()
+    {
+        $this->connectIfNeeded();
+
+        return $this->redis->getLastError();
+    }
+
     public function getMemoryStats()
     {
         $this->connectIfNeeded();
