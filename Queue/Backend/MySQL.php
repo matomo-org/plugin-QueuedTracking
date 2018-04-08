@@ -28,13 +28,10 @@ class MySQL implements Backend
     public function install()
     {
         DbHelper::createTable($this->table, "
-                  `idqueueentry` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
                   `queue_key` VARCHAR(70) NULL DEFAULT NULL,
                   `queue_value` VARCHAR(255) NOT NULL,
                   `expiry_time` BIGINT UNSIGNED DEFAULT 9999999999,
-                  PRIMARY KEY (`idqueueentry`),
                   UNIQUE unique_queue_key (`queue_key`)");
-
     }
 
     private function makePrefixedKeyListTableName($key)
@@ -47,7 +44,7 @@ class MySQL implements Backend
         $table = $this->makePrefixedKeyListTableName($key);
         $createDefinition = "
                   `idqueuelist` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                  `list_value` LONGTEXT NOT NULL,
+                  `list_value` LONGBLOB NOT NULL,
                   PRIMARY KEY (`idqueuelist`)";
 
         $dbSettings = new Db\Settings();
@@ -94,6 +91,12 @@ class MySQL implements Backend
 
         $query = sprintf('INSERT INTO %s (`list_value`) VALUES (?)', $table);
         foreach ($values as $value) {
+            if (empty($value)) {
+                continue;
+            }
+
+            $value = gzcompress($value);
+
             try {
                 Db::query($query, array($value));
             } catch (\Exception $e) {
@@ -136,7 +139,9 @@ class MySQL implements Backend
 
         $raw = array();
         foreach ($values as $value) {
-            $raw[] = $value['list_value'];
+            if (!empty($value['list_value'])) {
+                $raw[] = gzuncompress($value['list_value']);
+            }
         }
 
         return $raw;

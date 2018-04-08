@@ -28,11 +28,10 @@ class Updates_3_2_0 extends PiwikUpdates
     public function getMigrations(Updater $updater)
     {
         $migration1 = $this->migration->db->createTable('queuedtracking_queue', array(
-            'idqueueentry' => 'BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
             'queue_key' => 'VARCHAR(70) NULL DEFAULT NULL',
             'queue_value' => 'VARCHAR(255) NOT NULL',
             'expiry_time' => 'BIGINT UNSIGNED DEFAULT 9999999999'
-        ), 'idqueueentry');
+        ));
         $migration2 = $this->migration->db->addUniqueKey('queuedtracking_queue', array('queue_key'), 'unique_queue_key');
 
         return array(
