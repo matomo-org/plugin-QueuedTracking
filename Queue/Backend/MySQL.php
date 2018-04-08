@@ -28,8 +28,8 @@ class MySQL implements Backend
     public function install()
     {
         DbHelper::createTable($this->table, "
-                  `queue_key` VARCHAR(70) NULL DEFAULT NULL,
-                  `queue_value` VARCHAR(255) NOT NULL,
+                  `queue_key` VARCHAR(70) NOT NULL,
+                  `queue_value` VARCHAR(255) NULL DEFAULT NULL,
                   `expiry_time` BIGINT UNSIGNED DEFAULT 9999999999,
                   UNIQUE unique_queue_key (`queue_key`)");
     }

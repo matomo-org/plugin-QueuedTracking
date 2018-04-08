@@ -2,13 +2,16 @@
 
 __What are the requirements for this plugin?__
 
-* [Redis server 2.8+](http://redis.io/) - [Redis quickstart](http://redis.io/topics/quickstart)
-* [phpredis PHP extension](https://github.com/nicolasff/phpredis) - [Install](https://github.com/nicolasff/phpredis#installingconfiguring)
+We recommend to use the plugin with Redis, but it may work just as well by using the MySQL database which is already used
+for Matomo anyway.
+
+* Recommended [Redis server 2.8+](http://redis.io/) - [Redis quickstart](http://redis.io/topics/quickstart)
+* Recommended [phpredis PHP extension](https://github.com/nicolasff/phpredis) - [Install](https://github.com/nicolasff/phpredis#installingconfiguring)
 * Transactions are used and must be supported by the SQL database.
 
 __Where can I configure and enable the queue?__
 
-In your Piwik instance go to "Settings => Plugin Settings". There is a config section for this plugin.
+In your Piwik instance go to "Administration => General Settings". There is a config section for this plugin.
 
 __When will a queued tracking request be processed?__
 
@@ -76,10 +79,15 @@ change the "Number of requests to process" in plugin settings to "1" and process
 `./console queuedtracking:process` shortly before disabling the queue and directly afterwards. It is still possible to
 process remaining request once the queue is disabled but new tracking requests won't be written into the queue.
 
-__How can I access Redis data?__
+__How can I access the queued data?__
 
+**Redis**
 You can either acccess data on the command line via `redis-cli` or use a Redis monitor like [phpRedisAdmin](https://github.com/ErikDubbelboer/phpRedisAdmin).
 In case you are using something like a Redis monitor make sure it is not accessible by everyone.
+
+**MySQL**
+There will be some DB tables in regular Matomo DB containing `queuedtracking_list_*`. Depending on your DB prefix, the name
+of the tables might be for example `matomo_queuedtracking_list_*`. Locks are stored in `queuedtracking_queue`.
 
 __The processor won't start processing again as it thinks another processor is processing the data already, what can I do?__
 
@@ -90,7 +98,7 @@ by executing the command `./console queuedtracking:lock-status`. This will outpu
 You should actually never have to do this as a lock automatically expires after a while. It just may take a while depending
 on the amount of requests you are importing.
 
-__How can I test my Redis / QueuedTracking setup in case I'm getting errors?__
+__How can I test my Redis / MySQL / QueuedTracking setup in case I'm getting errors?__
 
 There is a command to test some the connection to Redis as well as some needed features: `./console queuedtracking:test`.
 
