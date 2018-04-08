@@ -85,7 +85,7 @@ class Process extends ConsoleCommand
 
         $startTime = microtime(true);
         $processor = new Processor($queueManager);
-        $processor->setNumberOfMaxBatchesToProcess(1000);
+        $processor->setNumberOfMaxBatchesToProcess(500);
         $tracker   = $processor->process();
 
         $neededTime = (microtime(true) - $startTime);
