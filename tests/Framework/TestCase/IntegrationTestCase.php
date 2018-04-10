@@ -20,9 +20,11 @@ use Piwik\Tracker\Request;
  */
 class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTestCase
 {
+    protected $testRequiresRedis = true;
+
     public function setUp()
     {
-        if (!self::isRedisAvailable()) {
+        if ($this->testRequiresRedis && !self::isRedisAvailable()) {
             $this->markTestSkipped('Redis extension is not installed, skipping test');
         }
 
@@ -46,10 +48,19 @@ class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTes
         return class_exists('\Redis', false) && extension_loaded('redis');
     }
 
-    protected function clearRedisDb()
+    protected function clearBackend()
     {
-        $backend = $this->createRedisBackend();
+        if (self::isRedisAvailable()) {
+            $backend = $this->createRedisBackend();
+            $backend->flushAll();
+        }
+        $backend = $this->createMySQLBackend();
         $backend->flushAll();
+    }
+
+    protected function createMySQLBackend()
+    {
+        return new Queue\Backend\MySQL();
     }
 
     protected function createRedisBackend()

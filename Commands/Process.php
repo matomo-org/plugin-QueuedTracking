@@ -62,21 +62,6 @@ class Process extends ConsoleCommand
             return;
         }
 
-        $shouldProcess = false;
-        foreach ($queueManager->getAllQueues() as $queue) {
-            if ($queue->shouldProcess()) {
-                $shouldProcess = true;
-                break;
-            }
-        }
-
-        if (!$shouldProcess) {
-            $trackerEnvironment->destroy();
-
-            $this->writeSuccessMessage($output, array("No queue currently needs processing"));
-            return;
-        }
-
         $output->writeln("<info>Starting to process request sets, this can take a while</info>");
 
         register_shutdown_function(function () use ($queueManager) {

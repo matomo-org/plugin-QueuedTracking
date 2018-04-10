@@ -29,7 +29,7 @@ class NumWorkersTest extends IntegrationTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->clearRedisDb();
+        $this->clearBackend();
 
         $container = self::$fixture->piwikEnvironment->getContainer();
         $this->settings = $container->get('Piwik\Plugins\QueuedTracking\SystemSettings');
@@ -37,7 +37,7 @@ class NumWorkersTest extends IntegrationTestCase
 
     public function tearDown()
     {
-        $this->clearRedisDb();
+        $this->clearBackend();
         parent::tearDown();
     }
 

@@ -315,7 +315,7 @@ class MySQL implements Backend
         // we need to use unix_timestamp in mysql and not time() in php since the local time might be different on each server
         // better to rely on one central DB server time only
         $sql = sprintf('UPDATE %s SET expiry_time = (UNIX_TIMESTAMP() + ?) WHERE queue_key = ? and queue_value = ?', $this->tablePrefixed);
-        return (bool) Db::query($sql, array($ttlInSeconds, $key, $value))->rowCount();
+        return (bool) Db::query($sql, array((int) $ttlInSeconds, $key, $value))->rowCount();
     }
 
     public function get($key)

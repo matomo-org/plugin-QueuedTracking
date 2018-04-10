@@ -78,6 +78,11 @@ class Lock
 
             if (!$success) {
                 $value = $this->backend->get($this->lockKey);
+                if ($value === $this->lockValue) {
+                    // the expire did not work because the same time was already set and we just tried to set the same ttl
+                    // again too fast within one second
+                    return true;
+                }
                 $message = sprintf('Failed to expire key %s (%s / %s).', $this->lockKey, $this->lockValue, (string) $value);
 
                 if ($value === false) {
@@ -89,6 +94,7 @@ class Lock
                 } else {
                     Common::printDebug($message . ' Failed to expire key.');
                 }
+
                 return false;
             }
 
