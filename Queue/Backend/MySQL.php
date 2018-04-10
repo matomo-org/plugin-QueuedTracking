@@ -212,6 +212,13 @@ class MySQL implements Backend
             $ttlInSeconds = 999999999;
         }
 
+        // FYI: We used to have an INSERT INTO ... ON DUPLICATE UPDATE ... However, this can be problematic in concurrency issues
+        // because the ON DUPLICATE UPDATE may work successfully for 2 jobs at the same time but only one of them got the lock then.
+        // This would be perfectly fine if we did something like `return $this->get($key) === $value` to 100% detect which process
+        // got the lock as we do now. However, maybe the expireTime gets overwritten with a wrong value or so. That's why we
+        // rather try to get the lock with the insert only because only one job can succeed with this. If below flow with the
+        // delete becomes to slow, we may be able to use the INSERT INTO ... ON DUPLICATE UPDATE again.
+
         if ($this->get($key)) {
             return false; // a value is set, won't be possible to insert
         }
