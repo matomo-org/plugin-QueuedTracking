@@ -253,7 +253,7 @@ class Manager
     {
         $this->unlock();
 
-        if ($this->forceQueueId && $this->forceQueueId <= $this->numQueuesAvailable) {
+        if (isset($this->forceQueueId) && $this->forceQueueId <= $this->numQueuesAvailable) {
             $queue = $this->createQueue($this->currentQueueId);
 
             $shouldProcess = $queue->shouldProcess();
