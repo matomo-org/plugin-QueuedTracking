@@ -30,7 +30,7 @@ class Process extends ConsoleCommand
     protected function configure()
     {
         $this->setName('queuedtracking:process');
-        $this->addOption('queue-id', null, InputOption::VALUE_REQUIRED, 'If set, will only work on that queue');
+        $this->addOption('queue-id', null, InputOption::VALUE_REQUIRED, 'If set, will only work on that specific queue. For example "0" or "1" (if there are multiple queues). Not recommended when only one worker is in use. If for example 4 workers are in use, you may want to use 0, 1, 2, or 3.');
         $this->setDescription('Processes all queued tracking requests in case there are enough requests in the queue and in case they are not already in process by another script. To keep track of the queue use the <comment>--verbose</comment> option or execute the <comment>queuedtracking:monitor</comment> command.');
     }
 
@@ -47,6 +47,9 @@ class Process extends ConsoleCommand
             $queueId = null;
         } elseif (!is_numeric($queueId)) {
             throw new \Exception('queue-id needs to be numeric');
+        } else {
+            $queueId = (int) $queueId;
+            $output->writeln("<info>Forcing queue ID: </info>" . $queueId);
         }
 
         $trackerEnvironment = new Environment('tracker');
