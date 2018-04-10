@@ -35,6 +35,8 @@ class Manager
 
     private $numRequestsToProcessInBulk = 50;
 
+    private $forceQueueId;
+
     /**
      * This mapping makes sure we move requests more evenly into different queues. Eg if we would do a
      * ord($firstLetter) instead of this mapping, and have 4 workers, we would move the following characters:
@@ -67,6 +69,11 @@ class Manager
     {
         $this->backend = $backend;
         $this->lock    = $lock;
+    }
+
+    public function setForceQueueId($queueId)
+    {
+        $this->forceQueueId = $queueId;
     }
 
     public function setNumberOfAvailableQueues($numQueues)
@@ -246,6 +253,16 @@ class Manager
     {
         $this->unlock();
 
+        if ($this->forceQueueId && $this->forceQueueId <= $this->numQueuesAvailable) {
+            $queue = $this->createQueue($this->currentQueueId);
+
+            $shouldProcess = $queue->shouldProcess();
+
+            if ($shouldProcess && $this->lock->acquireLock($this->currentQueueId)) {
+                return $queue;
+            }
+        }
+
         if ($this->currentQueueId < 0) {
             // we just want to avoid to always start looking for the queue at position 0
             $this->currentQueueId = $this->getRandomQueueId();
@@ -260,7 +277,9 @@ class Manager
             $this->currentQueueId = $start % $this->numQueuesAvailable;
             $queue = $this->createQueue($this->currentQueueId);
 
-            if ($queue->shouldProcess() && $this->lock->acquireLock($this->currentQueueId)) {
+            $shouldProcess = $queue->shouldProcess();
+
+            if ($shouldProcess && $this->lock->acquireLock($this->currentQueueId)) {
                 return $queue;
             }
         }

@@ -21,6 +21,7 @@ use Piwik\Plugins\QueuedTracking\Queue\Processor;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
 use Piwik\Tracker;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Process extends ConsoleCommand
@@ -29,6 +30,7 @@ class Process extends ConsoleCommand
     protected function configure()
     {
         $this->setName('queuedtracking:process');
+        $this->addOption('queue-id', null, InputOption::VALUE_REQUIRED, 'If set, will only work on that queue');
         $this->setDescription('Processes all queued tracking requests in case there are enough requests in the queue and in case they are not already in process by another script. To keep track of the queue use the <comment>--verbose</comment> option or execute the <comment>queuedtracking:monitor</comment> command.');
     }
 
@@ -38,6 +40,13 @@ class Process extends ConsoleCommand
         if ($settings->isRedisBackend()) {
             $systemCheck = new SystemCheck();
             $systemCheck->checkRedisIsInstalled();
+        }
+
+        $queueId = $input->getOption('queue-id');
+        if (empty($queueId) && $queueId !== 0 && $queueId !== '0') {
+            $queueId = null;
+        } elseif (!is_numeric($queueId)) {
+            throw new \Exception('queue-id needs to be numeric');
         }
 
         $trackerEnvironment = new Environment('tracker');
@@ -54,13 +63,7 @@ class Process extends ConsoleCommand
 
         $backend      = Queue\Factory::makeBackend();
         $queueManager = Queue\Factory::makeQueueManager($backend);
-
-        if (!$queueManager->canAcquireMoreLocks()) {
-            $trackerEnvironment->destroy();
-
-            $this->writeSuccessMessage($output, array("Nothing to proccess. Already max number of workers in process."));
-            return;
-        }
+        $queueManager->setForceQueueId($queueId);
 
         $output->writeln("<info>Starting to process request sets, this can take a while</info>");
 
