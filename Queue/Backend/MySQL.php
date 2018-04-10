@@ -172,10 +172,16 @@ class MySQL implements Backend
     public function getNumValuesInList($key)
     {
         $table = $this->makePrefixedKeyListTableName($key);
-        $sql = sprintf('SELECT count(*) as num_entries FROM %s', $table);
-
+        $sql = sprintf('SELECT max(idqueuelist) - min(idqueuelist) as num_entries FROM %s', $table);
         try {
-            return (int) Db::fetchOne($sql);
+            $value = Db::fetchOne($sql);
+            if ($value === null || $value === false) {
+                return 0;
+            }
+            // we need to add one more, for example imagine min(id) = 1, max(id) = 1... then it does 1-1=0 but it is 1
+            // or when min(id) = 5 and max(id) = 8 then 8-5 = 3 but there are 4 values.
+            $value++;
+            return $value;
         } catch (\Exception $e) {
             if ($this->isErrorTableNotExists($e)) {
                 // no value inserted yet
