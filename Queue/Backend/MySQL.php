@@ -212,17 +212,31 @@ class MySQL implements Backend
             $ttlInSeconds = 999999999;
         }
 
+        if ($this->get($key)) {
+            return false; // a value is set, won't be possible to insert
+        }
+
+        $sql = sprintf('DELETE FROM %s WHERE queue_key = ? and not (%s)', $this->tablePrefixed, $this->getQueryPartExpiryTime());
+        Db::query($sql, array($key));
+
         $query = sprintf('INSERT INTO %s (`queue_key`, `queue_value`, `expiry_time`) 
-                                 VALUES (?,?,(UNIX_TIMESTAMP() + ?)) 
-                                 ON DUPLICATE KEY UPDATE queue_value = IF(%s, queue_value, ?), expiry_time = IF(%s, expiry_time, UNIX_TIMESTAMP() + ?)',
-            $this->tablePrefixed, $this->getQueryPartExpiryTime(), $this->getQueryPartExpiryTime());
+                                 VALUES (?,?,(UNIX_TIMESTAMP() + ?))',
+            $this->tablePrefixed);
         // we make sure to update the row if the key is expired and consider it as "deleted"
 
-        $query = Db::query($query, array($key, $value, (int) $ttlInSeconds, $value, (int) $ttlInSeconds));
-        $rowCount = $query->rowCount();
-        $wasSet = $rowCount >= 1;
+        try {
+            $query = Db::query($query, array($key, $value, (int) $ttlInSeconds));
+        } catch (\Exception $e) {
+            if ($e->getCode() == 23000
+                || strpos($e->getMessage(), 'Duplicate entry') !== false
+                || strpos($e->getMessage(), ' 1062 ') !== false) {
+                return false;
+            }
+            throw $e;
+        }
 
-        return $wasSet;
+        // we make sure we got the lock
+        return $this->get($key) === $value;
     }
 
     /**
