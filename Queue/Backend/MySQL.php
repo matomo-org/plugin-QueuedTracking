@@ -223,8 +223,14 @@ class MySQL implements Backend
             return false; // a value is set, won't be possible to insert
         }
 
-        $sql = sprintf('DELETE FROM %s WHERE queue_key = ? and not (%s)', $this->tablePrefixed, $this->getQueryPartExpiryTime());
-        Db::query($sql, array($key));
+        // remove any existing but expired lock
+        // todo: we could combine get() and keyExists() in one query!
+        if ($this->keyExists($key)) {
+            // most of the time an expired key should not exist... we don't want to lock the row unncessarily therefore we check first
+            // if value exists... 
+            $sql = sprintf('DELETE FROM %s WHERE queue_key = ? and not (%s)', $this->tablePrefixed, $this->getQueryPartExpiryTime());
+            Db::query($sql, array($key));
+        }
 
         $query = sprintf('INSERT INTO %s (`queue_key`, `queue_value`, `expiry_time`) 
                                  VALUES (?,?,(UNIX_TIMESTAMP() + ?))',
@@ -343,6 +349,13 @@ class MySQL implements Backend
     {
         $sql = sprintf('SELECT queue_value FROM %s WHERE queue_key = ? AND %s LIMIT 1', $this->tablePrefixed, $this->getQueryPartExpiryTime());
         return Db::fetchOne($sql, array($key));
+    }
+
+    public function keyExists($key)
+    {
+        $sql = sprintf('SELECT 1 FROM %s WHERE queue_key = ? LIMIT 1', $this->tablePrefixed);
+        $value = Db::fetchOne($sql, array($key));
+        return !empty($value);
     }
 
     /**
