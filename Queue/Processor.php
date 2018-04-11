@@ -77,20 +77,37 @@ class Processor
         try {
 
             while ($queue = $this->queueManager->lockNext()) {
-                if ($loops > $this->numMaxBatchesToProcess) {
-                    Common::printDebug('This worker processed ' . $loops . ' times, stopping now.');
-                    break;
-                } else {
+                for ($i = 0; $i < 10; $i++) {
+                    // lets run several processings without re-acquiring the lock each time to avoid possible performance
+                    // and reduce concurrency issues re the lock. When we have the lock to work on a queue, there is
+                    // no need to unlock and get the lock each time... it otherwise becomes quite ineffecient
+                    if ($loops > $this->numMaxBatchesToProcess) {
+                        Common::printDebug('This worker processed ' . $loops . ' times, stopping now.');
+                        $this->queueManager->unlock();
+                        break 2;
+                    }
+
                     $loops++;
-                }
+                    $queuedRequestSets = $queue->getRequestSetsToProcess();
 
-                $queuedRequestSets = $queue->getRequestSetsToProcess();
+                    if (count($queuedRequestSets) < $queue->getNumberOfRequestsToProcessAtSameTime()) {
+                        // could also use `$queue->shouldProcess()` but this is quite a bit faster when there are always
+                        // many requests in queue... it is also done this way to prevent potential race conditions...
+                        // imagine we call "shouldProcess" and it says there are 60 requests in the queue, now a few ms
+                        // we want to take out 50 requests, however, only 10 requests are returned for whatever reason
+                        // (should not happen usually as only one job works on a queue).
+                        // we need to shop in processing if we don't get enough requests returned, otherwise we would
+                        // mark below some requests as processed but they weren't.
+                        $this->queueManager->unlock();
+                        break 2;
+                    }
 
-                if (!empty($queuedRequestSets)) {
-                    $requestSetsToRetry = $this->processRequestSets($tracker, $queuedRequestSets);
-                    $this->processRequestSets($tracker, $requestSetsToRetry);
-                    $queue->markRequestSetsAsProcessed();
-                    // TODO if markR..() fails, we would process them again later
+                    if (!empty($queuedRequestSets)) {
+                        $requestSetsToRetry = $this->processRequestSets($tracker, $queuedRequestSets);
+                        $this->processRequestSets($tracker, $requestSetsToRetry);
+                        $queue->markRequestSetsAsProcessed();
+                        // TODO if markR..() fails, we would process them again later
+                    }
                 }
 
                 $this->queueManager->unlock();
