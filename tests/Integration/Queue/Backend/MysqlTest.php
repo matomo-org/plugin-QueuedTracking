@@ -197,6 +197,18 @@ class MysqlTest extends IntegrationTestCase
         $this->assertEquals('mytest', $value);
     }
 
+    public function test_keyExists_ShouldReturnFalse_IfKeyNotSet()
+    {
+        $value = $this->backend->keyExists($this->key);
+        $this->assertFalse($value);
+    }
+
+    public function test_get_ShouldReturnTrueIfValueIsSet()
+    {
+        $this->backend->setIfNotExists($this->key, 'mytest', 60);
+        $this->assertTrue($this->backend->keyExists($this->key));
+    }
+
     /**
      * @depends test_setIfNotExists_ShouldAlsoNotWork_IfTryingToSetDifferentValue
      */
