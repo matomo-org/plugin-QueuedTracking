@@ -273,7 +273,7 @@ class MySQL implements Backend
         }
 
         $secondsLeft = $row['expiry_time'] - $row['timestamp'];
-        if ($secondsLeft < 0) {
+        if ($secondsLeft <= 0) {
             return 0;// expired => key does not exist anymore
         }
 
@@ -342,7 +342,15 @@ class MySQL implements Backend
         // we need to use unix_timestamp in mysql and not time() in php since the local time might be different on each server
         // better to rely on one central DB server time only
         $sql = sprintf('UPDATE %s SET expiry_time = (UNIX_TIMESTAMP() + ?) WHERE queue_key = ? and queue_value = ?', $this->tablePrefixed);
-        return (bool) Db::query($sql, array((int) $ttlInSeconds, $key, $value))->rowCount();
+        $success = (bool) Db::query($sql, array((int) $ttlInSeconds, $key, $value))->rowCount();
+
+        if (!$success) {
+            // the above update did not work because the same time was already set and we just tried to set the same ttl
+            // again too fast within one second
+            return $value === $this->get($key);
+        }
+
+        return true;
     }
 
     public function get($key)

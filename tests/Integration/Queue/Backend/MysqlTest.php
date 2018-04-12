@@ -247,6 +247,18 @@ class MysqlTest extends IntegrationTestCase
         $this->assertFalse($success);
     }
 
+    public function test_expire_ShouldStilReturnTrueEvenWhenSettingSameTimeout()
+    {
+        $success = $this->backend->setIfNotExists($this->key, 'test', 60);
+        $this->assertTrue($success);
+
+        $success = $this->backend->expireIfKeyHasValue($this->key, 'test', 60);
+        $this->assertTrue($success);
+
+        $success = $this->backend->expireIfKeyHasValue($this->key, 'test', 60);
+        $this->assertTrue($success);
+    }
+
     public function test_getTimeToLive_ShouldReturnTheNumberOfTimeLeft_IfExpires()
     {
         $success = $this->backend->setIfNotExists($this->key, 'test', 60);
