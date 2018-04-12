@@ -1,5 +1,10 @@
 ## Changelog
 
+3.2.0
+- Added possibility to use a MySQL backend instead of redis
+- New option `queue-id` for the `queuedtracking:process` command which may improve processing speed as the command would only focus on one queue instead of trying to get the lock for a random queue.
+- Various other minor performance improvements
+
 3.0.2
 
 - Ensure do not track cookie works

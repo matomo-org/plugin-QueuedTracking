@@ -89,6 +89,7 @@ class Lock
                 } else {
                     Common::printDebug($message . ' Failed to expire key.');
                 }
+
                 return false;
             }
 

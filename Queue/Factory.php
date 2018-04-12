@@ -43,6 +43,9 @@ class Factory
         return new Lock($backend);
     }
 
+    /**
+     * @return \Piwik\Plugins\QueuedTracking\SystemSettings
+     */
     public static function getSettings()
     {
         return StaticContainer::get('Piwik\Plugins\QueuedTracking\SystemSettings');
@@ -50,6 +53,10 @@ class Factory
 
     public static function makeBackendFromSettings(SystemSettings $settings)
     {
+        if ($settings->isMysqlBackend()) {
+            return new Queue\Backend\MySQL();
+        }
+
         $host     = $settings->redisHost->getValue();
         $port     = $settings->redisPort->getValue();
         $timeout  = $settings->redisTimeout->getValue();

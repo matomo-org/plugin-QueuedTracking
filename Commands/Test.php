@@ -50,32 +50,28 @@ class Test extends ConsoleCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        try {
-            $systemCheck = new SystemCheck();
-            $systemCheck->checkRedisIsInstalled();
-
-            $extension = new \ReflectionExtension('redis');
-            $output->writeln('PHPRedis version: ' . $extension->getVersion());
-        } catch(\Exception $e) {
-            $output->writeln('No PHPRedis extension (not a problem if sentinel is used):' . $e->getMessage());
-        }
-
         $trackerEnvironment = new Environment('tracker');
         $trackerEnvironment->init();
 
+        $settings = Queue\Factory::getSettings();
+        $isUsingRedis = $settings->isRedisBackend();
+
         Tracker::loadTrackerEnvironment();
 
-        $settings = Queue\Factory::getSettings();
         $output->writeln('<comment>Settings that will be used:</comment>');
+        $output->writeln('Backend: ' .  $settings->backend->getValue());
+        $output->writeln('NumQueueWorkers: ' . $settings->numQueueWorkers->getValue());
+        $output->writeln('NumRequestsToProcess: ' . $settings->numRequestsToProcess->getValue());
+        $output->writeln('ProcessDuringTrackingRequest: ' . (int) $settings->processDuringTrackingRequest->getValue());
+        $output->writeln('QueueEnabled: ' . (int) $settings->queueEnabled->getValue());
+        $output->writeln('');
+
+        $output->writeln('<comment>Redis backend only settings (does not apply when using MySQL backend):</comment>');
         $output->writeln('Host: ' . $settings->redisHost->getValue());
         $output->writeln('Port: ' . $settings->redisPort->getValue());
         $output->writeln('Timeout: ' . $settings->redisTimeout->getValue());
         $output->writeln('Password: ' . $settings->redisPassword->getValue());
         $output->writeln('Database: ' . $settings->redisDatabase->getValue());
-        $output->writeln('NumQueueWorkers: ' . $settings->numQueueWorkers->getValue());
-        $output->writeln('NumRequestsToProcess: ' . $settings->numRequestsToProcess->getValue());
-        $output->writeln('ProcessDuringTrackingRequest: ' . (int) $settings->processDuringTrackingRequest->getValue());
-        $output->writeln('QueueEnabled: ' . (int) $settings->queueEnabled->getValue());
         $output->writeln('UseSentinelBackend: ' . (int) $settings->useSentinelBackend->getValue());
         $output->writeln('SentinelMasterName: ' . $settings->sentinelMasterName->getValue());
 
@@ -85,31 +81,45 @@ class Test extends ConsoleCommand
         $output->writeln('PHP version: ' . phpversion());
         $output->writeln('Uname: ' . php_uname());
 
+        if ($isUsingRedis) {
+            try {
+                $systemCheck = new SystemCheck();
+                $systemCheck->checkRedisIsInstalled();
+
+                $extension = new \ReflectionExtension('redis');
+                $output->writeln('PHPRedis version: ' . $extension->getVersion());
+            } catch(\Exception $e) {
+                $output->writeln('No PHPRedis extension (not a problem if sentinel is used):' . $e->getMessage());
+            }
+        }
+
         $backend = Queue\Factory::makeBackend();
 
         if ($backend instanceof Queue\Backend\Sentinel) {
-            $output->writeln('Backend is using sentinel');
+            $output->writeln('Redis backend is using sentinel');
         }
 
-        $output->writeln('Redis version: ' . $backend->getServerVersion());
+        $output->writeln('Backend version: ' . $backend->getServerVersion());
         $output->writeln('Memory: ' . var_export($backend->getMemoryStats(), 1));
 
         $redis = $backend->getConnection();
+        if ($isUsingRedis) {
 
-        $evictionPolicy = $this->getRedisConfig($redis, 'maxmemory-policy');
-        $output->writeln('MaxMemory Eviction Policy config: ' . $evictionPolicy);
+            $evictionPolicy = $this->getRedisConfig($redis, 'maxmemory-policy');
+            $output->writeln('MaxMemory Eviction Policy config: ' . $evictionPolicy);
 
-        if ($evictionPolicy !== 'allkeys-lru' && $evictionPolicy !== 'noeviction') {
-            $output->writeln('<error>The eviction policy can likely lead to errors when memory is low. We recommend to use eviction policy <comment>allkeys-lru</comment> or alternatively <comment>noeviction</comment>. Read more here: http://redis.io/topics/lru-cache</error>');
+            if ($evictionPolicy !== 'allkeys-lru' && $evictionPolicy !== 'noeviction') {
+                $output->writeln('<error>The eviction policy can likely lead to errors when memory is low. We recommend to use eviction policy <comment>allkeys-lru</comment> or alternatively <comment>noeviction</comment>. Read more here: http://redis.io/topics/lru-cache</error>');
+            }
+
+            $evictionPolicy = $this->getRedisConfig($redis, 'maxmemory');
+            $output->writeln('MaxMemory config: ' . $evictionPolicy);
         }
-
-        $evictionPolicy = $this->getRedisConfig($redis, 'maxmemory');
-        $output->writeln('MaxMemory config: ' . $evictionPolicy);
 
         $output->writeln('');
         $output->writeln('<comment>Performing some tests:</comment>');
 
-        if (method_exists($redis, 'isConnected')) {
+        if ($isUsingRedis && method_exists($redis, 'isConnected')) {
             $output->writeln('Redis is connected: ' . (int) $redis->isConnected());
         }
 
@@ -119,18 +129,21 @@ class Test extends ConsoleCommand
             $output->writeln('Connection does not actually work: ' . $redis->getLastError());
         }
 
-        $this->testRedis($redis, 'set', array('testKey', 'value'), 'testKey', $output);
-        $this->testRedis($redis, 'setnx', array('testnxkey', 'value'), 'testnxkey', $output);
-        $this->testRedis($redis, 'setex', array('testexkey', 5, 'value'), 'testexkey', $output);
-        $this->testRedis($redis, 'set', array('testKeyWithNx', 'value', array('nx')), 'testKeyWithNx', $output);
-        $this->testRedis($redis, 'set', array('testKeyWithEx', 'value', array('ex' => 5)), 'testKeyWithEx', $output);
+        if ($isUsingRedis) {
+            $this->testRedis($redis, 'set', array('testKey', 'value'), 'testKey', $output);
+            $this->testRedis($redis, 'setnx', array('testnxkey', 'value'), 'testnxkey', $output);
+            $this->testRedis($redis, 'setex', array('testexkey', 5, 'value'), 'testexkey', $output);
+            $this->testRedis($redis, 'set', array('testKeyWithNx', 'value', array('nx')), 'testKeyWithNx', $output);
+            $this->testRedis($redis, 'set', array('testKeyWithEx', 'value', array('ex' => 5)), 'testKeyWithEx', $output);
+        }
 
         $backend->delete('foo');
         if (!$backend->setIfNotExists('foo', 'bar', 5)) {
-            $output->writeln("setIfNotExists(foo, bar, 1) does not work, most likely we won't be able to acquire a lock:" . $redis->getLastError());
+            $message = "setIfNotExists(foo, bar, 1) does not work, most likely we won't be able to acquire a lock: " . $backend->getLastError();
+            $output->writeln($message);
         } else{
-            $initialTtl = $redis->ttl('foo');
-            if ($initialTtl > 3 && $initialTtl <= 5) {
+            $initialTtl = $backend->getTimeToLive('foo');
+            if ($initialTtl >= 3000 && $initialTtl <= 5000) {
                 $output->writeln('Initial expire seems to be set correctly');
             } else {
                 $output->writeln('<error>Initial expire seems to be not set correctly: ' . $initialTtl . ' </error>');
@@ -148,8 +161,8 @@ class Test extends ConsoleCommand
                 $output->writeln('<error>There might be a problem with expireIfKeyHasValue: ' . $redis->getLastError() . '</error>');
             }
 
-            $extendedTtl = $redis->ttl('foo');
-            if ($extendedTtl > 8 && $extendedTtl <= 10) {
+            $extendedTtl = $backend->getTimeToLive('foo');
+            if ($extendedTtl >= 8000 && $extendedTtl <= 10000) {
                 $output->writeln('Extending expire seems to be set correctly');
             } else {
                 $output->writeln('<error>Extending expire seems to be not set correctly: ' . $extendedTtl . ' </error>');
@@ -161,8 +174,8 @@ class Test extends ConsoleCommand
                 $output->writeln('expireIfKeyHasValue correctly expires only when the value is correct');
             }
 
-            $extendedTtl = $redis->ttl('foo');
-            if ($extendedTtl > 7 && $extendedTtl <= 10) {
+            $extendedTtl = $backend->getTimeToLive('foo');
+            if ($extendedTtl >= 7000 && $extendedTtl <= 10000) {
                 $output->writeln('Expire is still set which is correct');
             } else {
                 $output->writeln('<error>Expire missing after a wrong extendExpire: ' . $extendedTtl . ' </error>');
@@ -175,7 +188,7 @@ class Test extends ConsoleCommand
             }
         }
 
-        $redis->delete('fooList');
+        $backend->delete('fooList');
         $backend->appendValuesToList('fooList', array('value1', 'value2', 'value3'));
         $values = $backend->getFirstXValuesFromList('fooList', 2);
         if ($values == array('value1', 'value2')) {
@@ -197,7 +210,7 @@ class Test extends ConsoleCommand
         $output->writeln('<comment>Done</comment>');
     }
 
-    private function getRedisConfig(\Redis $redis, $configName)
+    private function getRedisConfig($redis, $configName)
     {
         $config = $redis->config('GET', $configName);
         $value = strtolower(array_shift($config));
@@ -205,7 +218,7 @@ class Test extends ConsoleCommand
         return $value;
     }
 
-    private function testRedis(\Redis $redis, $method, $params, $keyToCleanUp, OutputInterface $output)
+    private function testRedis($redis, $method, $params, $keyToCleanUp, OutputInterface $output)
     {
         if ($keyToCleanUp) {
             $redis->delete($keyToCleanUp);

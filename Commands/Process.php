@@ -21,6 +21,7 @@ use Piwik\Plugins\QueuedTracking\Queue\Processor;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
 use Piwik\Tracker;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Process extends ConsoleCommand
@@ -29,13 +30,27 @@ class Process extends ConsoleCommand
     protected function configure()
     {
         $this->setName('queuedtracking:process');
+        $this->addOption('queue-id', null, InputOption::VALUE_REQUIRED, 'If set, will only work on that specific queue. For example "0" or "1" (if there are multiple queues). Not recommended when only one worker is in use. If for example 4 workers are in use, you may want to use 0, 1, 2, or 3.');
         $this->setDescription('Processes all queued tracking requests in case there are enough requests in the queue and in case they are not already in process by another script. To keep track of the queue use the <comment>--verbose</comment> option or execute the <comment>queuedtracking:monitor</comment> command.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $systemCheck = new SystemCheck();
-        $systemCheck->checkRedisIsInstalled();
+        $settings = Queue\Factory::getSettings();
+        if ($settings->isRedisBackend()) {
+            $systemCheck = new SystemCheck();
+            $systemCheck->checkRedisIsInstalled();
+        }
+
+        $queueId = $input->getOption('queue-id');
+        if (empty($queueId) && $queueId !== 0 && $queueId !== '0') {
+            $queueId = null;
+        } elseif (!is_numeric($queueId)) {
+            throw new \Exception('queue-id needs to be numeric');
+        } else {
+            $queueId = (int) $queueId;
+            $output->writeln("<info>Forcing queue ID: </info>" . $queueId);
+        }
 
         $trackerEnvironment = new Environment('tracker');
         $trackerEnvironment->init();
@@ -51,28 +66,7 @@ class Process extends ConsoleCommand
 
         $backend      = Queue\Factory::makeBackend();
         $queueManager = Queue\Factory::makeQueueManager($backend);
-
-        if (!$queueManager->canAcquireMoreLocks()) {
-            $trackerEnvironment->destroy();
-
-            $this->writeSuccessMessage($output, array("Nothing to proccess. Already max number of workers in process."));
-            return;
-        }
-
-        $shouldProcess = false;
-        foreach ($queueManager->getAllQueues() as $queue) {
-            if ($queue->shouldProcess()) {
-                $shouldProcess = true;
-                break;
-            }
-        }
-
-        if (!$shouldProcess) {
-            $trackerEnvironment->destroy();
-
-            $this->writeSuccessMessage($output, array("No queue currently needs processing"));
-            return;
-        }
+        $queueManager->setForceQueueId($queueId);
 
         $output->writeln("<info>Starting to process request sets, this can take a while</info>");
 
@@ -82,7 +76,7 @@ class Process extends ConsoleCommand
 
         $startTime = microtime(true);
         $processor = new Processor($queueManager);
-        $processor->setNumberOfMaxBatchesToProcess(1000);
+        $processor->setNumberOfMaxBatchesToProcess(500);
         $tracker   = $processor->process();
 
         $neededTime = (microtime(true) - $startTime);

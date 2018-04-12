@@ -43,6 +43,11 @@ class Queue
         return $this->id;
     }
 
+    public function getKey()
+    {
+        return $this->key;
+    }
+
     public function setNumberOfRequestsToProcessAtSameTime($numRequests)
     {
         $this->numRequestsToProcessInBulk = $numRequests;

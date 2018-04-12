@@ -28,10 +28,12 @@ class Monitor extends ConsoleCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $systemCheck = new SystemCheck();
-        $systemCheck->checkRedisIsInstalled();
-
         $settings = Queue\Factory::getSettings();
+
+        if ($settings->isRedisBackend()) {
+            $systemCheck = new SystemCheck();
+            $systemCheck->checkRedisIsInstalled();
+        }
 
         if ($settings->queueEnabled->getValue()) {
             $output->writeln('Queue is enabled');
