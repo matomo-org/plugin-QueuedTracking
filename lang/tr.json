@@ -1,0 +1,6 @@
+{
+    "QueuedTracking": {
+        "NumHostsNotMatchNumPorts": "Yapılandırılmış sunucuların sayısı yapılandırılmış kapı numaraları ile eşleşmiyor.",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Redis Sentinel etkinleştirildiğinde birden çok sunucu ya da kapı numarası yapılandırılabilir. Sentinel kullanımı hakkında ayrıntılı bilgi almak için uygulama eki belgelerine bakın."
+    }
+}
