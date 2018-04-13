@@ -27,6 +27,18 @@ class QueuedTracking extends \Piwik\Plugin
     {
         $mysql = new MySQL();
         $mysql->install();
+
+        $configuration = new Configuration();
+        $configuration->install();
+    }
+
+    public function uninstall()
+    {
+        $mysql = new MySQL();
+        $mysql->uninstall();
+
+        $configuration = new Configuration();
+        $configuration->uninstall();
     }
 
     public function isTrackerPlugin()
