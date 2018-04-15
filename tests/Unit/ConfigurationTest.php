@@ -36,7 +36,7 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         $QueuedTracking = Config::getInstance()->QueuedTracking;
         $this->assertEquals(array(
             'notify_queue_threshold_single_queue' => Configuration::DEFAULT_NOTIFY_THRESHOLD,
-            'notify_queue_threshold_emails' => Configuration::DEFAULT_NOTIFY_EMAILS
+            'notify_queue_threshold_emails' => Configuration::$DEFAULT_NOTIFY_EMAILS
         ), $QueuedTracking);
     }
 
@@ -76,7 +76,7 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
     public function test_getNotifyEmails_noConfig_shouldReturnDefault()
     {
         Config::getInstance()->QueuedTracking = array();
-        $this->assertEquals(Configuration::DEFAULT_NOTIFY_EMAILS, $this->configuration->getNotifyEmails());
+        $this->assertEquals(Configuration::$DEFAULT_NOTIFY_EMAILS, $this->configuration->getNotifyEmails());
     }
 
 

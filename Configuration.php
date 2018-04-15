@@ -12,7 +12,7 @@ use Piwik\Config;
 
 class Configuration
 {
-    const DEFAULT_NOTIFY_EMAILS = [];
+    public static $DEFAULT_NOTIFY_EMAILS = [];
     const DEFAULT_NOTIFY_THRESHOLD = 250000;
     const KEY_NOTIFY_EMAILS = 'notify_queue_threshold_emails';
     const KEY_NOTIFY_THRESHOLD = 'notify_queue_threshold_single_queue';
@@ -31,7 +31,7 @@ class Configuration
             $reports[self::KEY_NOTIFY_THRESHOLD] = self::DEFAULT_NOTIFY_THRESHOLD;
         }
         if (empty($reports[self::KEY_NOTIFY_EMAILS])) {
-            $reports[self::KEY_NOTIFY_EMAILS] = self::DEFAULT_NOTIFY_EMAILS;
+            $reports[self::KEY_NOTIFY_EMAILS] = self::$DEFAULT_NOTIFY_EMAILS;
         }
         $config->QueuedTracking = $reports;
 
@@ -64,10 +64,10 @@ class Configuration
      */
     public function getNotifyEmails()
     {
-        $value = $this->getConfigValue(self::KEY_NOTIFY_EMAILS, self::DEFAULT_NOTIFY_EMAILS);
+        $value = $this->getConfigValue(self::KEY_NOTIFY_EMAILS, self::$DEFAULT_NOTIFY_EMAILS);
 
         if (empty($value)) {
-            $value = self::DEFAULT_NOTIFY_EMAILS;
+            $value = self::$DEFAULT_NOTIFY_EMAILS;
         }
         if (!is_array($value)) {
             $value = array($value);
