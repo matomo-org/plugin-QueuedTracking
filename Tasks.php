@@ -56,19 +56,26 @@ class Tasks extends \Piwik\Plugin\Tasks
         $backend      = Queue\Factory::makeBackend();
         $queueManager = Queue\Factory::makeQueueManager($backend);
 
-        $sendEmail = false;
-        $message = "";
+        $larger = "";
+        $smaller = "";
 
         foreach ($queueManager->getAllQueues() as $queue) {
             $size = $queue->getNumberOfRequestSetsInQueue();
-            $message .= sprintf("Queue ID %s has %s entries.<br />", $queue->getId(), $size);
+            $entriesMessage = sprintf("Queue ID %s has %s entries.<br />", $queue->getId(), $size);
             if ($size >= $threshold) {
-                $sendEmail = true;
+                $larger .= $entriesMessage;
+            } else {
+                $smaller .= $entriesMessage;
             }
         }
 
-        if ($sendEmail) {
-            $message = sprintf("This is a notification that the threshold %s for a single queue has been reached.<br />The current queue sizes are as follows: <br /><br />%s", $threshold, $message);
+        if (!empty($larger)) {
+            $message = sprintf("This is a notification that the threshold %s for a single queue has been reached.<br /><br />The following queue sizes are greater than the threshold: <br />%s", $threshold, $larger);
+
+            if (!empty($smaller)) {
+                $message .= sprintf("<br /><br />The remaining queue sizes, which are below the threshold, are listed below: <br />%s", $smaller);
+            }
+
             $message = $message . "<br /><br />Sent from " . SettingsPiwik::getPiwikUrl();
             $mail = new Mail();
             $mail->setDefaultFromPiwik();
