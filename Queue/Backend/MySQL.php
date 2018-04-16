@@ -36,6 +36,11 @@ class MySQL implements Backend
                   UNIQUE unique_queue_key (`queue_key`)");
     }
 
+    public function uninstall()
+    {
+        Db::query(sprintf('DROP TABLE IF EXISTS `%s`', $this->tablePrefixed));
+    }
+
     private function makePrefixedKeyListTableName($key)
     {
         return Common::prefixTable($this->tableListPrefix . $key);

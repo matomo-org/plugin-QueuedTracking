@@ -4,6 +4,7 @@
 - Added possibility to use a MySQL backend instead of redis
 - New option `queue-id` for the `queuedtracking:process` command which may improve processing speed as the command would only focus on one queue instead of trying to get the lock for a random queue.
 - Various other minor performance improvements
+- New feature: Get notified by email when a single queue reaches a specific threshold
 
 3.0.2
 

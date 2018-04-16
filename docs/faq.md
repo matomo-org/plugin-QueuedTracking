@@ -127,6 +127,17 @@ __Can I configure multiple Sentinel servers?__
 
 Yes, once Sentinel is enabled you can configure multiple servers by specifying multiple hosts and ports comma separated via the UI.
 
+__Can I be notified when a queue reaches a certain threshold?__
+
+Yes, you can optionally receive an email when the number of requests queued in a single queue reaches a configured
+threshold. You can configure this in your `config/config.ini.php` config file using the following configuration:
+
+```
+[QueuedTracking]
+notify_queue_threshold_emails[] = example@example.org
+notify_queue_threshold_single_queue = 250000
+```
+
 __Are there any known issues?__
 
 * In case you are using bulk tracking the bulk tracking response varies compared to the regular one. We will always return

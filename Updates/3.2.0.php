@@ -9,6 +9,7 @@
 
 namespace Piwik\Plugins\QueuedTracking;
 
+use Piwik\Config;
 use Piwik\Updater;
 use Piwik\Updates as PiwikUpdates;
 use Piwik\Updater\Migration\Factory as MigrationFactory;
@@ -42,5 +43,8 @@ class Updates_3_2_0 extends PiwikUpdates
     public function doUpdate(Updater $updater)
     {
         $updater->executeMigrations(__FILE__, $this->getMigrations($updater));
+
+        $config = new Configuration();
+        $config->install();
     }
 }
