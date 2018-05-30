@@ -154,6 +154,28 @@ class MySQL implements Backend
         return $raw;
     }
 
+    public function hasAtLeastXRequestsQueued($key, $numValuesRequired)
+    {
+        if ($numValuesRequired <= 0) {
+            return true;
+        }
+
+        $table = $this->makePrefixedKeyListTableName($key);
+        $sql = sprintf('SELECT idqueuelist FROM %s LIMIT %d', $table, (int)$numValuesRequired);
+
+        try {
+            $values = Db::fetchAll($sql);
+        } catch (\Exception $e) {
+            if ($this->isErrorTableNotExists($e)) {
+                return false;
+            } else {
+                throw $e;
+            }
+        }
+
+        return count($values) >= $numValuesRequired;
+    }
+
     public function removeFirstXValuesFromList($key, $numValues)
     {
         if ($numValues <= 0) {
