@@ -261,6 +261,9 @@ class Manager
             if ($shouldProcess && $this->lock->acquireLock($this->forceQueueId)) {
                 return $queue;
             }
+            
+            // do not try to acquire a different lock
+            return;
         }
 
         if ($this->currentQueueId < 0) {
