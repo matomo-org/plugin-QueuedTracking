@@ -77,6 +77,8 @@ class Processor
         try {
 
             while ($queue = $this->queueManager->lockNext()) {
+                Common::printDebug('Acquired lock for queue ' . $queue->getId());
+
                 for ($i = 0; $i < 10; $i++) {
                     // lets run several processings without re-acquiring the lock each time to avoid possible performance
                     // and reduce concurrency issues re the lock. When we have the lock to work on a queue, there is
@@ -103,6 +105,7 @@ class Processor
                     }
 
                     if (!empty($queuedRequestSets)) {
+                        Common::printDebug('Need to retry ' . count($queuedRequestSets) . ' request sets.');
                         $requestSetsToRetry = $this->processRequestSets($tracker, $queuedRequestSets);
                         $this->processRequestSets($tracker, $requestSetsToRetry);
                         $queue->markRequestSetsAsProcessed();

@@ -123,6 +123,26 @@ class MysqlTest extends IntegrationTestCase
         $this->assertFirstValuesInList($this->emptyListKey, array());
     }
 
+    public function test_hasAtLeastXRequestsQueued_noEntry()
+    {
+        $this->assertTrue($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 0));
+        $this->assertFalse($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 10));
+    }
+
+    public function test_hasAtLeastXRequestsQueued_WhenListIsNotEmpty()
+    {
+        $this->backend->appendValuesToList($this->emptyListKey, array(12));
+        $this->assertTrue($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 0));
+        $this->assertTrue($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 1));
+        $this->assertFalse($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 2));
+
+        $this->backend->appendValuesToList($this->emptyListKey, range(1,11));
+        $this->assertTrue($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 10));
+        $this->assertTrue($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 11));
+        $this->assertTrue($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 12));
+        $this->assertFalse($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 13));
+    }
+
     public function test_getNumValuesInList_shouldReturnZero_IfListIsEmpty()
     {
         $this->assertNumberOfItemsInList($this->emptyListKey, 0);

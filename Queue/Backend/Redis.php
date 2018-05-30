@@ -132,6 +132,17 @@ class Redis implements Backend
         $this->redis->ltrim($key, $numValues, -1);
     }
 
+    public function hasAtLeastXRequestsQueued($key, $numValuesRequired)
+    {
+        if ($numValuesRequired <= 0) {
+            return true;
+        }
+
+        $numActual = $this->getNumValuesInList($key);
+
+        return $numActual >= $numValuesRequired;
+    }
+
     public function getNumValuesInList($key)
     {
         $this->connectIfNeeded();
