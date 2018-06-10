@@ -24,6 +24,7 @@ class Monitor extends ConsoleCommand
     {
         $this->setName('queuedtracking:monitor');
         $this->setDescription('Shows and updates the current state of the queue every 2 seconds.');
+        $this->addOption('iterations', null, InputOption::VALUE_REQUIRED, 'If set, will limit the number of monitoring iterations done.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -34,6 +35,19 @@ class Monitor extends ConsoleCommand
             $systemCheck = new SystemCheck();
             $systemCheck->checkRedisIsInstalled();
         }
+
+        $iterations = $input->getOption('iterations');
+        if (empty($iterations) && $iterations !== 0 && $iterations !== '0') {
+            $queueId = null;
+        } elseif (!is_numeric($iterations)) {
+            throw new \Exception('iterations needs to be numeric');
+        } else {
+            $iterations = (int)$iterations;
+            if ($iterations <= 0) {
+              throw new \Exception('iterations needs to be a non-zero positive number');
+            }
+        }
+            $output->writeln("<info>Only running " . $iterations . " iterations.</info>");
 
         if ($settings->queueEnabled->getValue()) {
             $output->writeln('Queue is enabled');
@@ -55,6 +69,7 @@ class Monitor extends ConsoleCommand
         $output->writeln(sprintf('Up to %d workers will be used', $manager->getNumberOfAvailableQueues()));
         $output->writeln(sprintf('Processor will start once there are at least %s request sets in the queue',
                                  $manager->getNumberOfRequestsToProcessAtSameTime()));
+        $iterationCount = 0;
 
         while (1) {
             $memory = $backend->getMemoryStats(); // I know this will only work with redis currently as it is not defined in backend interface etc. needs to be refactored once we add another backend
@@ -72,6 +87,12 @@ class Monitor extends ConsoleCommand
                                $lock->getNumberOfAcquiredLocks());
             $output->write("\x0D");
             $output->write($message);
+            if (!is_null($iterations)) {
+                $iterationCount += 1;
+                if ($iterationCount >= $iterations) {
+                    break;
+                }
+            }
             sleep(2);
         }
 
