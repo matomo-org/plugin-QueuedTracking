@@ -36,18 +36,10 @@ class Monitor extends ConsoleCommand
             $systemCheck->checkRedisIsInstalled();
         }
 
-        $iterations = $input->getOption('iterations');
-        if (empty($iterations) && $iterations !== 0 && $iterations !== '0') {
-            $queueId = null;
-        } elseif (!is_numeric($iterations)) {
-            throw new \Exception('iterations needs to be numeric');
-        } else {
-            $iterations = (int)$iterations;
-            if ($iterations <= 0) {
-              throw new \Exception('iterations needs to be a non-zero positive number');
-            }
-        }
+        $iterations = $this->getIterationsFromArg($input);
+        if ($iterations  !== null) {
             $output->writeln("<info>Only running " . $iterations . " iterations.</info>");
+        }
 
         if ($settings->queueEnabled->getValue()) {
             $output->writeln('Queue is enabled');
@@ -96,6 +88,28 @@ class Monitor extends ConsoleCommand
             sleep(2);
         }
 
+    }
+
+    /**
+     * Loads the `iteration` argument from the commands arguments. `null` indicates no limit supplied.
+     *
+     * @param InputInterface $input
+     * @return int|null
+     */
+    private function getIterationsFromArg(InputInterface $input)
+    {
+        $iterations = $input->getOption('iterations');
+        if (empty($iterations) && $iterations !== 0 && $iterations !== '0') {
+            $iterations = null;
+        } elseif (!is_numeric($iterations)) {
+            throw new \Exception('iterations needs to be numeric');
+        } else {
+            $iterations = (int)$iterations;
+            if ($iterations <= 0) {
+                throw new \Exception('iterations needs to be a non-zero positive number');
+            }
+        }
+        return $iterations;
     }
 
 }
