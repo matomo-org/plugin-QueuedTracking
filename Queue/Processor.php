@@ -50,6 +50,17 @@ class Processor
      */
     private $numMaxBatchesToProcess = 250;
 
+    /**
+     * The minimum number of times to loop through all queues before exiting due to an empty queue.
+     *
+     * This value is a trade-off between fast execution when the queues are near-empty; and 'fair' processing of all
+     * queues.
+     *
+     * A value of zero will stop on the first empty queue.
+     * @var int
+     */
+    private $numMinQueueIterations = 2;
+
     public function __construct(Queue\Manager $queueManager)
     {
         $this->queueManager = $queueManager;
@@ -59,6 +70,11 @@ class Processor
     public function setNumberOfMaxBatchesToProcess($numBatches)
     {
         $this->numMaxBatchesToProcess = (int) $numBatches;
+    }
+
+    public function setNumberOfMinQueueIterations($numMinQueueIterations)
+    {
+        $this->numMinQueueIterations = (int) $numMinQueueIterations;
     }
 
     public function process(Tracker $tracker = null)
@@ -73,6 +89,9 @@ class Processor
         $request->rememberEnvironment();
 
         $loops = 0;
+
+        // Records the queue ID and the number of times we've seen this queue and it's been empty.
+        $emptyQueueVisitCounts = array();
 
         try {
 
@@ -100,8 +119,24 @@ class Processor
                         // (should not happen usually as only one job works on a queue).
                         // we need to shop in processing if we don't get enough requests returned, otherwise we would
                         // mark below some requests as processed but they weren't.
-                        $this->queueManager->unlock();
-                        break 2;
+                        if (!isset($emptyQueueVisitCounts[$queue->getId()])) {
+                            $emptyQueueVisitCounts[$queue->getId()] = 1;
+                        } else {
+                            $emptyQueueVisitCounts[$queue->getId()] += 1;
+                        }
+                        if ($emptyQueueVisitCounts[$queue->getId()] <= $this->numMinQueueIterations) {
+                            // We have got a near-empty queue; but we haven't visited it the required number of times
+                            // to ensure we have visited all the queues at least `$this->numMinQueueIterations` times.
+                            // Stop processing this queue and move on.
+                            // Unlocking is not necessary here as it is done just after the for loop.
+                            break;
+                        } else {
+                            // Visited this near-empty queue enough times to have processed each queue at least
+                            // `$this->numMinQueueIterations` times; we can now exit whilst ensuring we are also
+                            // giving the other queues a chance to empty.
+                            $this->queueManager->unlock();
+                            break 2;
+                        }
                     }
 
                     if (!empty($queuedRequestSets)) {
