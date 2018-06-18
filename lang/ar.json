@@ -1,0 +1,6 @@
+{
+    "QueuedTracking": {
+        "NumHostsNotMatchNumPorts": "عدد الأجهزة المضيفة المضبوطة لا يتطابق مع عدد المنافذ المضبوطة.",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "لا يمكن ضبط تعدد الأجهزة المضيفة أو المنافذ إلا حين تمكين مراقِب Redis. ألق نظرة على ملف اقرأني الخاص بهذه الإضافة لتتعلم كيفية تمكين المراقب."
+    }
+}
