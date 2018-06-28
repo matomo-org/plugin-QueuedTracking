@@ -3,6 +3,10 @@
 3.3.0 
 - When using 3rd party cookies, the 3rd party cookie value will not be overwritten by local site visitor id values
  
+3.2.1
+- Faster queue locking
+- More debug output while processing
+
 3.2.0
 - Added possibility to use a MySQL backend instead of redis
 - New option `queue-id` for the `queuedtracking:process` command which may improve processing speed as the command would only focus on one queue instead of trying to get the lock for a random queue.

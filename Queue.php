@@ -101,9 +101,7 @@ class Queue
 
     public function shouldProcess()
     {
-        $numRequests = $this->getNumberOfRequestSetsInQueue();
-
-        return $numRequests >= $this->numRequestsToProcessInBulk;
+        return $this->backend->hasAtLeastXRequestsQueued($this->key, $this->numRequestsToProcessInBulk);
     }
 
     public function markRequestSetsAsProcessed()

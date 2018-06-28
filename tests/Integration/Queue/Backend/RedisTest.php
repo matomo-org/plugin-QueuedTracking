@@ -124,6 +124,20 @@ class RedisTest extends IntegrationTestCase
         $this->assertNumberOfItemsInList($this->emptyListKey, 4);
     }
 
+    public function test_hasAtLeastXRequestsQueued_WhenListIsNotEmpty()
+    {
+        $this->redis->appendValuesToList($this->emptyListKey, array(12));
+        $this->assertTrue($this->redis->hasAtLeastXRequestsQueued($this->emptyListKey, 0));
+        $this->assertTrue($this->redis->hasAtLeastXRequestsQueued($this->emptyListKey, 1));
+        $this->assertFalse($this->redis->hasAtLeastXRequestsQueued($this->emptyListKey, 2));
+
+        $this->redis->appendValuesToList($this->emptyListKey, range(1,11));
+        $this->assertTrue($this->redis->hasAtLeastXRequestsQueued($this->emptyListKey, 10));
+        $this->assertTrue($this->redis->hasAtLeastXRequestsQueued($this->emptyListKey, 11));
+        $this->assertTrue($this->redis->hasAtLeastXRequestsQueued($this->emptyListKey, 12));
+        $this->assertFalse($this->redis->hasAtLeastXRequestsQueued($this->emptyListKey, 13));
+    }
+
     public function test_deleteIfKeyHasValue_ShouldNotWork_IfKeyDoesNotExist()
     {
         $success = $this->redis->deleteIfKeyHasValue('inVaLidKeyTest', '1');

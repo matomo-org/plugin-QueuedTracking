@@ -29,6 +29,8 @@ interface Backend
 
     public function deleteIfKeyHasValue($key, $value);
 
+    public function hasAtLeastXRequestsQueued($key, $numValuesRequired);
+
     public function expireIfKeyHasValue($key, $value, $ttlInSeconds);
 
     public function get($key);
