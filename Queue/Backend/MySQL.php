@@ -132,7 +132,7 @@ class MySQL implements Backend
         }
 
         $table = $this->makePrefixedKeyListTableName($key);
-        $sql = sprintf('SELECT list_value FROM %s ORDER BY idqueuelist ASC LIMIT %d OFFSET 0', $table, (int)$numValues);
+        $sql = sprintf('SELECT SQL_NO_CACHE list_value FROM %s ORDER BY idqueuelist ASC LIMIT %d OFFSET 0', $table, (int)$numValues);
 
         try {
             $values = Db::fetchAll($sql);
@@ -161,7 +161,7 @@ class MySQL implements Backend
         }
 
         $table = $this->makePrefixedKeyListTableName($key);
-        $sql = sprintf('SELECT idqueuelist FROM %s LIMIT %d', $table, (int)$numValuesRequired);
+        $sql = sprintf('SELECT SQL_NO_CACHE idqueuelist FROM %s LIMIT %d', $table, (int)$numValuesRequired);
 
         try {
             $values = Db::fetchAll($sql);
@@ -199,7 +199,7 @@ class MySQL implements Backend
     public function getNumValuesInList($key)
     {
         $table = $this->makePrefixedKeyListTableName($key);
-        $sql = sprintf('SELECT max(idqueuelist) - min(idqueuelist) as num_entries FROM %s', $table);
+        $sql = sprintf('SELECT SQL_NO_CACHE max(idqueuelist) - min(idqueuelist) as num_entries FROM %s', $table);
         try {
             $value = Db::fetchOne($sql);
             if ($value === null || $value === false) {
@@ -286,7 +286,7 @@ class MySQL implements Backend
      */
     public function getTimeToLive($key)
     {
-        $sql = sprintf('SELECT expiry_time, UNIX_TIMESTAMP() as timestamp FROM %s WHERE queue_key = ? LIMIT 1', $this->tablePrefixed);
+        $sql = sprintf('SELECT SQL_NO_CACHE expiry_time, UNIX_TIMESTAMP() as timestamp FROM %s WHERE queue_key = ? LIMIT 1', $this->tablePrefixed);
         $row = Db::fetchRow($sql, array($key));
 
         if (empty($row)) {
@@ -350,7 +350,7 @@ class MySQL implements Backend
      */
     public function getKeysMatchingPattern($pattern)
     {
-        $sql = sprintf('SELECT distinct queue_key FROM %s WHERE queue_key like ? and %s', $this->tablePrefixed, $this->getQueryPartExpiryTime());
+        $sql = sprintf('SELECT SQL_NO_CACHE distinct queue_key FROM %s WHERE queue_key like ? and %s', $this->tablePrefixed, $this->getQueryPartExpiryTime());
         $pattern = str_replace('*', '%', $pattern);
         $keys = Db::fetchAll($sql, array($pattern));
         $raw = array();
@@ -382,13 +382,13 @@ class MySQL implements Backend
 
     public function get($key)
     {
-        $sql = sprintf('SELECT queue_value FROM %s WHERE queue_key = ? AND %s LIMIT 1', $this->tablePrefixed, $this->getQueryPartExpiryTime());
+        $sql = sprintf('SELECT SQL_NO_CACHE queue_value FROM %s WHERE queue_key = ? AND %s LIMIT 1', $this->tablePrefixed, $this->getQueryPartExpiryTime());
         return Db::fetchOne($sql, array($key));
     }
 
     public function keyExists($key)
     {
-        $sql = sprintf('SELECT 1 FROM %s WHERE queue_key = ? LIMIT 1', $this->tablePrefixed);
+        $sql = sprintf('SELECT SQL_NO_CACHE 1 FROM %s WHERE queue_key = ? LIMIT 1', $this->tablePrefixed);
         $value = Db::fetchOne($sql, array($key));
         return !empty($value);
     }
