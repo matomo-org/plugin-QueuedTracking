@@ -1,0 +1,6 @@
+{
+    "QueuedTracking": {
+        "NumHostsNotMatchNumPorts": "O número de servidores configurados não coincide com o número de portas configuradas.",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Apenas podem ser configurados múltiplos utilizadores ou portas quando o Redis Sentinel está ativo. Consulte o ficheiro readme da extensão para saber mais sobre como ativar o Sentinel."
+    }
+}
