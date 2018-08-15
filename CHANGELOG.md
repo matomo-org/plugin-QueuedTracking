@@ -1,5 +1,8 @@
 ## Changelog
 
+3.3.1
+- Support MySQLi adapter
+
 3.3.0 
 - When using 3rd party cookies, the 3rd party cookie value will not be overwritten by local site visitor id values
  
