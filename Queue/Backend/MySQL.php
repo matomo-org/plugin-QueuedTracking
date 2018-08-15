@@ -13,6 +13,7 @@ use Piwik\Db;
 use Piwik\DbHelper;
 use Piwik\Log;
 use Piwik\Plugins\QueuedTracking\Queue\Backend;
+use Piwik\Tracker\Db\Mysqli;
 
 class MySQL implements Backend
 {
@@ -105,8 +106,19 @@ class MySQL implements Backend
             $value = gzcompress($value);
 
             try {
-                Db::query($query, array($value));
+
+                $result = Db::query($query, array($value));
+
+                if ($result === false) {
+                    // user is using Mysqli Tracker DB
+                    $this->createListTable($key);
+                    Db::query($query, array($value));
+                }
+
+                unset($result);
+
             } catch (\Exception $e) {
+                // anything else but Mysqli in tracker mode (eg PDO or Mysqli in regular mode)
                 if ($this->isErrorTableNotExists($e)) {
 
                     // we create list tables only on demand
@@ -316,7 +328,7 @@ class MySQL implements Backend
     public function delete($key)
     {
         $sql = sprintf('DELETE FROM %s WHERE queue_key = ?', $this->tablePrefixed);
-        $wasDeleted = (bool) Db::query($sql, array($key))->rowCount();
+        $wasDeleted = $this->queryDidMakeChange($sql, array($key));
 
         $table = $this->makePrefixedKeyListTableName($key);
         $wasDeleted = $this->dropTable($table) || $wasDeleted; // we return true if either list was removed or value
@@ -324,9 +336,21 @@ class MySQL implements Backend
         return $wasDeleted;
     }
 
+    private function queryDidMakeChange($sql, $bind = array())
+    {
+        $query = Db::query($sql, $bind);
+        if (is_object($query) && method_exists($query, 'rowCount')) {
+            // anything else but mysqli in tracker mode
+            return (bool) $query->rowCount();
+        } else {
+            // mysqli in tracker mode
+            return (bool) Db::get()->rowCount($query);
+        }
+    }
+
     private function dropTable($table)
     {
-        $wasDeleted = (bool)Db::query(sprintf('DROP TABLE IF EXISTS `%s`', $table))->rowCount();
+        $wasDeleted = $this->queryDidMakeChange(sprintf('DROP TABLE IF EXISTS `%s`', $table));
         return $wasDeleted;
     }
 
@@ -342,7 +366,7 @@ class MySQL implements Backend
         }
 
         $sql = sprintf('DELETE FROM %s WHERE queue_key = ? and queue_value = ?', $this->tablePrefixed);
-        return (bool) Db::query($sql, array($key, $value))->rowCount();
+        return $this->queryDidMakeChange($sql, array($key, $value));
     }
 
     /**
@@ -369,7 +393,7 @@ class MySQL implements Backend
         // we need to use unix_timestamp in mysql and not time() in php since the local time might be different on each server
         // better to rely on one central DB server time only
         $sql = sprintf('UPDATE %s SET expiry_time = (UNIX_TIMESTAMP() + ?) WHERE queue_key = ? and queue_value = ?', $this->tablePrefixed);
-        $success = (bool) Db::query($sql, array((int) $ttlInSeconds, $key, $value))->rowCount();
+        $success = $this->queryDidMakeChange($sql, array((int) $ttlInSeconds, $key, $value));
 
         if (!$success) {
             // the above update did not work because the same time was already set and we just tried to set the same ttl

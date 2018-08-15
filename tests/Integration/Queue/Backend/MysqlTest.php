@@ -8,6 +8,7 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue\Backend;
 
+use Piwik\Db;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\MySQL;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
 use \Piwik\Tests\Framework\TestCase\IntegrationTestCase;
@@ -35,6 +36,10 @@ class MysqlTest extends IntegrationTestCase
             parent::setUp();
         }
 
+        // ensure tracker DB will be used
+        Db::destroyDatabaseObject();
+        $GLOBALS['PIWIK_TRACKER_MODE'] = true;
+
         $this->backend = $this->createMysqlBackend();
 
         if (!$this->hasDependencies()) {
@@ -43,6 +48,13 @@ class MysqlTest extends IntegrationTestCase
             $this->backend->delete($this->key);
             $this->backend->appendValuesToList($this->listKey, array(10, 299, '34'));
         }
+    }
+
+    public function tearDown()
+    {
+        $GLOBALS['PIWIK_TRACKER_MODE'] = false;
+        Db::destroyDatabaseObject();
+        parent::tearDown();
     }
 
     protected function flushBackend()
