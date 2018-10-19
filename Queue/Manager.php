@@ -196,7 +196,7 @@ class Manager
     private function getVisitorIdFromRequest(Tracker\Request $request)
     {
         try {
-            $visitorId = $request->getVisitorId();
+            $visitorId = $request->getVisitorId(true);
         } catch (InvalidRequestParameterException $e) {
             $visitorId = null;
         }
