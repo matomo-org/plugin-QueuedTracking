@@ -287,7 +287,10 @@ class HandlerTest extends IntegrationTestCase
 
     public function test_process_ShouldNotCreateADatabaseConnectionAtAnyTime()
     {
-        $this->setDummyRequests(false);
+        $this->requestSet->setRequests(array(
+            array('idsite' => 1, 'url' => 'http://localhost/foo?bar'),
+            array('idsite' => 1, 'url' => 'http://localhost'),
+        ));
 
         Queue\Factory::getSettings()->queueEnabled->getValue(); // this will cause a db query but will be cached afterwards
         Db::destroyDatabaseObject();
@@ -324,15 +327,13 @@ class HandlerTest extends IntegrationTestCase
         $this->handler->process($this->tracker, $this->requestSet);
     }
 
-    private function setDummyRequests($useTokenAuth = true)
+    private function setDummyRequests()
     {
-        if ($useTokenAuth) {
-            $useTokenAuth = Fixture::getTokenAuth();
-        }
+        $tokenAuth = Fixture::getTokenAuth();
 
         $this->requestSet->setRequests(array(
-            array('idsite' => 1, 'url' => 'http://localhost/foo?bar', 'cip' => '192.168.33.11', 'token_auth' => $useTokenAuth),
-            array('idsite' => 1, 'url' => 'http://localhost', 'cip' => '192.168.33.11', 'token_auth' => $useTokenAuth),
+            array('idsite' => 1, 'url' => 'http://localhost/foo?bar', 'cip' => '192.168.33.11', 'token_auth' => $tokenAuth),
+            array('idsite' => 1, 'url' => 'http://localhost', 'cip' => '192.168.33.11', 'token_auth' => $tokenAuth),
         ));
     }
 }
