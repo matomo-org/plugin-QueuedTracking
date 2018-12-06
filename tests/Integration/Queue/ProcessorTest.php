@@ -9,6 +9,7 @@
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue;
 
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
+use Piwik\Tests\Framework\Fixture;
 use Piwik\Tracker\TrackerConfig;
 use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
@@ -58,6 +59,8 @@ class ProcessorTest extends IntegrationTestCase
     {
         parent::setUp();
 
+        Fixture::createWebsite('2014-01-02 03:04:05');
+        
         $this->backend = $this->createMySQLBackend();
 
         $this->lock = new Queue\Lock($this->backend);
