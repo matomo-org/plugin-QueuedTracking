@@ -203,7 +203,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
             $field->title = 'Number of queue workers';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 5);
-            $field->inlineHelp = 'Number of allowed maximum queue workers. Accepts a number between 1 and 16. Best practice is to set the number of CPUs you want to make available for queue processing. Be aware you need to make sure to start the workers manually. We recommend to not use 9-15 workers, rather use 8 or 16 as the queue might not be distributed evenly into different queues. DO NOT USE more than 1 worker if you make use the UserId feature when tracking see https://github.com/piwik/piwik/issues/7691';
+            $field->inlineHelp = 'Number of allowed maximum queue workers. Has to be at least 1. Best practice is to set the number of CPUs you want to make available for queue processing. Be aware you need to make sure to start the workers manually. We recommend to not use 9-15 workers, rather use 8 or 16 as the queue might not be distributed evenly into different queues. DO NOT USE more than 1 worker if you make use the UserId feature when tracking see https://github.com/piwik/piwik/issues/7691';
             $field->validate = function ($value) {
 
                 if (!is_numeric($value)) {
@@ -211,8 +211,8 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
                 }
 
                 $value = (int) $value;
-                if ($value > 16 || $value < 1) {
-                    throw new \Exception('Only 1-16 workers allowed');
+                if ($value < 1) {
+                    throw new \Exception('At least one worker needs to be configured');
                 }
             };
         });

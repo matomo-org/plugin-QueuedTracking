@@ -175,16 +175,7 @@ class SettingsTest extends IntegrationTestCase
 
     /**
      * @expectedException \Exception
-     * @expectedExceptionMessage Only 1-16 workers allowed
-     */
-    public function test_numQueueWorkers_ShouldFail_IfTooHigh()
-    {
-        $this->settings->numQueueWorkers->setValue('17');
-    }
-
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Only 1-16 workers allowed
+     * @expectedExceptionMessage At least one worker needs to be configured
      */
     public function test_numQueueWorkers_ShouldFail_IfTooLow()
     {
