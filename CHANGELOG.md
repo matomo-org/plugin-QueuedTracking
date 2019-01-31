@@ -1,5 +1,11 @@
 ## Changelog
 
+3.3.3
+- Add possibility to ignore queued tracking handler and track request directly into the database
+
+3.3.2
+- Send branded HTML email
+
 3.3.1
 - Support MySQLi adapter
 
