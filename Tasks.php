@@ -38,9 +38,7 @@ class Tasks extends \Piwik\Plugin\Tasks
      */
     public function notifyQueueSize()
     {
-        $settings = Queue\Factory::getSettings();
-
-        if (!$settings->queueEnabled->getValue()) {
+        if (!QueuedTracking::isQueuedTrackingEnabled()) {
             // not needed to check anything
             return;
         }
@@ -92,7 +90,7 @@ class Tasks extends \Piwik\Plugin\Tasks
     public function optimizeQueueTable()
     {
         $settings = Queue\Factory::getSettings();
-        if ($settings->isMysqlBackend() && $settings->queueEnabled->getValue()) {
+        if ($settings->isMysqlBackend() && QueuedTracking::isQueuedTrackingEnabled()) {
 
             $db = Db::get();
             $prefix = Common::prefixTable(MySQL::QUEUED_TRACKING_TABLE_PREFIX);

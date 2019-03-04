@@ -10,6 +10,7 @@ namespace Piwik\Plugins\QueuedTracking\Commands;
 
 use Piwik\Application\Environment;
 use Piwik\Plugin\ConsoleCommand;
+use Piwik\Plugins\QueuedTracking\QueuedTracking;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
 use Piwik\Tracker;
 use Symfony\Component\Console\Input\InputInterface;
@@ -63,7 +64,7 @@ class Test extends ConsoleCommand
         $output->writeln('NumQueueWorkers: ' . $settings->numQueueWorkers->getValue());
         $output->writeln('NumRequestsToProcess: ' . $settings->numRequestsToProcess->getValue());
         $output->writeln('ProcessDuringTrackingRequest: ' . (int) $settings->processDuringTrackingRequest->getValue());
-        $output->writeln('QueueEnabled: ' . (int) $settings->queueEnabled->getValue());
+        $output->writeln('QueueEnabled: ' . (int) QueuedTracking::isQueuedTrackingEnabled());
         $output->writeln('');
 
         $output->writeln('<comment>Redis backend only settings (does not apply when using MySQL backend):</comment>');

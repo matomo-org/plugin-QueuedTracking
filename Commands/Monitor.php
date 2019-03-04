@@ -12,6 +12,7 @@ namespace Piwik\Plugins\QueuedTracking\Commands;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Processor;
+use Piwik\Plugins\QueuedTracking\QueuedTracking;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
 use Piwik\Tracker;
 use Symfony\Component\Console\Input\InputInterface;
@@ -35,7 +36,7 @@ class Monitor extends ConsoleCommand
             $systemCheck->checkRedisIsInstalled();
         }
 
-        if ($settings->queueEnabled->getValue()) {
+        if (QueuedTracking::isQueuedTrackingEnabled()) {
             $output->writeln('Queue is enabled');
         } else {
             $output->writeln('<comment>' . strtoupper('Queue is disabled: ') . 'No new requests will be written into the queue, processing the remaining requests is still possible.</comment>');

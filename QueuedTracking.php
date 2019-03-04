@@ -9,6 +9,7 @@
 namespace Piwik\Plugins\QueuedTracking;
 
 use Piwik\Common;
+use Piwik\Container\StaticContainer;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\MySQL;
 use Piwik\Plugins\QueuedTracking\Tracker\Handler;
 
@@ -47,6 +48,11 @@ class QueuedTracking extends \Piwik\Plugin
         return true;
     }
 
+    public static function isQueuedTrackingEnabled()
+    {
+        return StaticContainer::get('QueuedTrackingIsEnabled');
+    }
+
     public function replaceHandlerIfQueueIsEnabled(&$handler)
     {
         $useQueuedTracking = Common::getRequestVar('queuedtracking', 1, 'int');
@@ -54,14 +60,8 @@ class QueuedTracking extends \Piwik\Plugin
             return;
         }
 
-        $settings = Queue\Factory::getSettings();
-
-        if ($settings->queueEnabled->getValue()) {
-            $handler = new Handler();
-
-            if ($settings->processDuringTrackingRequest->getValue()) {
-                $handler->enableProcessingInTrackerMode();
-            }
+        if (StaticContainer::get('QueuedTrackingIsEnabled')) {
+            $handler = StaticContainer::get(Handler::class);
         }
     }
 
