@@ -1,5 +1,8 @@
 ## Changelog
 
+3.3.4
+- Add possibility to enable queued tracking through dependency injection (`config/config.php`)
+
 3.3.3
 - Add possibility to ignore queued tracking handler and track request directly into the database
 
