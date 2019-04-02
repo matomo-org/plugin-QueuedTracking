@@ -101,7 +101,7 @@ class Redis implements Backend
         $this->connectIfNeeded();
 
         foreach ($values as $value) {
-            $this->redis->rPush($key, $value);
+            $this->redis->rPush($key, gzdeflate($value));
         }
 
         // usually we would simply do call_user_func_array(array($redis, 'rPush'), $values); as rpush supports multiple values
@@ -118,6 +118,9 @@ class Redis implements Backend
 
         $this->connectIfNeeded();
         $values = $this->redis->lRange($key, 0, $numValues - 1);
+        foreach($values as $key => $value) {
+            $values[$key] = gzinflate($value);
+        }
 
         return $values;
     }
@@ -259,6 +262,7 @@ end';
 
         if (!empty($this->database) || 0 === $this->database) {
             $this->redis->select($this->database);
+            
         }
 
         return $success;
