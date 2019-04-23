@@ -1,5 +1,8 @@
 ## Changelog
 
+3.3.4
+- Use primary key instead of a unique index for mysql backend for better replication
+
 3.3.3
 - Add possibility to ignore queued tracking handler and track request directly into the database
 
