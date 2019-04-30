@@ -30,8 +30,8 @@ class Updates_3_3_4 extends PiwikUpdates
 
     public function getMigrations(Updater $updater)
     {
-        $migration1 = $this->migration->db->dropIndex('queuedtracking_queue', 'unique_queue_key');
-        $migration2 = $this->migration->db->addPrimaryKey('queuedtracking_queue', array('queue_key'));
+        $migration1 = $this->migration->db->addPrimaryKey('queuedtracking_queue', array('queue_key'));
+        $migration2 = $this->migration->db->dropIndex('queuedtracking_queue', 'unique_queue_key');
 
         return array(
             $migration1,

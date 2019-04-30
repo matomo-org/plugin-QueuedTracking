@@ -1,5 +1,8 @@
 ## Changelog
 
+3.3.5
+- Improve update script to first add primary key and then remove index
+
 3.3.4
 - Use primary key instead of a unique index for mysql backend for better replication
 
