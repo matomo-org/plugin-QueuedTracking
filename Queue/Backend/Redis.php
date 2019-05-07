@@ -269,7 +269,6 @@ end';
 
         if (!empty($this->database) || 0 === $this->database) {
             $this->redis->select($this->database);
-            
         }
 
         return $success;
