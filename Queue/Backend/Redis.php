@@ -101,7 +101,7 @@ class Redis implements Backend
         $this->connectIfNeeded();
 
         foreach ($values as $value) {
-            $this->redis->rPush($key, $value);
+            $this->redis->rPush($key, gzcompress($value));
         }
 
         // usually we would simply do call_user_func_array(array($redis, 'rPush'), $values); as rpush supports multiple values
@@ -118,6 +118,16 @@ class Redis implements Backend
 
         $this->connectIfNeeded();
         $values = $this->redis->lRange($key, 0, $numValues - 1);
+        foreach($values as $key => $value) {
+            $tmpValue = @gzuncompress($value); // Avoid warning if not compressed
+            
+            // if empty, string is not compressed. Use original value
+            if(empty($tmpValue)) {
+                $values[$key] = $value;
+            } else {
+                $values[$key] = $tmpValue;
+            }
+        }
 
         return $values;
     }
