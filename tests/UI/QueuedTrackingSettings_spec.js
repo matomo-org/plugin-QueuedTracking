@@ -27,36 +27,33 @@ describe("QueuedTrackingSettings", function () {
         testEnvironment.save();
     });
 
-    it("should display the settings page", function (done) {
-        expect.screenshot('settings_page').to.be.captureSelector(selector, function (page) {
-            page.load(url);
-        }, done);
+    it("should display the settings page", async function () {
+        await page.goto(url);
+        expect(await page.screenshotSelector(selector)).to.matchImage('settings_page');
     });
 
-    it("should show an error if queue is enabled and redis connection is wrong", function (done) {
-        expect.screenshot('settings_save_error').to.be.captureSelector(selector + ',#notificationContainer', function (page) {
-            page.click('label[for=queueEnabled]');
-            page.sendKeys('input[name=redisPort]', '1');
-            page.click('.card-content:contains(\'QueuedTracking\') .pluginsSettingsSubmit');
-            page.wait(750);
-            // hide all cards, except of QueueTracking
-            page.evaluate(function(){
-                $('.card-content').hide();
-                $('.card-content:contains(\'QueuedTracking\')').show();
-            });
-        }, done);
+    it("should show an error if queue is enabled and redis connection is wrong", async function () {
+        await page.click('label[for="queueEnabled"]');
+        await page.type('input[name="redisPort"]', '1');
+        await (await page.jQuery('.card-content:contains(\'QueuedTracking\') .pluginsSettingsSubmit')).click();
+        await page.waitForNetworkIdle();
+        // hide all cards, except of QueueTracking
+        await page.evaluate(function(){
+            $('.card-content').hide();
+            $('.card-content:contains(\'QueuedTracking\')').show();
+        });
+        expect(await page.screenshotSelector(selector + ',#notificationContainer')).to.matchImage('settings_save_error');
     });
 
-    it("should display the settings page with sentinel enabled", function (done) {
+    it("should display the settings page with sentinel enabled", async function () {
 
         testEnvironment.overrideConfig('QueuedTracking', {
             useSentinelBackend: '1'
         });
         testEnvironment.save();
 
-        expect.screenshot('settings_page_sentinel').to.be.captureSelector(selector, function (page) {
-            page.load(url);
-        }, done);
+        await page.goto(url);
+        expect(await page.screenshotSelector(selector)).to.matchImage('settings_page_sentinel');
     });
 
 });
