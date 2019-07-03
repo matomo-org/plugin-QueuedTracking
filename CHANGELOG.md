@@ -1,5 +1,33 @@
 ## Changelog
 
+3.3.5
+- Improve update script to first add primary key and then remove index
+
+3.3.4
+- Use primary key instead of a unique index for mysql backend for better replication
+
+3.3.3
+- Add possibility to ignore queued tracking handler and track request directly into the database
+
+3.3.2
+- Send branded HTML email
+
+3.3.1
+- Support MySQLi adapter
+
+3.3.0 
+- When using 3rd party cookies, the 3rd party cookie value will not be overwritten by local site visitor id values
+ 
+3.2.1
+- Faster queue locking
+- More debug output while processing
+
+3.2.0
+- Added possibility to use a MySQL backend instead of redis
+- New option `queue-id` for the `queuedtracking:process` command which may improve processing speed as the command would only focus on one queue instead of trying to get the lock for a random queue.
+- Various other minor performance improvements
+- New feature: Get notified by email when a single queue reaches a specific threshold
+
 3.0.2
 
 - Ensure do not track cookie works

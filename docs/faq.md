@@ -2,13 +2,16 @@
 
 __What are the requirements for this plugin?__
 
-* [Redis server 2.8+](http://redis.io/) - [Redis quickstart](http://redis.io/topics/quickstart)
-* [phpredis PHP extension](https://github.com/nicolasff/phpredis) - [Install](https://github.com/nicolasff/phpredis#installingconfiguring)
+We recommend to use the plugin with Redis, but it may work just as well by using the MySQL database which is already used
+for Matomo anyway.
+
+* Recommended [Redis server 2.8+](http://redis.io/) - [Redis quickstart](http://redis.io/topics/quickstart)
+* Recommended [phpredis PHP extension](https://github.com/nicolasff/phpredis) - [Install](https://github.com/nicolasff/phpredis#installingconfiguring)
 * Transactions are used and must be supported by the SQL database.
 
 __Where can I configure and enable the queue?__
 
-In your Piwik instance go to "Settings => Plugin Settings". There is a config section for this plugin.
+In your Piwik instance go to "Administration => General Settings". There is a config section for this plugin.
 
 __When will a queued tracking request be processed?__
 
@@ -76,10 +79,15 @@ change the "Number of requests to process" in plugin settings to "1" and process
 `./console queuedtracking:process` shortly before disabling the queue and directly afterwards. It is still possible to
 process remaining request once the queue is disabled but new tracking requests won't be written into the queue.
 
-__How can I access Redis data?__
+__How can I access the queued data?__
 
+**Redis**
 You can either acccess data on the command line via `redis-cli` or use a Redis monitor like [phpRedisAdmin](https://github.com/ErikDubbelboer/phpRedisAdmin).
 In case you are using something like a Redis monitor make sure it is not accessible by everyone.
+
+**MySQL**
+There will be some DB tables in regular Matomo DB containing `queuedtracking_list_*`. Depending on your DB prefix, the name
+of the tables might be for example `matomo_queuedtracking_list_*`. Locks are stored in `queuedtracking_queue`.
 
 __The processor won't start processing again as it thinks another processor is processing the data already, what can I do?__
 
@@ -90,7 +98,7 @@ by executing the command `./console queuedtracking:lock-status`. This will outpu
 You should actually never have to do this as a lock automatically expires after a while. It just may take a while depending
 on the amount of requests you are importing.
 
-__How can I test my Redis / QueuedTracking setup in case I'm getting errors?__
+__How can I test my Redis / MySQL / QueuedTracking setup in case I'm getting errors?__
 
 There is a command to test some the connection to Redis as well as some needed features: `./console queuedtracking:test`.
 
@@ -104,6 +112,7 @@ __How can I debug in case something goes wrong?__
 * Set the option `-vvv` when processing via `./console queuedtracking:process -vvv` to enable the tracker debug mode for this run. This will print detailed information to screen.
 * Enable tracker mode in `config.ini.php` via `[Tracker] debug=1` if processing requests during tracking is enabled.
 * Use the command `./console queuedtracking:print-queued-requests` to view the next requests to process in each queue. If you execute this command twice within 1-10 minutes, and it outputs the same, the queue is not being processed most likely indicating a problem.
+* You can add the tracking parameter `&queuedtracking=0` to the tracking request to insert a tracking request directly into the database instead of into the queued tracking handler
 
 __I am using the Log Importer in combination with Queued Tracking, is there something to consider?__
 
@@ -118,6 +127,17 @@ When using Sentinel, the `phpredis` extension is not needed as it uses a PHP cla
 __Can I configure multiple Sentinel servers?__
 
 Yes, once Sentinel is enabled you can configure multiple servers by specifying multiple hosts and ports comma separated via the UI.
+
+__Can I be notified when a queue reaches a certain threshold?__
+
+Yes, you can optionally receive an email when the number of requests queued in a single queue reaches a configured
+threshold. You can configure this in your `config/config.ini.php` config file using the following configuration:
+
+```
+[QueuedTracking]
+notify_queue_threshold_emails[] = example@example.org
+notify_queue_threshold_single_queue = 250000
+```
 
 __Are there any known issues?__
 

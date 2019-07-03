@@ -12,12 +12,7 @@ services:
 
 addons:
   apt:
-    sources:
-      - deadsnakes
-
     packages:
-      - python2.6
-      - python2.6-dev
       - nginx
       - realpath
       - lftp
@@ -96,7 +91,7 @@ install:
   - ./tests/travis/checkout_dependent_plugins.sh
 
 before_script:
-  - if [[ "$TRAVIS_PHP_VERSION" != 7* ]]; then phpenv config-rm xdebug.ini; fi
+  - phpenv config-rm xdebug.ini
 
   # add always_populate_raw_post_data=-1 to php.ini
   - echo "always_populate_raw_post_data=-1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
@@ -106,27 +101,6 @@ before_script:
 
   # make tmpfs and run MySQL on it for reasonnable performance
   - ./tests/travis/setup_mysql_tmpfs.sh
-
-  # print out mysql information
-  - mysql --version
-  - mysql -e "SELECT VERSION();"
-
-  # configure mysql
-  - mysql -e "SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES'" # Travis default
-  # try to avoid 'mysql has gone away' errors
-  - mysql -e "SET GLOBAL wait_timeout = 36000;"
-  - mysql -e "SET GLOBAL max_allowed_packet = 134209536;"
-  - mysql -e "SHOW VARIABLES LIKE 'max_allowed_packet';"
-  - mysql -e "SHOW VARIABLES LIKE 'wait_timeout';"
-
-  - mysql -e "SELECT @@sql_mode;"
-  # - mysql -e "SHOW GLOBAL VARIABLES;"
-
-  # print out more debugging info
-  - uname -a
-  - date
-  - php -r "var_dump(gd_info());"
-  - mysql -e 'create database piwik_tests;'
 
   - ./tests/travis/prepare.sh
   - ./tests/travis/setup_webserver.sh

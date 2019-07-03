@@ -33,8 +33,11 @@ class LockStatus extends ConsoleCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $systemCheck = new SystemCheck();
-        $systemCheck->checkRedisIsInstalled();
+        $settings = Queue\Factory::getSettings();
+        if ($settings->isRedisBackend()) {
+            $systemCheck = new SystemCheck();
+            $systemCheck->checkRedisIsInstalled();
+        }
 
         $backend = Queue\Factory::makeBackend();
         $lock    = Queue\Factory::makeLock($backend);

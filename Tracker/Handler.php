@@ -44,7 +44,7 @@ class Handler extends Tracker\Handler
 
         $requests = $requestSet->getRequests();
         foreach ($requests as $request) {
-            $request->setThirdPartyCookie($request->getVisitorId());
+            $request->setThirdPartyCookie($request->getVisitorIdForThirdPartyCookie());
         }
 
         $this->sendResponseNow($tracker, $requestSet);

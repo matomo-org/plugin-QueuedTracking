@@ -50,6 +50,17 @@ class Processor
      */
     private $numMaxBatchesToProcess = 250;
 
+    /**
+     * The minimum number of times to loop through all queues before exiting due to an empty queue.
+     *
+     * This value is a trade-off between fast execution when the queues are near-empty; and 'fair' processing of all
+     * queues.
+     *
+     * A value of zero will stop on the first empty queue.
+     * @var int
+     */
+    private $numMinQueueIterations = 2;
+
     public function __construct(Queue\Manager $queueManager)
     {
         $this->queueManager = $queueManager;
@@ -59,6 +70,11 @@ class Processor
     public function setNumberOfMaxBatchesToProcess($numBatches)
     {
         $this->numMaxBatchesToProcess = (int) $numBatches;
+    }
+
+    public function setNumberOfMinQueueIterations($numMinQueueIterations)
+    {
+        $this->numMinQueueIterations = (int) $numMinQueueIterations;
     }
 
     public function process(Tracker $tracker = null)
@@ -74,23 +90,64 @@ class Processor
 
         $loops = 0;
 
+        // Records the queue ID and the number of times we've seen this queue and it's been empty.
+        $emptyQueueVisitCounts = array();
+
         try {
 
             while ($queue = $this->queueManager->lockNext()) {
-                if ($loops > $this->numMaxBatchesToProcess) {
-                    Common::printDebug('This worker processed ' . $loops . ' times, stopping now.');
-                    break;
-                } else {
+                Common::printDebug('Acquired lock for queue ' . $queue->getId());
+
+                for ($i = 0; $i < 10; $i++) {
+                    // lets run several processings without re-acquiring the lock each time to avoid possible performance
+                    // and reduce concurrency issues re the lock. When we have the lock to work on a queue, there is
+                    // no need to unlock and get the lock each time... it otherwise becomes quite ineffecient
+                    if ($loops > $this->numMaxBatchesToProcess) {
+                        Common::printDebug('This worker processed ' . $loops . ' times, stopping now.');
+                        $this->queueManager->unlock();
+                        break 2;
+                    }
+
                     $loops++;
-                }
+                    $queuedRequestSets = $queue->getRequestSetsToProcess();
 
-                $queuedRequestSets = $queue->getRequestSetsToProcess();
+                    if (count($queuedRequestSets) < $queue->getNumberOfRequestsToProcessAtSameTime()) {
+                        // could also use `$queue->shouldProcess()` but this is quite a bit faster when there are always
+                        // many requests in queue... it is also done this way to prevent potential race conditions...
+                        // imagine we call "shouldProcess" and it says there are 60 requests in the queue, now a few ms
+                        // we want to take out 50 requests, however, only 10 requests are returned for whatever reason
+                        // (should not happen usually as only one job works on a queue).
+                        // we need to shop in processing if we don't get enough requests returned, otherwise we would
+                        // mark below some requests as processed but they weren't.
+                        if (!isset($emptyQueueVisitCounts[$queue->getId()])) {
+                            $emptyQueueVisitCounts[$queue->getId()] = 1;
+                        } else {
+                            $emptyQueueVisitCounts[$queue->getId()] += 1;
+                        }
+                        if ($emptyQueueVisitCounts[$queue->getId()] <= $this->numMinQueueIterations) {
+                            // We have got a near-empty queue; but we haven't visited it the required number of times
+                            // to ensure we have visited all the queues at least `$this->numMinQueueIterations` times.
+                            // Stop processing this queue and move on.
+                            // Unlocking is not necessary here as it is done just after the for loop.
+                            break;
+                        } else {
+                            // Visited this near-empty queue enough times to have processed each queue at least
+                            // `$this->numMinQueueIterations` times; we can now exit whilst ensuring we are also
+                            // giving the other queues a chance to empty.
+                            $this->queueManager->unlock();
+                            break 2;
+                        }
+                    }
 
-                if (!empty($queuedRequestSets)) {
-                    $requestSetsToRetry = $this->processRequestSets($tracker, $queuedRequestSets);
-                    $this->processRequestSets($tracker, $requestSetsToRetry);
-                    $queue->markRequestSetsAsProcessed();
-                    // TODO if markR..() fails, we would process them again later
+                    if (!empty($queuedRequestSets)) {
+                        $requestSetsToRetry = $this->processRequestSets($tracker, $queuedRequestSets);
+                        if (!empty($requestSetsToRetry)) {
+                            Common::printDebug('Need to retry ' . count($queuedRequestSets) . ' request sets.');
+                        }
+                        $this->processRequestSets($tracker, $requestSetsToRetry);
+                        $queue->markRequestSetsAsProcessed();
+                        // TODO if markR..() fails, we would process them again later
+                    }
                 }
 
                 $this->queueManager->unlock();

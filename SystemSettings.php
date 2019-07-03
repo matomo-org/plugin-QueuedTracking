@@ -24,6 +24,9 @@ use Exception;
 class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
 {
     /** @var Setting */
+    public $backend;
+
+    /** @var Setting */
     public $redisHost;
 
     /** @var Setting */
@@ -58,6 +61,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
 
     protected function init()
     {
+        $this->backend = $this->createBackendSetting();
         $this->useSentinelBackend = $this->createUseSentinelBackend();
         $this->sentinelMasterName = $this->createSetSentinelMasterName();
         $this->redisHost = $this->createRedisHostSetting();
@@ -92,6 +96,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
 
         return $this->makeSetting('redisHost', $default = '127.0.0.1', FieldConfig::TYPE_STRING, function (FieldConfig $field) use ($self) {
             $field->title = 'Redis host or unix socket';
+            $field->condition = 'backend=="redis"';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 500);
             $field->inlineHelp = 'Remote host or unix socket of the Redis server. Max 500 characters are allowed.';
@@ -127,6 +132,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
 
         return $this->makeSetting('redisPort', $default, FieldConfig::TYPE_STRING, function (FieldConfig $field) use ($self) {
             $field->title = 'Redis port';
+            $field->condition = 'backend=="redis"';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 100);
             $field->inlineHelp = 'Port the Redis server is running on. Value should be between 1 and 65535. Use 0 if you are using unix socket to connect to Redis server.';
@@ -168,6 +174,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     {
         $setting = $this->makeSetting('redisTimeout', $default = 0.0, FieldConfig::TYPE_FLOAT, function (FieldConfig $field) {
             $field->title = 'Redis timeout';
+            $field->condition = 'backend=="redis"';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 5);
             $field->inlineHelp = 'Redis connection timeout in seconds. "0.0" meaning unlimited. Can be a float eg "2.5" for a connection timeout of 2.5 seconds.';
@@ -219,6 +226,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     {
         return $this->makeSetting('redisPassword', $default = '', FieldConfig::TYPE_STRING, function (FieldConfig $field) {
             $field->title = 'Redis password';
+            $field->condition = 'backend=="redis"';
             $field->uiControl = FieldConfig::UI_CONTROL_PASSWORD;
             $field->uiControlAttributes = array('size' => 100);
             $field->inlineHelp = 'Password set on the Redis server, if any. Redis can be instructed to require a password before allowing clients to execute commands.';
@@ -234,6 +242,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     {
         return $this->makeSetting('redisDatabase', $default = 0, FieldConfig::TYPE_INT, function (FieldConfig $field) {
             $field->title = 'Redis database';
+            $field->condition = 'backend=="redis"';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 5);
             $field->inlineHelp = 'In case you are using Redis for caching make sure to use a different database.';
@@ -260,12 +269,12 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
             $field->validate = function ($value) use ($self) {
                 $value = (bool) $value;
 
-                if ($value) {
+                if ($value && $self->isRedisBackend()) {
                     $self->checkMatchHostsAndPorts();
 
                     $systemCheck = new SystemCheck();
 
-                    if (!$self->isUsingSentinelBackend()) {
+                    if ($self->isRedisBackend() && !$self->isUsingSentinelBackend()) {
                         $systemCheck->checkRedisIsInstalled();
                     }
                     $backend = Factory::makeBackendFromSettings($self);
@@ -335,12 +344,33 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         return $values;
     }
 
+    public function isRedisBackend()
+    {
+        return $this->backend->getValue() !== 'mysql';
+    }
+
+    public function isMysqlBackend()
+    {
+        return $this->backend->getValue() === 'mysql';
+    }
+
+    private function createBackendSetting()
+    {
+        return $this->makeSetting('backend', $default = 'redis', FieldConfig::TYPE_STRING, function (FieldConfig $field) {
+            $field->title = 'Backend';
+            $field->uiControl = FieldConfig::UI_CONTROL_SINGLE_SELECT;
+            $field->availableValues = array('redis' => 'Redis', 'mysql' => 'MySQL');
+            $field->inlineHelp = 'Select the backend you want to use for this feature. If you do not have any experience with Redis or it is not available on your server, we recommend to use Mysql.';
+        });
+    }
+
     private function createUseSentinelBackend()
     {
         return $this->makeSetting('useSentinelBackend', $default = false, FieldConfig::TYPE_BOOL, function (FieldConfig $field) {
-            $field->title = 'Enable Redis Sentinel\'';
+            $field->title = 'Enable Redis Sentinel';
             $field->uiControl = FieldConfig::UI_CONTROL_CHECKBOX;
             $field->uiControlAttributes = array('size' => 3);
+            $field->condition = 'backend=="redis"';
             $field->inlineHelp = 'If enabled, the Redis Sentinel feature will be used. Make sure to update host and port if needed. Once you have enabled and saved the change, you will be able to specify multiple hosts and ports comma separated.';
         });
     }
@@ -349,6 +379,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     {
         return $this->makeSetting('sentinelMasterName', $default = 'mymaster', FieldConfig::TYPE_STRING, function (FieldConfig $field) {
             $field->title = 'Redis Sentinel Master name';
+            $field->condition = 'backend=="redis"';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 200);
             $field->inlineHelp = 'The sentinel master name only needs to be configured if Sentinel is enabled.';

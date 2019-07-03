@@ -47,6 +47,7 @@ class ManagerTest extends IntegrationTestCase
         parent::setUp();
 
         Fixture::createSuperUser();
+        Fixture::createWebsite('2010-01-01 00:00:00');
 
         $manager = $this->createQueueManager();
         $this->manager = $manager['queue'];
@@ -65,7 +66,7 @@ class ManagerTest extends IntegrationTestCase
 
     public function tearDown()
     {
-        $this->clearRedisDb();
+        $this->clearBackend();
         parent::tearDown();
     }
 

@@ -13,6 +13,7 @@ use Piwik\Plugins\QueuedTracking\Queue\Processor\Handler;
 use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\ForcedException;
 use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\Tracker;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
+use Piwik\Tests\Framework\Fixture;
 use Piwik\Tests\Framework\Mock\Tracker\RequestSet;
 
 class TestHandler extends Handler {
@@ -45,6 +46,8 @@ class HandlerTest extends IntegrationTestCase
     {
         parent::setUp();
 
+        Fixture::createWebsite('2014-01-02 03:04:05');
+        
         $this->handler = $this->createHandler();
         $this->tracker = new Tracker();
 

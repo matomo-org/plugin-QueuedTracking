@@ -43,6 +43,11 @@ class Queue
         return $this->id;
     }
 
+    public function getKey()
+    {
+        return $this->key;
+    }
+
     public function setNumberOfRequestsToProcessAtSameTime($numRequests)
     {
         $this->numRequestsToProcessInBulk = $numRequests;
@@ -96,9 +101,7 @@ class Queue
 
     public function shouldProcess()
     {
-        $numRequests = $this->getNumberOfRequestSetsInQueue();
-
-        return $numRequests >= $this->numRequestsToProcessInBulk;
+        return $this->backend->hasAtLeastXRequestsQueued($this->key, $this->numRequestsToProcessInBulk);
     }
 
     public function markRequestSetsAsProcessed()

@@ -56,6 +56,13 @@ class Redis implements Backend
         return $version;
     }
 
+    public function getLastError()
+    {
+        $this->connectIfNeeded();
+
+        return $this->redis->getLastError();
+    }
+
     public function getMemoryStats()
     {
         $this->connectIfNeeded();
@@ -94,7 +101,7 @@ class Redis implements Backend
         $this->connectIfNeeded();
 
         foreach ($values as $value) {
-            $this->redis->rPush($key, $value);
+            $this->redis->rPush($key, gzcompress($value));
         }
 
         // usually we would simply do call_user_func_array(array($redis, 'rPush'), $values); as rpush supports multiple values
@@ -111,6 +118,16 @@ class Redis implements Backend
 
         $this->connectIfNeeded();
         $values = $this->redis->lRange($key, 0, $numValues - 1);
+        foreach($values as $key => $value) {
+            $tmpValue = @gzuncompress($value); // Avoid warning if not compressed
+            
+            // if empty, string is not compressed. Use original value
+            if(empty($tmpValue)) {
+                $values[$key] = $value;
+            } else {
+                $values[$key] = $tmpValue;
+            }
+        }
 
         return $values;
     }
@@ -123,6 +140,17 @@ class Redis implements Backend
 
         $this->connectIfNeeded();
         $this->redis->ltrim($key, $numValues, -1);
+    }
+
+    public function hasAtLeastXRequestsQueued($key, $numValuesRequired)
+    {
+        if ($numValuesRequired <= 0) {
+            return true;
+        }
+
+        $numActual = $this->getNumValuesInList($key);
+
+        return $numActual >= $numValuesRequired;
     }
 
     public function getNumValuesInList($key)

@@ -8,6 +8,8 @@
  */
 namespace Piwik\Plugins\QueuedTracking;
 
+use Piwik\Common;
+use Piwik\Plugins\QueuedTracking\Queue\Backend\MySQL;
 use Piwik\Plugins\QueuedTracking\Tracker\Handler;
 
 class QueuedTracking extends \Piwik\Plugin
@@ -22,6 +24,24 @@ class QueuedTracking extends \Piwik\Plugin
         );
     }
 
+    public function install()
+    {
+        $mysql = new MySQL();
+        $mysql->install();
+
+        $configuration = new Configuration();
+        $configuration->install();
+    }
+
+    public function uninstall()
+    {
+        $mysql = new MySQL();
+        $mysql->uninstall();
+
+        $configuration = new Configuration();
+        $configuration->uninstall();
+    }
+
     public function isTrackerPlugin()
     {
         return true;
@@ -29,6 +49,11 @@ class QueuedTracking extends \Piwik\Plugin
 
     public function replaceHandlerIfQueueIsEnabled(&$handler)
     {
+        $useQueuedTracking = Common::getRequestVar('queuedtracking', 1, 'int');
+        if (!$useQueuedTracking) {
+            return;
+        }
+
         $settings = Queue\Factory::getSettings();
 
         if ($settings->queueEnabled->getValue()) {

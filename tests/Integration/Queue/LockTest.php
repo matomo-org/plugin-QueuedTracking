@@ -24,6 +24,8 @@ use Piwik\Plugins\QueuedTracking\Queue\Processor;
 class LockTest extends IntegrationTestCase
 {
 
+    protected $testRequiresRedis = false;
+
     /**
      * @var Lock
      */
@@ -33,13 +35,13 @@ class LockTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $redis = $this->createRedisBackend();
+        $redis = $this->createMySQLBackend();
         $this->lock = $this->createLock($redis);
     }
 
     public function tearDown()
     {
-        $this->clearRedisDb();
+        $this->clearBackend();
         parent::tearDown();
     }
 

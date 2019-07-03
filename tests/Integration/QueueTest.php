@@ -48,7 +48,7 @@ class QueueTest extends IntegrationTestCase
 
     public function tearDown()
     {
-        $this->clearRedisDb();
+        $this->clearBackend();
         parent::tearDown();
     }
 

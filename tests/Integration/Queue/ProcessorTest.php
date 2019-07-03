@@ -9,6 +9,7 @@
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue;
 
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
+use Piwik\Tests\Framework\Fixture;
 use Piwik\Tracker\TrackerConfig;
 use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
@@ -32,6 +33,7 @@ class TestProcessor extends Processor {
  */
 class ProcessorTest extends IntegrationTestCase
 {
+    protected $testRequiresRedis = false;
 
     /**
      * @var TestProcessor
@@ -44,9 +46,9 @@ class ProcessorTest extends IntegrationTestCase
     private $queue;
 
     /**
-     * @var Redis
+     * @var Queue\Backend
      */
-    private $redis;
+    private $backend;
 
     /**
      * @var Queue\Lock
@@ -57,11 +59,13 @@ class ProcessorTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $this->redis = $this->createRedisBackend();
+        Fixture::createWebsite('2014-01-02 03:04:05');
+        
+        $this->backend = $this->createMySQLBackend();
 
-        $this->lock = new Queue\Lock($this->redis);
+        $this->lock = new Queue\Lock($this->backend);
 
-        $this->queue = new Queue\Manager($this->redis, $this->lock);
+        $this->queue = new Queue\Manager($this->backend, $this->lock);
         $this->queue->setNumberOfAvailableQueues(1);
         $this->queue->setNumberOfRequestsToProcessAtSameTime(3);
 
@@ -70,7 +74,7 @@ class ProcessorTest extends IntegrationTestCase
 
     public function tearDown()
     {
-        $this->clearRedisDb();
+        $this->clearBackend();
         parent::tearDown();
     }
 
