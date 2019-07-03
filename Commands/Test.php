@@ -197,6 +197,11 @@ class Test extends ConsoleCommand
         $output->writeln('<comment>Done</comment>');
     }
 
+    /**
+     * @param \Redis $redis
+     * @param $configName
+     * @return string
+     */
     private function getRedisConfig($redis, $configName)
     {
         $config = $redis->config('GET', $configName);
@@ -205,6 +210,13 @@ class Test extends ConsoleCommand
         return $value;
     }
 
+    /**
+     * @param \Redis $redis
+     * @param $method
+     * @param $params
+     * @param $keyToCleanUp
+     * @param OutputInterface $output
+     */
     private function testRedis($redis, $method, $params, $keyToCleanUp, OutputInterface $output)
     {
         if ($keyToCleanUp) {
