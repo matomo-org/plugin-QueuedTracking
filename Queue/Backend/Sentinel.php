@@ -14,9 +14,9 @@ use Piwik\Plugins\QueuedTracking\Queue\Backend;
 use Piwik\Tracker;
 use Exception;
 
-include_once PIWIK_INCLUDE_PATH . '/plugins/QueuedTracking/libs/credis/Client.php';
-include_once PIWIK_INCLUDE_PATH . '/plugins/QueuedTracking/libs/credis/Cluster.php';
-include_once PIWIK_INCLUDE_PATH . '/plugins/QueuedTracking/libs/credis/Sentinel.php';
+include_once __DIR__ . '/../../libs/credis/Client.php';
+include_once __DIR__ . '/../../libs/credis/Cluster.php';
+include_once __DIR__ . '/../../libs/credis/Sentinel.php';
 
 class Sentinel extends Redis
 {
