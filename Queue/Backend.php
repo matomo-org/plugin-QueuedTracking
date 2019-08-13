@@ -9,12 +9,12 @@
 
 namespace Piwik\Plugins\QueuedTracking\Queue;
 
-use Piwik\Plugins\QueuedTracking\Queue;
+use Piwik\Concurrency\LockBackend;
 
 /**
  * Interface for queue backends.
  */
-interface Backend
+interface Backend extends LockBackend
 {
 
     public function appendValuesToList($key, $values);
