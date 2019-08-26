@@ -144,7 +144,12 @@ class Processor
                         if (!empty($requestSetsToRetry)) {
                             Common::printDebug('Need to retry ' . count($queuedRequestSets) . ' request sets.');
                         }
-                        $this->processRequestSets($tracker, $requestSetsToRetry);
+
+                        $failedRequestSets = $this->processRequestSets($tracker, $requestSetsToRetry);
+                        if (!empty($failedRequestSets)) {
+                            Common::printDebug('Failed processing ' . count($failedRequestSets) . ' request sets.');
+                        }
+
                         $queue->markRequestSetsAsProcessed();
                         // TODO if markR..() fails, we would process them again later
                     }
