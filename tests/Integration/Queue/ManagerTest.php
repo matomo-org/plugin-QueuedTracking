@@ -262,16 +262,16 @@ class ManagerTest extends IntegrationTestCase
     public function test_addRequestSetToQueues_getNumberOfRequestSetsInAllQueues_shouldMoveThemIntoDifferentQueues()
     {
         for ($i = 0; $i < 26; $i++) {
-            $requestSet = $this->buildRequestSetWithIdSite(1, array('uid' => $i));
+            $requestSet = $this->buildRequestSetWithIdSite(1, array('uid' => $i, '_id' => substr(sha1($i), 0, 16)));
 
             $this->manager->addRequestSetToQueues($requestSet);
         }
 
         $this->assertSame(26, $this->manager->getNumberOfRequestSetsInAllQueues());
         $this->assertNumberOfRequestSetsInQueueEquals(5,  $queueId = 0);
-        $this->assertNumberOfRequestSetsInQueueEquals(10, $queueId = 1);
+        $this->assertNumberOfRequestSetsInQueueEquals(9, $queueId = 1);
         $this->assertNumberOfRequestSetsInQueueEquals(1,  $queueId = 2);
-        $this->assertNumberOfRequestSetsInQueueEquals(10, $queueId = 3);
+        $this->assertNumberOfRequestSetsInQueueEquals(11, $queueId = 3);
         $this->assertNumberOfRequestSetsInQueueEquals(0,  $queueId = 4); // this queue is not available
     }
 
@@ -280,7 +280,7 @@ class ManagerTest extends IntegrationTestCase
         $expectedRequestSets = array();
 
         for ($i = 0; $i < 26; $i++) {
-            $requestSet = $this->buildRequestSetWithIdSite(1, array('uid' => 4));
+            $requestSet = $this->buildRequestSetWithIdSite(1, array('uid' => 4, '_id' => substr(sha1(4), 0, 16)));
 
             $this->manager->addRequestSetToQueues($requestSet);
             $expectedRequestSets[] = $requestSet;
@@ -298,7 +298,7 @@ class ManagerTest extends IntegrationTestCase
 
     public function test_addRequestSetToQueues_shouldMoveAllInSameQueue_IfAllHaveSameUidAndTheyAreInOneRequestSet()
     {
-        $requestSet = $this->buildRequestSetWithIdSite(15, array('uid' => 4));
+        $requestSet = $this->buildRequestSetWithIdSite(15, array('uid' => 4, '_id' => substr(sha1(4), 0, 16)));
 
         $this->manager->addRequestSetToQueues($requestSet);
 
@@ -317,12 +317,12 @@ class ManagerTest extends IntegrationTestCase
         $req = new RequestSet();
 
         $requests = array();
-        $requests[0] = array('idsite' => 1, 'uid' => 1);
-        $requests[1] = array('idsite' => 1, 'uid' => 2);
-        $requests[2] = array('idsite' => 1, 'uid' => 3);
-        $requests[3] = array('idsite' => 1, 'uid' => 5);
-        $requests[4] = array('idsite' => 3, 'uid' => 1);
-        $requests[5] = array('idsite' => 1, 'uid' => 3);
+        $requests[0] = array('idsite' => 1, 'uid' => 1, '_id' => substr(sha1(1), 0, 16));
+        $requests[1] = array('idsite' => 1, 'uid' => 2, '_id' => substr(sha1(2), 0, 16));
+        $requests[2] = array('idsite' => 1, 'uid' => 3, '_id' => substr(sha1(3), 0, 16));
+        $requests[3] = array('idsite' => 1, 'uid' => 5, '_id' => substr(sha1(5), 0, 16));
+        $requests[4] = array('idsite' => 3, 'uid' => 1, '_id' => substr(sha1(1), 0, 16));
+        $requests[5] = array('idsite' => 1, 'uid' => 3, '_id' => substr(sha1(3), 0, 16));
 
         $req->setRequests($requests);
         $req->rememberEnvironment();
@@ -338,13 +338,13 @@ class ManagerTest extends IntegrationTestCase
         $this->assertNumberOfRequestSetsInQueueEquals(0, $queueId = 4);
 
         $req->setRequests(array($requests[1]));
-        $this->assertRequestSetsInQueueEquals($req, 1);
+        $this->assertRequestSetsInQueueEquals([$req], 1);
 
         $req->setRequests(array($requests[3]));
-        $this->assertRequestSetsInQueueEquals($req, 2);
+        $this->assertRequestSetsInQueueEquals([$req], 2);
 
         $req->setRequests(array($requests[0], $requests[2], $requests[4], $requests[5]));
-        $this->assertRequestSetsInQueueEquals($req, 3);
+        $this->assertRequestSetsInQueueEquals([$req], 3);
     }
 
     public function test_moveSomeQueuesIfNeeded_ShouldReturnFalseIfNoQueuesNeedToBeMoved()
