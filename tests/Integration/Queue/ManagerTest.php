@@ -262,7 +262,7 @@ class ManagerTest extends IntegrationTestCase
     public function test_addRequestSetToQueues_getNumberOfRequestSetsInAllQueues_shouldMoveThemIntoDifferentQueues()
     {
         for ($i = 0; $i < 26; $i++) {
-            $requestSet = $this->buildRequestSetWithIdSite(1, array('uid' => $i));
+            $requestSet = $this->buildRequestSetWithIdSite(1, array('uid' => $i, '_id' => substr(sha1($i), 0, 16)));
 
             $this->manager->addRequestSetToQueues($requestSet);
         }
@@ -280,7 +280,7 @@ class ManagerTest extends IntegrationTestCase
         $expectedRequestSets = array();
 
         for ($i = 0; $i < 26; $i++) {
-            $requestSet = $this->buildRequestSetWithIdSite(1, array('uid' => 4));
+            $requestSet = $this->buildRequestSetWithIdSite(1, array('uid' => 4, '_id' => substr(sha1(4), 0, 16)));
 
             $this->manager->addRequestSetToQueues($requestSet);
             $expectedRequestSets[] = $requestSet;
@@ -298,7 +298,7 @@ class ManagerTest extends IntegrationTestCase
 
     public function test_addRequestSetToQueues_shouldMoveAllInSameQueue_IfAllHaveSameUidAndTheyAreInOneRequestSet()
     {
-        $requestSet = $this->buildRequestSetWithIdSite(15, array('uid' => 4));
+        $requestSet = $this->buildRequestSetWithIdSite(15, array('uid' => 4, '_id' => substr(sha1(4), 0, 16)));
 
         $this->manager->addRequestSetToQueues($requestSet);
 
