@@ -271,7 +271,7 @@ class ManagerTest extends IntegrationTestCase
         $this->assertNumberOfRequestSetsInQueueEquals(5,  $queueId = 0);
         $this->assertNumberOfRequestSetsInQueueEquals(9, $queueId = 1);
         $this->assertNumberOfRequestSetsInQueueEquals(1,  $queueId = 2);
-        $this->assertNumberOfRequestSetsInQueueEquals(10, $queueId = 3);
+        $this->assertNumberOfRequestSetsInQueueEquals(11, $queueId = 3);
         $this->assertNumberOfRequestSetsInQueueEquals(0,  $queueId = 4); // this queue is not available
     }
 
@@ -338,13 +338,13 @@ class ManagerTest extends IntegrationTestCase
         $this->assertNumberOfRequestSetsInQueueEquals(0, $queueId = 4);
 
         $req->setRequests(array($requests[1]));
-        $this->assertRequestSetsInQueueEquals($req, 1);
+        $this->assertRequestSetsInQueueEquals([$req], 1);
 
         $req->setRequests(array($requests[3]));
-        $this->assertRequestSetsInQueueEquals($req, 2);
+        $this->assertRequestSetsInQueueEquals([$req], 2);
 
         $req->setRequests(array($requests[0], $requests[2], $requests[4], $requests[5]));
-        $this->assertRequestSetsInQueueEquals($req, 3);
+        $this->assertRequestSetsInQueueEquals([$req], 3);
     }
 
     public function test_moveSomeQueuesIfNeeded_ShouldReturnFalseIfNoQueuesNeedToBeMoved()
