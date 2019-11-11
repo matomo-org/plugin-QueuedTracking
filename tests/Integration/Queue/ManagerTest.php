@@ -269,7 +269,7 @@ class ManagerTest extends IntegrationTestCase
 
         $this->assertSame(26, $this->manager->getNumberOfRequestSetsInAllQueues());
         $this->assertNumberOfRequestSetsInQueueEquals(5,  $queueId = 0);
-        $this->assertNumberOfRequestSetsInQueueEquals(10, $queueId = 1);
+        $this->assertNumberOfRequestSetsInQueueEquals(9, $queueId = 1);
         $this->assertNumberOfRequestSetsInQueueEquals(1,  $queueId = 2);
         $this->assertNumberOfRequestSetsInQueueEquals(10, $queueId = 3);
         $this->assertNumberOfRequestSetsInQueueEquals(0,  $queueId = 4); // this queue is not available
@@ -317,12 +317,12 @@ class ManagerTest extends IntegrationTestCase
         $req = new RequestSet();
 
         $requests = array();
-        $requests[0] = array('idsite' => 1, 'uid' => 1);
-        $requests[1] = array('idsite' => 1, 'uid' => 2);
-        $requests[2] = array('idsite' => 1, 'uid' => 3);
-        $requests[3] = array('idsite' => 1, 'uid' => 5);
-        $requests[4] = array('idsite' => 3, 'uid' => 1);
-        $requests[5] = array('idsite' => 1, 'uid' => 3);
+        $requests[0] = array('idsite' => 1, 'uid' => 1, '_id' => substr(sha1(1), 0, 16));
+        $requests[1] = array('idsite' => 1, 'uid' => 2, '_id' => substr(sha1(2), 0, 16));
+        $requests[2] = array('idsite' => 1, 'uid' => 3, '_id' => substr(sha1(3), 0, 16));
+        $requests[3] = array('idsite' => 1, 'uid' => 5, '_id' => substr(sha1(5), 0, 16));
+        $requests[4] = array('idsite' => 3, 'uid' => 1, '_id' => substr(sha1(1), 0, 16));
+        $requests[5] = array('idsite' => 1, 'uid' => 3, '_id' => substr(sha1(3), 0, 16));
 
         $req->setRequests($requests);
         $req->rememberEnvironment();
