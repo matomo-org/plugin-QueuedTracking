@@ -29,6 +29,7 @@ describe("QueuedTrackingSettings", function () {
 
     it("should display the settings page", async function () {
         await page.goto(url);
+        await page.mouse.move(-10, -10);
         expect(await page.screenshotSelector(selector)).to.matchImage('settings_page');
     });
 
@@ -42,6 +43,7 @@ describe("QueuedTrackingSettings", function () {
             $('.card-content').hide();
             $('.card-content:contains(\'QueuedTracking\')').show();
         });
+        await page.mouse.move(-10, -10);
         expect(await page.screenshotSelector(selector + ',#notificationContainer')).to.matchImage('settings_save_error');
     });
 
@@ -53,6 +55,7 @@ describe("QueuedTrackingSettings", function () {
         testEnvironment.save();
 
         await page.goto(url);
+        await page.mouse.move(-10, -10);
         expect(await page.screenshotSelector(selector)).to.matchImage('settings_page_sentinel');
     });
 
