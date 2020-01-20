@@ -28,11 +28,11 @@ git:
 env:
   global:
     - PLUGIN_NAME=QueuedTracking
-    - PIWIK_ROOT_DIR=$TRAVIS_BUILD_DIR/piwik
-    # this variable controls the version of Piwik your tests will run against.
+    - PIWIK_ROOT_DIR=$TRAVIS_BUILD_DIR/matomo
+    # this variable controls the version of Matomo your tests will run against.
     # by default it will run against the maximum support version read from plugin.json
     # (PIWIK_TEST_TARGET=maximum_supported_piwik).
-    # You can also specify a specific Piwik version
+    # You can also specify a specific Matomo version
     # (PIWIK_TEST_TARGET=2.16.0-b1).
     - PIWIK_TEST_TARGET=maximum_supported_piwik
   matrix:
@@ -75,14 +75,14 @@ install:
   - cp -R !($PLUGIN_NAME) $PLUGIN_NAME
   - cp -R .git/ $PLUGIN_NAME/
   - cp .travis.yml $PLUGIN_NAME
-  # checkout piwik in the current directory
-  - git clone -q https://github.com/piwik/piwik.git piwik
-  - cd piwik
+  # checkout matomo in the current directory
+  - git clone -q https://github.com/matomo-org/matomo.git matomo
+  - cd matomo
   - git fetch -q --all
   - git submodule update
 
   # make sure travis-scripts repo is latest for initial travis setup
-  - '[ -d ./tests/travis/.git ] || sh -c "rm -rf ./tests/travis && git clone https://github.com/piwik/travis-scripts.git ./tests/travis"'
+  - '[ -d ./tests/travis/.git ] || sh -c "rm -rf ./tests/travis && git clone https://github.com/matomo-org/travis-scripts.git ./tests/travis"'
   - cd ./tests/travis ; git checkout master ; cd ../..
 
   - export GENERATE_TRAVIS_YML_COMMAND="php ./tests/travis/generator/main.php generate:travis-yml --plugin=\"QueuedTracking\" --php-versions=\"5.5,5.6,7,7.1,7.2,7.3\" --dist-trusty --sudo-false --verbose"
