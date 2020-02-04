@@ -59,7 +59,6 @@ class Handler extends Tracker\Handler
     {
         $response = $this->getResponse();
         $response->outputResponse($tracker);
-        $this->redirectIfNeeded($requestSet);
         $response->sendResponseToBrowserDirectly();
     }
 
@@ -111,7 +110,6 @@ class Handler extends Tracker\Handler
 
     public function finish(Tracker $tracker, RequestSet $requestSet)
     {
-        $this->redirectIfNeeded($requestSet);
         return $this->getResponse()->getOutput();
     }
 }
