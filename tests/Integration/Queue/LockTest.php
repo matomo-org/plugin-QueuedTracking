@@ -31,7 +31,7 @@ class LockTest extends IntegrationTestCase
      */
     public $lock;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -39,7 +39,7 @@ class LockTest extends IntegrationTestCase
         $this->lock = $this->createLock($redis);
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->clearBackend();
         parent::tearDown();

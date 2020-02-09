@@ -20,7 +20,7 @@ use Piwik\Plugins\QueuedTracking\Queue\Factory;
  */
 class SentinelTest extends RedisTest
 {
-    public function setUp()
+    public function setUp(): void
     {
         if (self::isTravisCI()) {
             $this->markTestSkipped('Sentinel is not installed on travis');
@@ -28,7 +28,7 @@ class SentinelTest extends RedisTest
         parent::setUp();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         Config::getInstance()->QueuedTracking = array();
         parent::tearDown();
@@ -64,12 +64,11 @@ class SentinelTest extends RedisTest
         $this->assertTrue($sentinel->testConnection());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage QueuedTracking_NumHostsNotMatchNumPorts
-     */
     public function test_connect_ShouldThrowException_IfNotExactSameHostAndPortNumbersGiven()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('QueuedTracking_NumHostsNotMatchNumPorts');
+
         $this->enableRedisSentinel();
 
         $settings = Factory::getSettings();

@@ -56,7 +56,7 @@ class HandlerTest extends UnitTestCase
 
     private $transactionId = 'my4929transactionid';
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->handler = new TestHandler();

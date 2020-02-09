@@ -33,7 +33,7 @@ class TrackerTest extends SystemTestCase
 
     private $requestProcessLimit = 5;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -58,7 +58,7 @@ class TrackerTest extends SystemTestCase
         $this->enableQueue();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->createRedisBackend()->flushAll();
 

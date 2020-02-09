@@ -42,7 +42,7 @@ class HandlerTest extends IntegrationTestCase
      */
     private $tracker;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -54,7 +54,7 @@ class HandlerTest extends IntegrationTestCase
         $this->handler->init($this->tracker);
     }
     
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->handler->rollBack($this->tracker);
 

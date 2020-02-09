@@ -25,7 +25,7 @@ class QueuedTrackingTest extends IntegrationTestCase
      */
     private $plugin;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->plugin = new QueuedTracking();

@@ -42,7 +42,7 @@ class ManagerTest extends IntegrationTestCase
      */
     private $lock;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -64,7 +64,7 @@ class ManagerTest extends IntegrationTestCase
         return array('queue' => $queue, 'lock' => $lock);
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->clearBackend();
         parent::tearDown();

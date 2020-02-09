@@ -26,7 +26,7 @@ class SystemCheckTest extends IntegrationTestCase
      */
     private $systemCheck;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -40,22 +40,20 @@ class SystemCheckTest extends IntegrationTestCase
         $this->assertTrue(true);
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Connection to Redis failed. Please verify Redis host and port
-     */
     public function test_checkConnectionDetails_shouldFailIfServerIsWrong()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Connection to Redis failed. Please verify Redis host and port');
+
         $backend = $this->makeBackend('192.168.123.234', 6379, 0.2, null);
         $this->systemCheck->checkConnectionDetails($backend);
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Connection to Redis failed. Please verify Redis host and port
-     */
     public function test_checkConnectionDetails_shouldFailIfPortIsWrong()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Connection to Redis failed. Please verify Redis host and port');
+
         $backend = $this->makeBackend('127.0.0.1', 6370, 0.2, null);
         $this->systemCheck->checkConnectionDetails($backend);
     }

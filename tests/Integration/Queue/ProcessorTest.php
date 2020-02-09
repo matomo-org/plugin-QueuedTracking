@@ -55,7 +55,7 @@ class ProcessorTest extends IntegrationTestCase
      */
     private $lock;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -72,7 +72,7 @@ class ProcessorTest extends IntegrationTestCase
         $this->processor = $this->createProcessor();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->clearBackend();
         parent::tearDown();
@@ -155,12 +155,11 @@ class ProcessorTest extends IntegrationTestCase
         $this->assertNumberOfRequestSetsLeftInQueue(2);
     }
 
-    /**
-     * @expectedException \Piwik\Plugins\QueuedTracking\Queue\LockExpiredException
-     * @expectedExceptionMessage Rolled back
-     */
     public function test_processRequestSets_ShouldThrowAnExceptionAndRollback_InCaseWeDoNoLongerHaveTheLock()
     {
+        $this->expectException(\Piwik\Plugins\QueuedTracking\Queue\LockExpiredException::class);
+        $this->expectExceptionMessage('Rolled back');
+
         $queuedRequestSets = array(
             $this->buildRequestSet(5)
         );
