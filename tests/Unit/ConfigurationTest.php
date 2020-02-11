@@ -15,7 +15,7 @@ use Piwik\Plugins\QueuedTracking\Configuration;
  * @group QueuedTracking
  * @group Plugins
  */
-class ConfigurationTest extends \PHPUnit_Framework_TestCase
+class ConfigurationTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var Configuration
