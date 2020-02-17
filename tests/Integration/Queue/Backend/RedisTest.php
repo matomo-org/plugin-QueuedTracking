@@ -10,7 +10,6 @@ namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue\Backend;
 
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
-use Piwik\Translate;
 
 /**
  * @group QueuedTracking

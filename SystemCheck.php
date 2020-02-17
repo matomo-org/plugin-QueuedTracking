@@ -9,8 +9,6 @@
 namespace Piwik\Plugins\QueuedTracking;
 
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
-use Piwik\Tracker;
-use Piwik\Translate;
 
 class SystemCheck
 {

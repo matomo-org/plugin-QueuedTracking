@@ -8,9 +8,7 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration;
 
-use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue;
-use Piwik\Translate;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 use Piwik\Tracker\RequestSet;
 use Piwik\Tracker\Request;
