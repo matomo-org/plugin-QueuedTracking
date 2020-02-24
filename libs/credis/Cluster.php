@@ -10,6 +10,8 @@
 
 /**
  * A generalized Credis_Client interface for a cluster of Redis servers
+ *
+ * @deprecated
  */
 class Credis_Cluster
 {
@@ -29,25 +31,31 @@ class Credis_Cluster
    * @var array
    */
   protected $aliases;
-  
+
   /**
    * Hash ring of Redis server nodes
    * @var array
    */
   protected $ring;
-  
+
   /**
    * Individual nodes of pointers to Redis servers on the hash ring
    * @var array
    */
   protected $nodes;
-  
+
   /**
    * The commands that are not subject to hashing
    * @var array
    * @access protected
    */
   protected $dont_hash;
+
+  /**
+   * Currently working cluster-wide database number.
+   * @var int
+   */
+  protected $selectedDb = 0;
 
   /**
    * Creates an interface to a cluster of Redis servers
@@ -67,6 +75,7 @@ class Credis_Cluster
    * @param array $servers The Redis servers in the cluster.
    * @param int $replicas
    * @param bool $standAlone
+   * @throws CredisException
    */
   public function __construct($servers, $replicas = 128, $standAlone = false)
   {
@@ -191,7 +200,7 @@ class Credis_Cluster
     $name = array_shift($args);
     $results = array();
     foreach($this->clients as $client) {
-      $results[] = call_user_func_array(array($client, $name), $args);
+      $results[] = call_user_func_array([$client, $name], $args);
     }
     return $results;
   }
@@ -205,6 +214,15 @@ class Credis_Cluster
   public function byHash($key)
   {
     return $this->clients[$this->hash($key)];
+  }
+
+  /**
+   * @param int $index
+   * @return void
+   */
+  public function select($index)
+  {
+      $this->selectedDb = (int) $index;
   }
 
   /**
@@ -222,9 +240,17 @@ class Credis_Cluster
       $client = $this->clients[0];
     }
     else {
-      $client = $this->byHash($args[0]);
+      $hashKey = $args[0];
+      if (is_array($hashKey)) {
+        $hashKey = join('|', $hashKey);
+      }
+      $client = $this->byHash($hashKey);
     }
-    return call_user_func_array(array($client, $name), $args);
+    // Ensure that current client is working on the same database as expected.
+    if ($client->getSelectedDb() != $this->selectedDb) {
+      $client->select($this->selectedDb);
+    }
+    return call_user_func_array([$client, $name], $args);
   }
 
   /**
@@ -256,62 +282,62 @@ class Credis_Cluster
 
   public function isReadOnlyCommand($command)
   {
-      $readOnlyCommands = array(
-          'DBSIZE',
-          'INFO',
-          'MONITOR',
-          'EXISTS',
-          'TYPE',
-          'KEYS',
-          'SCAN',
-          'RANDOMKEY',
-          'TTL',
-          'GET',
-          'MGET',
-          'SUBSTR',
-          'STRLEN',
-          'GETRANGE',
-          'GETBIT',
-          'LLEN',
-          'LRANGE',
-          'LINDEX',
-          'SCARD',
-          'SISMEMBER',
-          'SINTER',
-          'SUNION',
-          'SDIFF',
-          'SMEMBERS',
-          'SSCAN',
-          'SRANDMEMBER',
-          'ZRANGE',
-          'ZREVRANGE',
-          'ZRANGEBYSCORE',
-          'ZREVRANGEBYSCORE',
-          'ZCARD',
-          'ZSCORE',
-          'ZCOUNT',
-          'ZRANK',
-          'ZREVRANK',
-          'ZSCAN',
-          'HGET',
-          'HMGET',
-          'HEXISTS',
-          'HLEN',
-          'HKEYS',
-          'HVALS',
-          'HGETALL',
-          'HSCAN',
-          'PING',
-          'AUTH',
-          'SELECT',
-          'ECHO',
-          'QUIT',
-          'OBJECT',
-          'BITCOUNT',
-          'TIME',
-          'SORT'
+      static $readOnlyCommands = array(
+          'DBSIZE' => true,
+          'INFO' => true,
+          'MONITOR' => true,
+          'EXISTS' => true,
+          'TYPE' => true,
+          'KEYS' => true,
+          'SCAN' => true,
+          'RANDOMKEY' => true,
+          'TTL' => true,
+          'GET' => true,
+          'MGET' => true,
+          'SUBSTR' => true,
+          'STRLEN' => true,
+          'GETRANGE' => true,
+          'GETBIT' => true,
+          'LLEN' => true,
+          'LRANGE' => true,
+          'LINDEX' => true,
+          'SCARD' => true,
+          'SISMEMBER' => true,
+          'SINTER' => true,
+          'SUNION' => true,
+          'SDIFF' => true,
+          'SMEMBERS' => true,
+          'SSCAN' => true,
+          'SRANDMEMBER' => true,
+          'ZRANGE' => true,
+          'ZREVRANGE' => true,
+          'ZRANGEBYSCORE' => true,
+          'ZREVRANGEBYSCORE' => true,
+          'ZCARD' => true,
+          'ZSCORE' => true,
+          'ZCOUNT' => true,
+          'ZRANK' => true,
+          'ZREVRANK' => true,
+          'ZSCAN' => true,
+          'HGET' => true,
+          'HMGET' => true,
+          'HEXISTS' => true,
+          'HLEN' => true,
+          'HKEYS' => true,
+          'HVALS' => true,
+          'HGETALL' => true,
+          'HSCAN' => true,
+          'PING' => true,
+          'AUTH' => true,
+          'SELECT' => true,
+          'ECHO' => true,
+          'QUIT' => true,
+          'OBJECT' => true,
+          'BITCOUNT' => true,
+          'TIME' => true,
+          'SORT' => true,
       );
-      return in_array(strtoupper($command),$readOnlyCommands);
+      return array_key_exists(strtoupper($command), $readOnlyCommands);
   }
 }
 
