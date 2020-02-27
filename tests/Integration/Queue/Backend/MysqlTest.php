@@ -30,7 +30,7 @@ class MysqlTest extends IntegrationTestCase
     private $listKey = 'testMyListTestKey';
     private $key = 'testKeyValueKey';
 
-    public function setUp()
+    public function setUp(): void
     {
         if (!$this->hasDependencies()) {
             parent::setUp();
@@ -50,7 +50,7 @@ class MysqlTest extends IntegrationTestCase
         }
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $GLOBALS['PIWIK_TRACKER_MODE'] = false;
         Db::destroyDatabaseObject();

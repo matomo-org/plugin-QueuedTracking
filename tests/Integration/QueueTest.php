@@ -27,7 +27,7 @@ class QueueTest extends IntegrationTestCase
      */
     private $queue;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -44,7 +44,7 @@ class QueueTest extends IntegrationTestCase
         return $queue;
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->clearBackend();
         parent::tearDown();

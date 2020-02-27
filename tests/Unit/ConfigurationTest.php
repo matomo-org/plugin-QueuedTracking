@@ -22,7 +22,7 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
      */
     private $configuration;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

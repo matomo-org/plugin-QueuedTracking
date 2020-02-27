@@ -28,7 +28,7 @@ class RedisTest extends IntegrationTestCase
     private $listKey = 'testMyListTestKey';
     private $key = 'testKeyValueKey';
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

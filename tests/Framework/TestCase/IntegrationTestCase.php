@@ -22,7 +22,7 @@ class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTes
 {
     protected $testRequiresRedis = true;
 
-    public function setUp()
+    public function setUp(): void
     {
         if ($this->testRequiresRedis && !self::isRedisAvailable()) {
             $this->markTestSkipped('Redis extension is not installed, skipping test');

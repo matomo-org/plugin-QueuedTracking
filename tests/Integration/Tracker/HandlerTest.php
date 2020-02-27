@@ -58,7 +58,7 @@ class HandlerTest extends IntegrationTestCase
      */
     private $backend;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -76,7 +76,7 @@ class HandlerTest extends IntegrationTestCase
         $this->requestSet = new RequestSet();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->clearBackend();
         parent::tearDown();
