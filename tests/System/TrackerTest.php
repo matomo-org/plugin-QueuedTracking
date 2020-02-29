@@ -41,10 +41,6 @@ class TrackerTest extends SystemTestCase
             $this->markTestSkipped('Redis extension is not installed, skipping test');
         }
 
-        if (self::isTravisCI() && self::isPhpVersion53()) {
-            $this->markTestSkipped('Redis seems to be not enabled in nginx on Travis + PHP 5.3.3');
-        }
-
         self::$fixture->performSetup();
 
         $idSite = 1;
