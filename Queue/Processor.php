@@ -101,7 +101,7 @@ class Processor
                 for ($i = 0; $i < 10; $i++) {
                     // lets run several processings without re-acquiring the lock each time to avoid possible performance
                     // and reduce concurrency issues re the lock. When we have the lock to work on a queue, there is
-                    // no need to unlock and get the lock each time... it otherwise becomes quite ineffecient
+                    // no need to unlock and get the lock each time... it otherwise becomes quite inefficient
                     if ($loops > $this->numMaxBatchesToProcess) {
                         Common::printDebug('This worker processed ' . $loops . ' times, stopping now.');
                         $this->queueManager->unlock();
