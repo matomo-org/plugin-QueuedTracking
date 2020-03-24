@@ -82,7 +82,7 @@ process remaining request once the queue is disabled but new tracking requests w
 __How can I access the queued data?__
 
 **Redis**
-You can either acccess data on the command line via `redis-cli` or use a Redis monitor like [phpRedisAdmin](https://github.com/ErikDubbelboer/phpRedisAdmin).
+You can either access data on the command line via `redis-cli` or use a Redis monitor like [phpRedisAdmin](https://github.com/ErikDubbelboer/phpRedisAdmin).
 In case you are using something like a Redis monitor make sure it is not accessible by everyone.
 
 **MySQL**
