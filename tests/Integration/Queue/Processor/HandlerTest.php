@@ -70,7 +70,7 @@ class HandlerTest extends IntegrationTestCase
     public function test_init_shouldStartATransaction()
     {
         $this->assertNotEmpty($this->handler->getTransactionId());
-        $this->assertInternalType('string', $this->handler->getTransactionId());
+        $this->assertIsString($this->handler->getTransactionId());
         $this->assertTrue(ctype_alnum($this->handler->getTransactionId()));
     }
 
