@@ -20,8 +20,19 @@ class QueuedTracking extends \Piwik\Plugin
     public function registerEvents()
     {
         return array(
-            'Tracker.newHandler' => 'replaceHandlerIfQueueIsEnabled'
+            'Tracker.newHandler'    => 'replaceHandlerIfQueueIsEnabled',
+            'Db.getTablesInstalled' => 'getTablesInstalled'
         );
+    }
+
+    /**
+     * Register the new tables, so Matomo knows about them.
+     *
+     * @param array $allTablesInstalled
+     */
+    public function getTablesInstalled(&$allTablesInstalled)
+    {
+        $allTablesInstalled[] = Common::prefixTable('queuedtracking_queue');
     }
 
     public function install()
