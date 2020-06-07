@@ -34,7 +34,7 @@ describe("QueuedTrackingSettings", function () {
     });
 
     it("should show an error if queue is enabled and redis connection is wrong", async function () {
-        await page.click('label[for="queueEnabled"]');
+        await page.click('#queueEnabled + span');
         await page.type('input[name="redisPort"]', '1');
         await (await page.jQuery('.card-content:contains(\'QueuedTracking\') .pluginsSettingsSubmit')).click();
         await page.waitForNetworkIdle();
