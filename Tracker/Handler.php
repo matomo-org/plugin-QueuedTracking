@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -32,6 +32,7 @@ class Handler extends Tracker\Handler
 
     public function __construct()
     {
+        parent::__construct();
         $this->setResponse(new Response());
     }
 
@@ -58,7 +59,6 @@ class Handler extends Tracker\Handler
     {
         $response = $this->getResponse();
         $response->outputResponse($tracker);
-        $this->redirectIfNeeded($requestSet);
         $response->sendResponseToBrowserDirectly();
     }
 
@@ -110,7 +110,6 @@ class Handler extends Tracker\Handler
 
     public function finish(Tracker $tracker, RequestSet $requestSet)
     {
-        $this->redirectIfNeeded($requestSet);
         return $this->getResponse()->getOutput();
     }
 }

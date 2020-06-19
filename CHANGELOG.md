@@ -1,5 +1,17 @@
 ## Changelog
 
+3.3.5
+- Improve update script to first add primary key and then remove index
+
+3.3.4
+- Use primary key instead of a unique index for mysql backend for better replication
+
+3.3.3
+- Add possibility to ignore queued tracking handler and track request directly into the database
+
+3.3.2
+- Send branded HTML email
+
 3.3.1
 - Support MySQLi adapter
 

@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -10,11 +10,8 @@
 namespace Piwik\Plugins\QueuedTracking\Commands;
 
 use Piwik\Application\Environment;
-use Piwik\Cache;
-use Piwik\Container\StaticContainer;
 use Piwik\Log;
 use Piwik\Piwik;
-use Piwik\Plugin;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Processor;
@@ -52,6 +49,10 @@ class Process extends ConsoleCommand
             $output->writeln("<info>Forcing queue ID: </info>" . $queueId);
         }
 
+        if (OutputInterface::VERBOSITY_VERY_VERBOSE <= $output->getVerbosity()) {
+            $GLOBALS['PIWIK_TRACKER_DEBUG'] = true;
+        }
+
         $trackerEnvironment = new Environment('tracker');
         $trackerEnvironment->init();
 
@@ -59,10 +60,6 @@ class Process extends ConsoleCommand
         $trackerEnvironment->getContainer()->get('Piwik\Access')->setSuperUserAccess(false);
         $trackerEnvironment->getContainer()->get('Piwik\Plugin\Manager')->setTrackerPluginsNotToLoad(array('Provider'));
         Tracker::loadTrackerEnvironment();
-
-        if (OutputInterface::VERBOSITY_VERY_VERBOSE <= $output->getVerbosity()) {
-            $GLOBALS['PIWIK_TRACKER_DEBUG'] = true;
-        }
 
         $backend      = Queue\Factory::makeBackend();
         $queueManager = Queue\Factory::makeQueueManager($backend);

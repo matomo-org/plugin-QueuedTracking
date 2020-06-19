@@ -1,16 +1,14 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration;
 
-use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue;
-use Piwik\Translate;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 use Piwik\Tracker\RequestSet;
 use Piwik\Tracker\Request;
@@ -29,7 +27,7 @@ class QueueTest extends IntegrationTestCase
      */
     private $queue;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -46,7 +44,7 @@ class QueueTest extends IntegrationTestCase
         return $queue;
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->clearBackend();
         parent::tearDown();

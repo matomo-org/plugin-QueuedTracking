@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -42,7 +42,7 @@ class ManagerTest extends IntegrationTestCase
      */
     private $lock;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -64,7 +64,7 @@ class ManagerTest extends IntegrationTestCase
         return array('queue' => $queue, 'lock' => $lock);
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->clearBackend();
         parent::tearDown();
@@ -256,7 +256,7 @@ class ManagerTest extends IntegrationTestCase
     public function test_addRequestSetToQueues_getNumberOfRequestSetsInAllQueues_shouldMoveThemIntoDifferentQueues()
     {
         for ($i = 0; $i < 26; $i++) {
-            $requestSet = $this->buildRequestSetWithIdSite(1, array('uid' => $i));
+            $requestSet = $this->buildRequestSetWithIdSite(1, array('uid' => $i, '_id' => substr(sha1($i), 0, 16)));
 
             $this->manager->addRequestSetToQueues($requestSet);
         }
@@ -275,7 +275,7 @@ class ManagerTest extends IntegrationTestCase
         $expectedRequestSets = array();
 
         for ($i = 0; $i < 26; $i++) {
-            $requestSet = $this->buildRequestSetWithIdSite(1, array('uid' => 4));
+            $requestSet = $this->buildRequestSetWithIdSite(1, array('uid' => 4, '_id' => substr(sha1(4), 0, 16)));
 
             $this->manager->addRequestSetToQueues($requestSet);
             $expectedRequestSets[] = $requestSet;
@@ -293,7 +293,7 @@ class ManagerTest extends IntegrationTestCase
 
     public function test_addRequestSetToQueues_shouldMoveAllInSameQueue_IfAllHaveSameUidAndTheyAreInOneRequestSet()
     {
-        $requestSet = $this->buildRequestSetWithIdSite(15, array('uid' => 4));
+        $requestSet = $this->buildRequestSetWithIdSite(15, array('uid' => 4, '_id' => substr(sha1(4), 0, 16)));
 
         $this->manager->addRequestSetToQueues($requestSet);
 
@@ -318,6 +318,7 @@ class ManagerTest extends IntegrationTestCase
         $requests[3] = array('idsite' => 1, 'uid' => 5);
         $requests[4] = array('idsite' => 3, 'uid' => 1);
         $requests[5] = array('idsite' => 1, 'uid' => 3);
+
         $req->setRequests($requests);
         $req->rememberEnvironment();
 

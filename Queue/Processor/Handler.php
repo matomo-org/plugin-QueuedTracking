@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -10,6 +10,7 @@
 namespace Piwik\Plugins\QueuedTracking\Queue\Processor;
 
 use Piwik\Common;
+use Piwik\Db;
 use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue;
@@ -66,6 +67,15 @@ class Handler
     {
         // todo: how do we want to handle DbException or RedisException?
         $this->hasError = true;
+
+        Common::printDebug('Got exception: ' . $e->getMessage());
+
+        // retry if a deadlock or a lock wait timeout happened
+        if (Db::get()->isErrNo($e, 1213) || Db::get()->isErrNo($e, 1205)) {
+            $this->requestSetsToRetry[] = $requestSet;
+            Common::printDebug('Added deadlocked requestSet to requestSetsToRetry');
+            return;
+        }
 
         if ($this->count > 0) {
             // remove the first one that failed and all following (standard bulk tracking behavior)

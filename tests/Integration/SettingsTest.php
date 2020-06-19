@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -24,89 +24,81 @@ class SettingsTest extends IntegrationTestCase
      */
     private $settings;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
         $this->settings = new SystemSettings();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         parent::tearDown();
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Max 500 characters
-     */
     public function test_redisHost_ShouldFail_IfMoreThan300CharctersGiven()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Max 500 characters');
+
         $this->settings->redisHost->setValue(str_pad('3', 503, '4'));
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Port has to be at least 1
-     */
     public function test_redisPort_ShouldFail_IfPortIsTooLow()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Port has to be at least 1');
+
         $this->settings->redisPort->setValue(0);
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Port should be max 65535
-     */
     public function test_redisPort_ShouldFail_IfPortIsTooHigh()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Port should be max 65535');
+
         $this->settings->redisPort->setValue(65536);
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Max 5 characters
-     */
     public function test_redisTimeout_ShouldFail_IfTooLong()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Max 5 characters');
+
         $this->settings->redisTimeout->setIsWritableByCurrentUser(true);
         $this->settings->redisTimeout->setValue('333.43');
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage should be numeric
-     */
     public function test_redisTimeout_ShouldFail_IfNotNumeric()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('should be numeric');
+
         $this->settings->redisTimeout->setIsWritableByCurrentUser(true);
         $this->settings->redisTimeout->setValue('33d3.43');
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Max 200 characters are allowed
-     */
     public function test_sentinelMasterName_ShouldFail_IfTooManyCharacters()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Max 200 characters are allowed');
+
         $this->settings->sentinelMasterName->setValue(str_pad('1', 201, '1'));
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Max 100 characters
-     */
     public function test_redisPassword_ShouldFail_IfMoreThan100CharctersGiven()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Max 100 characters');
+
         $this->settings->redisPassword->setValue(str_pad('4', 102, '4'));
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Connection to Redis failed
-     */
     public function test_queueEnabled_ShouldFail_IfEnabledButWrongConnectionDetail()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Connection to Redis failed');
+
         $this->settings->redisPort->setValue(6378);
         $this->settings->queueEnabled->setValue(true);
     }
@@ -119,66 +111,67 @@ class SettingsTest extends IntegrationTestCase
         $this->assertFalse($this->settings->queueEnabled->getValue());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Number should be 1 or higher
-     */
     public function test_numRequestsToProcess_ShouldFail_IfTooLow()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Number should be 1 or higher');
+
         $this->settings->numRequestsToProcess->setValue(0);
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Value should be a number
-     */
     public function test_numRequestsToProcess_ShouldFail_IfNotNumeric()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Value should be a number');
+
         $this->settings->numRequestsToProcess->setValue('33d3.43');
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage The database has to be an integer
-     */
     public function test_redisDatabase_ShouldFail_IfIsNumericButFloat()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The database has to be an integer');
+
         $this->settings->redisDatabase->setValue('5.34');
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage The database has to be an integer
-     */
     public function test_redisDatabase_ShouldFail_IfNotNumeric()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('The database has to be an integer');
+
         $this->settings->redisDatabase->setValue('33d3.43');
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Max 5 digits allowed
-     */
     public function test_redisDatabase_ShouldFail_IfTooLong()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Max 5 digits allowed');
+
         $this->settings->redisDatabase->setValue('333333');
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage should be an integer
-     */
     public function test_numQueueWorkers_ShouldFail_IfNotNumeric()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('should be an integer');
+
         $this->settings->numQueueWorkers->setValue('1f');
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage At least one worker needs to be configured
-     */
+    public function test_numQueueWorkers_ShouldFail_IfTooHigh()
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('At least one worker needs to be configured');
+
+        $this->settings->numQueueWorkers->setValue('17');
+    }
+
     public function test_numQueueWorkers_ShouldFail_IfTooLow()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Only 1-16 workers allowed');
+
         $this->settings->numQueueWorkers->setValue('0');
     }
 
@@ -235,12 +228,11 @@ class SettingsTest extends IntegrationTestCase
         $this->assertTrue($this->settings->useSentinelBackend->getValue());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage QueuedTracking_MultipleServersOnlyConfigurableIfSentinelEnabled
-     */
     public function test_redisPort_ShouldFailWhenMultipleValuesGiven_IfSentinelNotEnabled()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('QueuedTracking_MultipleServersOnlyConfigurableIfSentinelEnabled');
+
         $this->settings->redisPort->setValue('45,56,788');
     }
 
@@ -251,23 +243,21 @@ class SettingsTest extends IntegrationTestCase
         $this->assertSame('55,44', $this->settings->redisPort->getValue());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage A port has to be a number
-     */
     public function test_redisPort_ShouldValidateEachPortSeparately_WhenManySpecified()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('A port has to be a number');
+
         $this->enableRedisSentinel();
         $this->settings->redisPort->setValue('55 , 44.34, 4mk ');
         $this->assertSame('55,44', $this->settings->redisPort->getValue());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage QueuedTracking_MultipleServersOnlyConfigurableIfSentinelEnabled
-     */
     public function test_redisHost_ShouldFailWhenMultipleValuesGiven_IfSentinelNotEnabled()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('QueuedTracking_MultipleServersOnlyConfigurableIfSentinelEnabled');
+
         $this->settings->redisHost->setValue('10.0.0.1,127.0.0.1');
     }
 
@@ -379,11 +369,12 @@ class SettingsTest extends IntegrationTestCase
 
     /**
      * @dataProvider getCommaSeparatedWithMultipleValues
-     * @expectedException \Exception
-     * @expectedExceptionMessage QueuedTracking_MultipleServersOnlyConfigurableIfSentinelEnabled
      */
     public function test_checkMultipleServersOnlyConfiguredWhenSentinelIsEnabled_shouldFailWhenMoreThanOneValue_IfSentinelNotEnabled($stringValue)
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('QueuedTracking_MultipleServersOnlyConfigurableIfSentinelEnabled');
+
         $this->disableRedisSentinel();
 
         $this->settings->checkMultipleServersOnlyConfiguredWhenSentinelIsEnabled($stringValue);
@@ -408,12 +399,11 @@ class SettingsTest extends IntegrationTestCase
         );
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage QueuedTracking_NumHostsNotMatchNumPorts
-     */
     public function test_save_shouldFailIfPortAndHostMismatch()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('QueuedTracking_NumHostsNotMatchNumPorts');
+
         $this->enableRedisSentinel();
         $this->settings->redisPort->setValue('6379,6480,4393');
         $this->settings->redisHost->setValue('127.0.0.1,127.0.0.2');

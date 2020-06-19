@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -15,6 +15,7 @@ use Piwik\Plugins\QueuedTracking\Queue\Processor;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
 use Piwik\Tracker;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Monitor extends ConsoleCommand
@@ -24,6 +25,7 @@ class Monitor extends ConsoleCommand
     {
         $this->setName('queuedtracking:monitor');
         $this->setDescription('Shows and updates the current state of the queue every 2 seconds.');
+        $this->addOption('iterations', null, InputOption::VALUE_REQUIRED, 'If set, will limit the number of monitoring iterations done.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -33,6 +35,11 @@ class Monitor extends ConsoleCommand
         if ($settings->isRedisBackend()) {
             $systemCheck = new SystemCheck();
             $systemCheck->checkRedisIsInstalled();
+        }
+
+        $iterations = $this->getIterationsFromArg($input);
+        if ($iterations  !== null) {
+            $output->writeln("<info>Only running " . $iterations . " iterations.</info>");
         }
 
         if ($settings->queueEnabled->getValue()) {
@@ -55,6 +62,7 @@ class Monitor extends ConsoleCommand
         $output->writeln(sprintf('Up to %d workers will be used', $manager->getNumberOfAvailableQueues()));
         $output->writeln(sprintf('Processor will start once there are at least %s request sets in the queue',
                                  $manager->getNumberOfRequestsToProcessAtSameTime()));
+        $iterationCount = 0;
 
         while (1) {
             $memory = $backend->getMemoryStats(); // I know this will only work with redis currently as it is not defined in backend interface etc. needs to be refactored once we add another backend
@@ -72,9 +80,37 @@ class Monitor extends ConsoleCommand
                                $lock->getNumberOfAcquiredLocks());
             $output->write("\x0D");
             $output->write($message);
+            if (!is_null($iterations)) {
+                $iterationCount += 1;
+                if ($iterationCount >= $iterations) {
+                    break;
+                }
+            }
             sleep(2);
         }
 
+    }
+
+    /**
+     * Loads the `iteration` argument from the commands arguments. `null` indicates no limit supplied.
+     *
+     * @param InputInterface $input
+     * @return int|null
+     */
+    private function getIterationsFromArg(InputInterface $input)
+    {
+        $iterations = $input->getOption('iterations');
+        if (empty($iterations) && $iterations !== 0 && $iterations !== '0') {
+            $iterations = null;
+        } elseif (!is_numeric($iterations)) {
+            throw new \Exception('iterations needs to be numeric');
+        } else {
+            $iterations = (int)$iterations;
+            if ($iterations <= 0) {
+                throw new \Exception('iterations needs to be a non-zero positive number');
+            }
+        }
+        return $iterations;
     }
 
 }

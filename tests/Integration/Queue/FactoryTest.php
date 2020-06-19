@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -58,12 +58,11 @@ class FactoryTest extends IntegrationTestCase
         $this->assertFalse($backend instanceof Queue\Backend\Sentinel);
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage You must configure a sentinel master name
-     */
     public function test_makeBackend_shouldFailToCreateASentinelInstance_IfNotFullyConfigured()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('You must configure a sentinel master name');
+
         Config::getInstance()->QueuedTracking = array('useSentinelBackend' => '1', 'sentinelMasterName' => '');
         Factory::makeBackend();
     }

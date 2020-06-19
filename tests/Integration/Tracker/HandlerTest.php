@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -58,7 +58,7 @@ class HandlerTest extends IntegrationTestCase
      */
     private $backend;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -76,7 +76,7 @@ class HandlerTest extends IntegrationTestCase
         $this->requestSet = new RequestSet();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->clearBackend();
         parent::tearDown();
@@ -101,48 +101,6 @@ class HandlerTest extends IntegrationTestCase
         $this->assertFalse($this->response->isExceptionOutput);
         $this->assertFalse($this->response->isResponseOutput);
         $this->assertTrue($this->response->isSend);
-    }
-
-    public function test_process_ShouldRedirectIfThereIsAValidUrl()
-    {
-        $_GET['redirecturl'] = 'http://localhost/test?foo=bar';
-
-        $this->setDummyRequests();
-
-        try {
-            $this->handler->process($this->tracker, $this->requestSet);
-            $this->fail('An expected exception was not thrown');
-        } catch (Exception $e) {
-            $this->assertContains('would redirect you to this URL: ' . $_GET['redirecturl'], $e->getMessage());
-            unset($_GET['redirecturl']);
-        }
-    }
-
-    public function test_process_ShouldRedirectIfThereIsAValidBelongingToTheSite()
-    {
-        $_GET['redirecturl'] = 'http://piwik.net/';
-
-        $this->setDummyRequests();
-
-        try {
-            $this->handler->process($this->tracker, $this->requestSet);
-            $this->fail('An expected exception was not thrown');
-        } catch (Exception $e) {
-            $this->assertContains('would redirect you to this URL: http://piwik.net/', $e->getMessage());
-            unset($_GET['redirecturl']);
-        }
-    }
-
-    public function test_process_ShouldNotRedirectIfThereIsAUrlThatDoesNotBelongToAnySite()
-    {
-        $_GET['redirecturl'] = 'http://random.piwik.org/test?foo=bar';
-
-        $this->setDummyRequests();
-
-        $this->handler->process($this->tracker, $this->requestSet);
-        unset($_GET['redirecturl']);
-
-        $this->assertTrue(true);
     }
 
     public function test_onException_ShouldOutputAndSendResponse()

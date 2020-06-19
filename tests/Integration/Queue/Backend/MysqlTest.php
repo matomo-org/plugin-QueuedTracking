@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -30,7 +30,7 @@ class MysqlTest extends IntegrationTestCase
     private $listKey = 'testMyListTestKey';
     private $key = 'testKeyValueKey';
 
-    public function setUp()
+    public function setUp(): void
     {
         if (!$this->hasDependencies()) {
             parent::setUp();
@@ -50,7 +50,7 @@ class MysqlTest extends IntegrationTestCase
         }
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $GLOBALS['PIWIK_TRACKER_MODE'] = false;
         Db::destroyDatabaseObject();

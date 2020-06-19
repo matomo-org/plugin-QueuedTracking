@@ -9,12 +9,14 @@
 
 namespace Piwik\Plugins\QueuedTracking;
 
-use Piwik\Config;
 use Piwik\Updater;
 use Piwik\Updates as PiwikUpdates;
 use Piwik\Updater\Migration\Factory as MigrationFactory;
 
-class Updates_3_2_0 extends PiwikUpdates
+/**
+ * Update for version 3.3.4.
+ */
+class Updates_3_3_4 extends PiwikUpdates
 {
     /**
      * @var MigrationFactory
@@ -28,23 +30,17 @@ class Updates_3_2_0 extends PiwikUpdates
 
     public function getMigrations(Updater $updater)
     {
-        $migration1 = $this->migration->db->createTable('queuedtracking_queue', array(
-            'queue_key' => 'VARCHAR(70) NOT NULL',
-            'queue_value' => 'VARCHAR(255) NULL DEFAULT NULL',
-            'expiry_time' => 'BIGINT UNSIGNED DEFAULT 9999999999'
-        ));
-        $migration2 = $this->migration->db->addUniqueKey('queuedtracking_queue', array('queue_key'), 'unique_queue_key');
+        $migration1 = $this->migration->db->addPrimaryKey('queuedtracking_queue', array('queue_key'));
+        $migration2 = $this->migration->db->dropIndex('queuedtracking_queue', 'unique_queue_key');
 
         return array(
-            $migration1, $migration2
+            $migration1,
+            $migration2
         );
     }
 
     public function doUpdate(Updater $updater)
     {
         $updater->executeMigrations(__FILE__, $this->getMigrations($updater));
-
-        $config = new Configuration();
-        $config->install();
     }
 }

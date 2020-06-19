@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -101,7 +101,7 @@ class Processor
                 for ($i = 0; $i < 10; $i++) {
                     // lets run several processings without re-acquiring the lock each time to avoid possible performance
                     // and reduce concurrency issues re the lock. When we have the lock to work on a queue, there is
-                    // no need to unlock and get the lock each time... it otherwise becomes quite ineffecient
+                    // no need to unlock and get the lock each time... it otherwise becomes quite inefficient
                     if ($loops > $this->numMaxBatchesToProcess) {
                         Common::printDebug('This worker processed ' . $loops . ' times, stopping now.');
                         $this->queueManager->unlock();
@@ -144,7 +144,12 @@ class Processor
                         if (!empty($requestSetsToRetry)) {
                             Common::printDebug('Need to retry ' . count($queuedRequestSets) . ' request sets.');
                         }
-                        $this->processRequestSets($tracker, $requestSetsToRetry);
+
+                        $failedRequestSets = $this->processRequestSets($tracker, $requestSetsToRetry);
+                        if (!empty($failedRequestSets)) {
+                            Common::printDebug('Failed processing ' . count($failedRequestSets) . ' request sets.');
+                        }
+
                         $queue->markRequestSetsAsProcessed();
                         // TODO if markR..() fails, we would process them again later
                     }

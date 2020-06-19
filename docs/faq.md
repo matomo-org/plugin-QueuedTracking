@@ -82,7 +82,7 @@ process remaining request once the queue is disabled but new tracking requests w
 __How can I access the queued data?__
 
 **Redis**
-You can either acccess data on the command line via `redis-cli` or use a Redis monitor like [phpRedisAdmin](https://github.com/ErikDubbelboer/phpRedisAdmin).
+You can either access data on the command line via `redis-cli` or use a Redis monitor like [phpRedisAdmin](https://github.com/ErikDubbelboer/phpRedisAdmin).
 In case you are using something like a Redis monitor make sure it is not accessible by everyone.
 
 **MySQL**
@@ -112,6 +112,7 @@ __How can I debug in case something goes wrong?__
 * Set the option `-vvv` when processing via `./console queuedtracking:process -vvv` to enable the tracker debug mode for this run. This will print detailed information to screen.
 * Enable tracker mode in `config.ini.php` via `[Tracker] debug=1` if processing requests during tracking is enabled.
 * Use the command `./console queuedtracking:print-queued-requests` to view the next requests to process in each queue. If you execute this command twice within 1-10 minutes, and it outputs the same, the queue is not being processed most likely indicating a problem.
+* You can add the tracking parameter `&queuedtracking=0` to the tracking request to insert a tracking request directly into the database instead of into the queued tracking handler
 
 __I am using the Log Importer in combination with Queued Tracking, is there something to consider?__
 

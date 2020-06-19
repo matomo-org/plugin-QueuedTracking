@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -228,11 +228,11 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
             $field->title = 'Redis password';
             $field->condition = 'backend=="redis"';
             $field->uiControl = FieldConfig::UI_CONTROL_PASSWORD;
-            $field->uiControlAttributes = array('size' => 100);
+            $field->uiControlAttributes = array('size' => 128);
             $field->inlineHelp = 'Password set on the Redis server, if any. Redis can be instructed to require a password before allowing clients to execute commands.';
             $field->validate = function ($value) {
-                if (strlen($value) > 100) {
-                    throw new \Exception('Max 100 characters allowed');
+                if (strlen($value) > 128) {
+                    throw new \Exception('Max 128 characters allowed');
                 }
             };
         });

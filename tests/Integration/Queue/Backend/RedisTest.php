@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -10,7 +10,6 @@ namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue\Backend;
 
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
-use Piwik\Translate;
 
 /**
  * @group QueuedTracking
@@ -29,7 +28,7 @@ class RedisTest extends IntegrationTestCase
     private $listKey = 'testMyListTestKey';
     private $key = 'testKeyValueKey';
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

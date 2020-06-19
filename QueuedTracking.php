@@ -1,13 +1,14 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
 namespace Piwik\Plugins\QueuedTracking;
 
+use Piwik\Common;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\MySQL;
 use Piwik\Plugins\QueuedTracking\Tracker\Handler;
 
@@ -19,8 +20,19 @@ class QueuedTracking extends \Piwik\Plugin
     public function registerEvents()
     {
         return array(
-            'Tracker.newHandler' => 'replaceHandlerIfQueueIsEnabled'
+            'Tracker.newHandler'    => 'replaceHandlerIfQueueIsEnabled',
+            'Db.getTablesInstalled' => 'getTablesInstalled'
         );
+    }
+
+    /**
+     * Register the new tables, so Matomo knows about them.
+     *
+     * @param array $allTablesInstalled
+     */
+    public function getTablesInstalled(&$allTablesInstalled)
+    {
+        $allTablesInstalled[] = Common::prefixTable('queuedtracking_queue');
     }
 
     public function install()
@@ -48,6 +60,11 @@ class QueuedTracking extends \Piwik\Plugin
 
     public function replaceHandlerIfQueueIsEnabled(&$handler)
     {
+        $useQueuedTracking = Common::getRequestVar('queuedtracking', 1, 'int');
+        if (!$useQueuedTracking) {
+            return;
+        }
+
         $settings = Queue\Factory::getSettings();
 
         if ($settings->queueEnabled->getValue()) {

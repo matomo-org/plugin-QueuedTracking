@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -42,7 +42,7 @@ class HandlerTest extends IntegrationTestCase
      */
     private $tracker;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -54,7 +54,7 @@ class HandlerTest extends IntegrationTestCase
         $this->handler->init($this->tracker);
     }
     
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->handler->rollBack($this->tracker);
 
@@ -70,7 +70,7 @@ class HandlerTest extends IntegrationTestCase
     public function test_init_shouldStartATransaction()
     {
         $this->assertNotEmpty($this->handler->getTransactionId());
-        $this->assertInternalType('string', $this->handler->getTransactionId());
+        $this->assertIsString($this->handler->getTransactionId());
         $this->assertTrue(ctype_alnum($this->handler->getTransactionId()));
     }
 

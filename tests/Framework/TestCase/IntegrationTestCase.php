@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -22,7 +22,7 @@ class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTes
 {
     protected $testRequiresRedis = true;
 
-    public function setUp()
+    public function setUp(): void
     {
         if ($this->testRequiresRedis && !self::isRedisAvailable()) {
             $this->markTestSkipped('Redis extension is not installed, skipping test');

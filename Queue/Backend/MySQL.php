@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -34,7 +34,7 @@ class MySQL implements Backend
                   `queue_key` VARCHAR(70) NOT NULL,
                   `queue_value` VARCHAR(255) NULL DEFAULT NULL,
                   `expiry_time` BIGINT UNSIGNED DEFAULT 9999999999,
-                  UNIQUE unique_queue_key (`queue_key`)");
+                  PRIMARY KEY (`queue_key`)");
     }
 
     public function uninstall()

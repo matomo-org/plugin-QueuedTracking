@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  */
 
@@ -33,16 +33,12 @@ class TrackerTest extends SystemTestCase
 
     private $requestProcessLimit = 5;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
         if (!IntegrationTestCase::isRedisAvailable()) {
             $this->markTestSkipped('Redis extension is not installed, skipping test');
-        }
-
-        if (self::isTravisCI() && self::isPhpVersion53()) {
-            $this->markTestSkipped('Redis seems to be not enabled in nginx on Travis + PHP 5.3.3');
         }
 
         self::$fixture->performSetup();
@@ -58,7 +54,7 @@ class TrackerTest extends SystemTestCase
         $this->enableQueue();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->createRedisBackend()->flushAll();
 

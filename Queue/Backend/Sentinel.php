@@ -1,8 +1,8 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
@@ -14,9 +14,9 @@ use Piwik\Plugins\QueuedTracking\Queue\Backend;
 use Piwik\Tracker;
 use Exception;
 
-include_once PIWIK_INCLUDE_PATH . '/plugins/QueuedTracking/libs/credis/Client.php';
-include_once PIWIK_INCLUDE_PATH . '/plugins/QueuedTracking/libs/credis/Cluster.php';
-include_once PIWIK_INCLUDE_PATH . '/plugins/QueuedTracking/libs/credis/Sentinel.php';
+include_once __DIR__ . '/../../libs/credis/Client.php';
+include_once __DIR__ . '/../../libs/credis/Cluster.php';
+include_once __DIR__ . '/../../libs/credis/Sentinel.php';
 
 class Sentinel extends Redis
 {

@@ -1,20 +1,20 @@
 <?php
 /**
- * Piwik - free/libre analytics platform
+ * Matomo - free/libre analytics platform
  *
- * @link http://piwik.org
+ * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
 
 namespace Piwik\Plugins\QueuedTracking\Queue;
 
-use Piwik\Plugins\QueuedTracking\Queue;
+use Piwik\Concurrency\LockBackend;
 
 /**
  * Interface for queue backends.
  */
-interface Backend
+interface Backend extends LockBackend
 {
 
     public function appendValuesToList($key, $values);
