@@ -89,9 +89,9 @@ class SettingsTest extends IntegrationTestCase
     public function test_redisPassword_ShouldFail_IfMoreThan100CharctersGiven()
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Max 100 characters');
+        $this->expectExceptionMessage('Max 160 characters');
 
-        $this->settings->redisPassword->setValue(str_pad('4', 102, '4'));
+        $this->settings->redisPassword->setValue(str_pad('4', 162, '4'));
     }
 
     public function test_queueEnabled_ShouldFail_IfEnabledButWrongConnectionDetail()
@@ -159,18 +159,10 @@ class SettingsTest extends IntegrationTestCase
         $this->settings->numQueueWorkers->setValue('1f');
     }
 
-    public function test_numQueueWorkers_ShouldFail_IfTooHigh()
-    {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('At least one worker needs to be configured');
-
-        $this->settings->numQueueWorkers->setValue('17');
-    }
-
     public function test_numQueueWorkers_ShouldFail_IfTooLow()
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Only 1-16 workers allowed');
+        $this->expectExceptionMessage('At least one worker needs to be configured');
 
         $this->settings->numQueueWorkers->setValue('0');
     }
