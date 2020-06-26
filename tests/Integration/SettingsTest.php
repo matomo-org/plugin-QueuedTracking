@@ -86,12 +86,12 @@ class SettingsTest extends IntegrationTestCase
         $this->settings->sentinelMasterName->setValue(str_pad('1', 201, '1'));
     }
 
-    public function test_redisPassword_ShouldFail_IfMoreThan100CharctersGiven()
+    public function test_redisPassword_ShouldFail_IfMoreThan128CharctersGiven()
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Max 100 characters');
+        $this->expectExceptionMessage('Max 128 characters');
 
-        $this->settings->redisPassword->setValue(str_pad('4', 102, '4'));
+        $this->settings->redisPassword->setValue(str_pad('4', 130, '4'));
     }
 
     public function test_queueEnabled_ShouldFail_IfEnabledButWrongConnectionDetail()
