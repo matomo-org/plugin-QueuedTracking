@@ -2,7 +2,7 @@ name: Translation Updates
 
 on:
   schedule:
-  - cron: "0 9 * * 3"
+  - cron: "0 22 * * 0"
 
 jobs:
   build:
