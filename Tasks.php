@@ -79,7 +79,9 @@ class Tasks extends \Piwik\Plugin\Tasks
             $message = $message . "<br /><br />Sent from " . SettingsPiwik::getPiwikUrl();
             $mail = new Mail();
             $mail->setDefaultFromPiwik();
-            $mail->addTo($emailsToNotify);
+            foreach ($emailsToNotify as $emailToNotify) {
+                $mail->addTo($emailToNotify);
+            }
             $mail->setSubject('Queued Tracking - queue size has reached your threshold');
             $mail->setWrappedHtmlBody($message);
             $mail->send();
