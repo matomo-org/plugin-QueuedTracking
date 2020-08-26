@@ -1,5 +1,11 @@
 ## Changelog
 
+4.0.1
+- Improve compatibility with PHP 7.4
+
+4.0.0
+- Compatibility with Matomo 4.0
+
 3.3.5
 - Improve update script to first add primary key and then remove index
 
