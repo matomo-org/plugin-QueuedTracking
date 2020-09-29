@@ -1,5 +1,8 @@
 ## Changelog
 
+4.0.2
+- Support new option `--force-num-requests-process-at-once` to the process command
+
 4.0.1
 - Improve compatibility with PHP 7.4
 
