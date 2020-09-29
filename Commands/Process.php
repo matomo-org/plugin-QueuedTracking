@@ -28,6 +28,7 @@ class Process extends ConsoleCommand
     {
         $this->setName('queuedtracking:process');
         $this->addOption('queue-id', null, InputOption::VALUE_REQUIRED, 'If set, will only work on that specific queue. For example "0" or "1" (if there are multiple queues). Not recommended when only one worker is in use. If for example 4 workers are in use, you may want to use 0, 1, 2, or 3.');
+        $this->addOption('force-num-requests-process-at-once', null, InputOption::VALUE_REQUIRED, 'If defined, it overwrites the setting of how many requests will be picked out of the queue and processed at once. Must be a number which is >= 1. By default, the configured value from the settings will be used. This can be useful for example if you want to process every single request within the queue. If otherwise a batch size of say 100 is configured, then there may be otherwise 99 requests left in the queue. It can be also useful for testing purposes.');
         $this->setDescription('Processes all queued tracking requests in case there are enough requests in the queue and in case they are not already in process by another script. To keep track of the queue use the <comment>--verbose</comment> option or execute the <comment>queuedtracking:monitor</comment> command.');
     }
 
@@ -64,6 +65,14 @@ class Process extends ConsoleCommand
         $backend      = Queue\Factory::makeBackend();
         $queueManager = Queue\Factory::makeQueueManager($backend);
         $queueManager->setForceQueueId($queueId);
+
+        $forceNumRequests = $input->getOption('force-num-requests-process-at-once');
+        if (!empty($forceNumRequests) && is_numeric($forceNumRequests) && $forceNumRequests >= 1) {
+            $output->writeln("<info>Force proccess num requests at once: </info>" . $forceNumRequests);
+            $queueManager->setNumberOfRequestsToProcessAtSameTime($forceNumRequests);
+        } elseif (!empty($forceNumRequests)) {
+            throw new \Exception('Number of requests to process must be a number and at least 1');
+        }
 
         $output->writeln("<info>Starting to process request sets, this can take a while</info>");
 
