@@ -251,7 +251,7 @@ class HandlerTest extends IntegrationTestCase
         ));
 
         Queue\Factory::getSettings()->queueEnabled->getValue(); // this will cause a db query but will be cached afterwards
-        Tracker\Cache::getCacheWebsiteAttributes(1); // this will cause a db query the first time it is called to check if cookiesless tracking is forced
+        Tracker\Cache::getCacheGeneral(); // this will cause a db query the first time it is called to check if cookiesless tracking is forced
         Db::destroyDatabaseObject();
 
         $this->handler->init($this->tracker, $this->requestSet);
