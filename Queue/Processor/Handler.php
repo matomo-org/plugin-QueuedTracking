@@ -42,8 +42,15 @@ class Handler
         $requestSet->restoreEnvironment();
 
         $this->count = 0;
-
+        
+        $clonedRequestSet = clone $requestSet;
+        $clonsedRequests = [];
         foreach ($requestSet->getRequests() as $request) {
+            $clonsedRequests[] = clone $request;
+        }
+        $clonedRequestSet->setRequests($clonsedRequests);
+        
+        foreach ($clonedRequestSet->getRequests() as $request) {
             try {
                 $startMs = round(microtime(true) * 1000);
 
