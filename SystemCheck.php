@@ -23,7 +23,7 @@ class SystemCheck
     {
         if (!$backend->testConnection()) {
             throw new \Exception('Connection to Redis failed. Please verify Redis host and port');
-        };
+        }
 
         $version = $backend->getServerVersion();
 
