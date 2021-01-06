@@ -44,7 +44,7 @@ Example crontab entry that starts the processor every minute:
 
 __Can I keep track of the state of the queue?__
 
-Yes, you can. Just execute the command `./console queuedtracking:monitor`. This will show the current state of the queue.
+Yes, you can. Just execute the command `./console queuedtracking:monitor`. This will show the current state of the queue. To exit this command you can for example press `CTRL + C` key at the same time.
 
 __Can I improve the speed of inserting requests from the Redis queue to the database?__
 
