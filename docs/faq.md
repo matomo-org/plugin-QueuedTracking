@@ -110,7 +110,7 @@ __How can I debug in case something goes wrong?__
 * Use the command `./console queuedtracking:monitor` to view the current state of all workers
 * Use the command `./console queuedtracking:lock-status` to view the current state of all locks
 * Set the option `-vvv` when processing via `./console queuedtracking:process -vvv` to enable the tracker debug mode for this run. This will print detailed information to screen.
-* Enable tracker mode in `config.ini.php` via `[Tracker] debug=1` if processing requests during tracking is enabled.
+* Enable tracker debug mode in `config.ini.php` via `[Tracker] debug=1` if processing requests during tracking is enabled.
 * Use the command `./console queuedtracking:print-queued-requests` to view the next requests to process in each queue. If you execute this command twice within 1-10 minutes, and it outputs the same, the queue is not being processed most likely indicating a problem.
 * You can add the tracking parameter `&queuedtracking=0` to the tracking request to insert a tracking request directly into the database instead of into the queued tracking handler
 
