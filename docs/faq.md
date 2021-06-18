@@ -56,7 +56,7 @@ If you process requests from the command line via `./console queuedtracking:proc
 
 __How fast are the requests inserted from Redis to the Database?__
 
-This very much depends on your setup and hardware. With fast CPUs you can achive up to 250req/s with 1 worker, 400req/s with 2 workers and 1500req/s with 8 workers (tested on a AWS c3.x2large instance).
+This very much depends on your setup and hardware. With fast CPUs you can achieve up to 250req/s with 1 worker, 400req/s with 2 workers and 1500req/s with 8 workers (tested on a AWS c3.x2large instance).
 
 __How should the redis server be configured?__
 
