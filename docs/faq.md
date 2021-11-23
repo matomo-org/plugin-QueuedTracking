@@ -7,6 +7,7 @@ for Matomo anyway.
 
 * Recommended [Redis server 2.8+](http://redis.io/) - [Redis quickstart](http://redis.io/topics/quickstart)
 * Recommended [phpredis PHP extension](https://github.com/nicolasff/phpredis) - [Install](https://github.com/nicolasff/phpredis#installingconfiguring)
+* Instead of Redis it is possible to use MySQL
 * Transactions are used and must be supported by the SQL database.
 
 __Where can I configure and enable the queue?__
