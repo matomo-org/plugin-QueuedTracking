@@ -29,6 +29,9 @@ describe("QueuedTrackingSettings", function () {
 
     it("should display the settings page", async function () {
         await page.goto(url);
+        await page.evaluate(function() {
+            $('.generalSettingsTOCCard').hide();
+        });
         await page.mouse.move(-10, -10);
         expect(await page.screenshotSelector(selector)).to.matchImage('settings_page');
     });
@@ -43,6 +46,7 @@ describe("QueuedTrackingSettings", function () {
         // hide all cards, except of QueueTracking
         await page.evaluate(function(){
             $('.card-content').hide();
+
             $('.card-content:contains(\'QueuedTracking\')').show();
         });
         await page.mouse.move(-10, -10);
@@ -57,6 +61,9 @@ describe("QueuedTrackingSettings", function () {
         testEnvironment.save();
 
         await page.goto(url);
+        await page.evaluate(function() {
+            $('.generalSettingsTOCCard').hide();
+        });
         await page.mouse.move(-10, -10);
         expect(await page.screenshotSelector(selector)).to.matchImage('settings_page_sentinel');
     });
