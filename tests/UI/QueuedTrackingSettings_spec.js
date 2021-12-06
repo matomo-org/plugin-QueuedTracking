@@ -46,7 +46,7 @@ describe("QueuedTrackingSettings", function () {
             $('.card-content:contains(\'QueuedTracking\')').show();
         });
         await page.mouse.move(-10, -10);
-        expect(await page.screenshotSelector(selector + ',#notificationContainer')).to.matchImage('settings_save_error');
+        expect(await page.screenshotSelector(selector + ',#ajaxError,#notificationContainer')).to.matchImage('settings_save_error');
     });
 
     it("should display the settings page with sentinel enabled", async function () {
