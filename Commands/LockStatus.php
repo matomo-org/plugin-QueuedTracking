@@ -61,5 +61,7 @@ class LockStatus extends ConsoleCommand
                 $output->writeln(' ');
             }
         }
+
+        return 0;
     }
 }

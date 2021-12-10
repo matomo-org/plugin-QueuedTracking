@@ -94,6 +94,8 @@ class Process extends ConsoleCommand
         $trackerEnvironment->destroy();
 
         $this->writeSuccessMessage($output, array(sprintf('This worker finished queue processing with %sreq/s (%s requests in %02.2f seconds)', $requestsPerSecond, $numRequestsTracked, $neededTime)));
+
+        return 0;
     }
 
     private function getNumberOfRequestsPerSecond($numRequestsTracked, $neededTimeInSeconds)

@@ -89,6 +89,7 @@ class Monitor extends ConsoleCommand
             sleep(2);
         }
 
+        return 0;
     }
 
     /**

@@ -208,6 +208,8 @@ class Test extends ConsoleCommand
 
         $output->writeln('');
         $output->writeln('<comment>Done</comment>');
+
+        return 0;
     }
 
     /**
