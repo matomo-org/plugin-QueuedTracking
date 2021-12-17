@@ -13,10 +13,8 @@ use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
 use Piwik\Tracker;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Piwik\Plugins\QueuedTracking\Queue;
-use Piwik\Plugins\QueuedTracking\Queue\Processor;
 
 /**
  * This class lets you define a new command. To read more about commands have a look at our Piwik Console guide on

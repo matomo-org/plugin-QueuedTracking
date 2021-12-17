@@ -10,7 +10,6 @@ namespace Piwik\Plugins\QueuedTracking;
 
 use Piwik\Plugins\QueuedTracking\Queue\Backend;
 use Piwik\Tracker\RequestSet;
-use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
 
 class Queue

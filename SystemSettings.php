@@ -8,12 +8,9 @@
  */
 namespace Piwik\Plugins\QueuedTracking;
 
-use Piwik\Cache;
-use Piwik\Config;
 use Piwik\Plugins\QueuedTracking\Settings\NumWorkers;
 use Piwik\Settings\Setting;
 use Piwik\Settings\FieldConfig;
-use Piwik\Settings\Storage\Backend;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Piwik;
 use Exception;

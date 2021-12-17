@@ -9,12 +9,9 @@
 
 namespace Piwik\Plugins\QueuedTracking\Commands;
 
-use Piwik\Plugin;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\Queue;
-use Piwik\Plugins\QueuedTracking\Queue\Processor;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
-use Piwik\Tracker;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;

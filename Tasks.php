@@ -9,7 +9,6 @@
 namespace Piwik\Plugins\QueuedTracking;
 
 use Piwik\Common;
-use Piwik\Config;
 use Piwik\Db;
 use Piwik\Mail;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\MySQL;

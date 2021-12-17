@@ -8,8 +8,6 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration;
 
-use Piwik\Access;
-use Piwik\Config;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;

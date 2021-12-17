@@ -10,7 +10,6 @@ namespace Piwik\Plugins\QueuedTracking\Queue\Backend;
 
 use Piwik\Log;
 use Piwik\Plugins\QueuedTracking\Queue\Backend;
-use Piwik\Tracker;
 
 class Redis implements Backend
 {

@@ -8,7 +8,6 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue\Processor;
 
-use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Plugins\QueuedTracking\Queue\Processor\Handler;
 use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\ForcedException;
 use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\Tracker;

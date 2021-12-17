@@ -10,8 +10,6 @@ namespace Piwik\Plugins\QueuedTracking\Queue\Backend;
 
 use Piwik\Log;
 use Piwik\Piwik;
-use Piwik\Plugins\QueuedTracking\Queue\Backend;
-use Piwik\Tracker;
 use Exception;
 
 include_once __DIR__ . '/../../libs/credis/Client.php';

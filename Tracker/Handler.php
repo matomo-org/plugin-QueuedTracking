@@ -16,7 +16,6 @@ use Piwik\Plugins\QueuedTracking\Queue\Backend;
 use Piwik\Plugins\QueuedTracking\Queue\Processor;
 use Piwik\Tracker\RequestSet;
 use Exception;
-use Piwik\Url;
 
 /**
  * @method Response getResponse()

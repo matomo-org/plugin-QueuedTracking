@@ -13,7 +13,6 @@ use Piwik\Db;
 use Piwik\DbHelper;
 use Piwik\Log;
 use Piwik\Plugins\QueuedTracking\Queue\Backend;
-use Piwik\Tracker\Db\Mysqli;
 
 class MySQL implements Backend
 {

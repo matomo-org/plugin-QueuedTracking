@@ -12,7 +12,6 @@ use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Lock;
-use Piwik\Plugins\QueuedTracking\Queue\Processor;
 
 /**
  * @group QueuedTracking

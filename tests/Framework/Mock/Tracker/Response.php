@@ -8,7 +8,6 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Framework\Mock\Tracker;
 
-use Piwik\Tracker;
 
 class Response extends \Piwik\Tests\Framework\Mock\Tracker\Response
 {

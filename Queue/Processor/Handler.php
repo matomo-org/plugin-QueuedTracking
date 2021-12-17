@@ -13,12 +13,8 @@ use Piwik\Common;
 use Piwik\Db;
 use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Tracker;
-use Piwik\Plugins\QueuedTracking\Queue;
-use Piwik\Plugins\QueuedTracking\Queue\Backend;
-use Piwik\Plugins\QueuedTracking\Queue\Processor;
 use Piwik\Tracker\RequestSet;
 use Exception;
-use Piwik\Url;
 
 class Handler
 {

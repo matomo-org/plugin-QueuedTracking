@@ -9,7 +9,6 @@
 namespace Piwik\Plugins\QueuedTracking\Tracker;
 
 use Piwik\Common;
-use Piwik\Tracker;
 use Piwik\Tracker\Response as TrackerResponse;
 
 class Response extends TrackerResponse

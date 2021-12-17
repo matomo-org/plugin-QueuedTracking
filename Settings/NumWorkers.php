@@ -8,8 +8,6 @@
  */
 namespace Piwik\Plugins\QueuedTracking\Settings;
 
-use Piwik\Cache;
-use Piwik\Config;
 use Piwik\Settings\Plugin\SystemSetting;
 
 /**
