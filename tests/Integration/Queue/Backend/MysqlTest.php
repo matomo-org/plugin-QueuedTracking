@@ -10,7 +10,6 @@ namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue\Backend;
 
 use Piwik\Db;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\MySQL;
-use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
 use \Piwik\Tests\Framework\TestCase\IntegrationTestCase;
 
 /**

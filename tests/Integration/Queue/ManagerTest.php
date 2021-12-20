@@ -9,7 +9,6 @@
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue;
 
 use Piwik\Tests\Framework\Fixture;
-use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 use Piwik\Tracker\RequestSet;

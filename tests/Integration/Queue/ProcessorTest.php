@@ -12,7 +12,6 @@ use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 use Piwik\Tests\Framework\Fixture;
 use Piwik\Tracker\TrackerConfig;
 use Piwik\Tracker;
-use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Processor;
 
