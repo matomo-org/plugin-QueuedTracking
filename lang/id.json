@@ -1,1 +1,5 @@
-{}
+{
+    "QueuedTracking": {
+        "NumHostsNotMatchNumPorts": "Jumlah host yang dikonfigurasi tidak cocok dengan jumlah port yang dikonfigurasi."
+    }
+}
