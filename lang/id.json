@@ -1,6 +1,6 @@
 {
     "QueuedTracking": {
-        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Beberapa host atau port hanya dapat dikonfigurasi ketika Redis Sentinel diaktifkan. Lihatlah berkas readme plugin untuk mempelajari tentang cara mengaktifkan Sentinel.",
-        "NumHostsNotMatchNumPorts": "Jumlah host yang dikonfigurasi tidak cocok dengan jumlah port yang dikonfigurasi."
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Beberapa host atau porta hanya dapat dikonfigurasi ketika Redis Sentinel diaktifkan. Lihatlah berkas readme plugin untuk mempelajari tentang cara mengaktifkan Sentinel.",
+        "NumHostsNotMatchNumPorts": "Jumlah host yang dikonfigurasi tidak cocok dengan jumlah porta yang dikonfigurasi."
     }
 }
