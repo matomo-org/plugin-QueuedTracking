@@ -228,7 +228,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
             $field->uiControlAttributes = array('size' => 128);
             $field->inlineHelp = 'Password set on the Redis server, if any. Redis can be instructed to require a password before allowing clients to execute commands.';
             $field->validate = function ($value) {
-                if (strlen($value) > 128) {
+                if (is_string($value) && strlen($value) > 128) {
                     throw new \Exception('Max 128 characters allowed');
                 }
             };
