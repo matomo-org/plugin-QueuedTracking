@@ -1,1 +1,6 @@
-{}
+{
+    "QueuedTracking": {
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Множество хостове или портове могат да бъдат конфигурирани само когато Redis Sentinel е активиран. Разгледайте файла readme на плъгина, за да научите как да активирате Sentinel.",
+        "NumHostsNotMatchNumPorts": "Броят на конфигурираните хостове не съвпада с броя на конфигурираните портове."
+    }
+}
