@@ -233,11 +233,19 @@ class Test extends ConsoleCommand
     private function testRedis($redis, $method, $params, $keyToCleanUp, OutputInterface $output)
     {
         if ($keyToCleanUp) {
-            $redis->delete($keyToCleanUp);
+            $redis->del($keyToCleanUp);
         }
 
         $result = call_user_func_array(array($redis, $method), $params);
-        $paramsInline = implode(', ', $params);
+
+        $paramsMapped = array_map(function($item) {
+            if (is_string($item)) {
+                return $item;
+            }
+            
+            return str_replace(["\r", "\n", "  "], '', var_export($item, true));
+        }, $params);
+        $paramsInline = implode(', ', $paramsMapped);
 
         if ($result) {
             $output->writeln("Success for method $method($paramsInline)");
@@ -247,7 +255,7 @@ class Test extends ConsoleCommand
         }
 
         if ($keyToCleanUp) {
-            $redis->delete($keyToCleanUp);
+            $redis->del($keyToCleanUp);
         }
     }
 }
