@@ -262,7 +262,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         return $this->makeSetting('queueEnabled', $default = false, FieldConfig::TYPE_BOOL, function (FieldConfig $field) use ($self) {
             $field->title = 'Queue enabled';
             $field->uiControl = FieldConfig::UI_CONTROL_CHECKBOX;
-            $field->inlineHelp = 'If enabled, all tracking requests will be written into a queue instead of the directly into the database. Requires a Redis server and phpredis PHP extension if using a Redis backend.';
+            $field->inlineHelp = 'If enabled, all tracking requests will be written into a queue instead of the directly into the database. Requires a Redis server and phpredis PHP extension if using Redis as a backend.';
             $field->validate = function ($value) use ($self) {
                 $value = (bool) $value;
 
