@@ -1,5 +1,8 @@
 ## Changelog
 
+4.0.4
+- Clarify inline help for "Queue enabled" config setting
+
 4.0.3
 - Replace Redis::delete() with Redis::del() and fix a warning
 

@@ -1,6 +1,6 @@
 {
     "name": "QueuedTracking",
-    "version": "4.0.3",
+    "version": "4.0.4",
     "description": "Scale your large traffic Matomo service by queuing tracking requests in Redis or MySQL for better performance and reliability when experiencing peaks.",
     "theme": false,
     "keywords": ["tracker", "tracking", "queue", "redis"],
