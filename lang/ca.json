@@ -1,6 +1,6 @@
 {
     "QueuedTracking": {
-        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Només es poden configurar múltiples hostes o ports quan Redis Sentinel està habilitat. Fes una ullada al fitxer readme del connector per saber com activar Sentinel.",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Només es poden configurar múltiples hostes o ports quan Redis Sentinel està activat. El connector README us indicarà com fer-ho.",
         "NumHostsNotMatchNumPorts": "El nombre d'hostes configurats no coincideix amb el nombre de ports configurats."
     }
 }
