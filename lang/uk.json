@@ -1,6 +1,6 @@
 {
     "QueuedTracking": {
-        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Множинні хости або порти можуть були налаштовані тільки тоді, коли Redis Sentinel ввімкнений. Подивіться на файл «readme» у доповненні, щоб дізнатися про те, як увімкнути Sentinel.",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Кілька хостів або портів можна налаштувати лише якщо увімкнено Redis Sentinel. Плагін README підкаже, як це зробити.",
         "NumHostsNotMatchNumPorts": "Число налаштованих хостів не збігається з числом налаштованих портів."
     }
 }
