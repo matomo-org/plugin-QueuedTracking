@@ -1,1 +1,6 @@
-{}
+{
+    "QueuedTracking": {
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Berbilang hos atau port hanya boleh dikonfigurasikan apabila Redis Sentinel dihidupkan. Pemalam README akan memberitahu anda cara berbuat demikian.",
+        "NumHostsNotMatchNumPorts": "Bilangan hos yang dikonfigurasikan tidak sepadan dengan bilangan port yang dikonfigurasikan."
+    }
+}
