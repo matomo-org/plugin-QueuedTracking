@@ -1,6 +1,6 @@
 {
     "QueuedTracking": {
-        "NumHostsNotMatchNumPorts": "Antalet konfigurerade värdar matchar inte antalet konfigurerade portar.",
-        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Flera värdar eller portar kan endast konfigureras när Redis Sentinel är aktiverat. Kolla i readme-filen för tillägget för att lära dig mer om hur du aktiverar Sentinel."
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Flera värdar eller portar kan bara konfigureras när Redis Sentinel är på. Insticksprogrammets README kommer att förklara hur du gör det.",
+        "NumHostsNotMatchNumPorts": "Antalet konfigurerade värdar matchar inte antalet konfigurerade portar."
     }
 }
