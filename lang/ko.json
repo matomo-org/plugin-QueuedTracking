@@ -1,1 +1,6 @@
-{}
+{
+    "QueuedTracking": {
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Redis Sentinel이 켜져 있을 때만 여러 호스트 또는 포트를 구성할 수 있습니다. 플러그인 README가 방법을 알려줄 것입니다.",
+        "NumHostsNotMatchNumPorts": "구성된 호스트의 수가 구성된 포트의 수와 일치하지 않습니다."
+    }
+}
