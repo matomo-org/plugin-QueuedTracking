@@ -1,5 +1,8 @@
 ## Changelog
 
+5.0.0
+- Compatibility with Matomo 5.0
+ 
 4.0.5
 - Translation changes
 
