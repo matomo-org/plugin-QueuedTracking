@@ -247,7 +247,7 @@ end';
     public function flushAll()
     {
         $this->connectIfNeeded();
-        $this->redis->flushAll();
+        $this->redis->flushDB();
     }
 
     private function connectIfNeeded()
