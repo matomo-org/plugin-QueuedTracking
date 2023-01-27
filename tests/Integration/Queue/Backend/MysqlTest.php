@@ -29,6 +29,22 @@ class MysqlTest extends IntegrationTestCase
     private $listKey = 'testMyListTestKey';
     private $key = 'testKeyValueKey';
 
+    /**
+     * This method also exists in `SystemTestCase`
+     * But as it was added in Matomo 4.8.0 tests might fail when running with Matomo < 4.8.0
+     *
+     * @todo remove with Matomo 5
+     * @return bool
+     */
+    public function hasDependencies(): bool
+    {
+        if (method_exists($this, 'requires')) {
+            return count($this->requires()) > 0;
+        }
+
+        return parent::hasDependencies();
+    }
+
     public function setUp(): void
     {
         if (!$this->hasDependencies()) {
