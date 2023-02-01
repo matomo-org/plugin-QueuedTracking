@@ -37,7 +37,7 @@ describe("QueuedTrackingSettings", function () {
         await page.click('#queueEnabled + span');
         await page.type('input[name="redisPort"]', '1');
         await (await page.jQuery('.card-content:contains(\'QueuedTracking\') .pluginsSettingsSubmit')).click();
-        await page.type('.confirm-password-modal input[type=password]', 'superUserPass');
+        await page.type('.confirm-password-modal input[type=password]', superUserPassword);
         await page.click('.confirm-password-modal .modal-close.btn');
         await page.waitForNetworkIdle();
         // hide all cards, except of QueueTracking
