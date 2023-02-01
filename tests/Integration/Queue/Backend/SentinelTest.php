@@ -7,6 +7,7 @@
  */
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue\Backend;
+
 use Piwik\Config;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Sentinel;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
@@ -22,7 +23,7 @@ class SentinelTest extends RedisTest
 {
     public function tearDown(): void
     {
-        Config::getInstance()->QueuedTracking = array();
+        Config::getInstance()->QueuedTracking = [];
         parent::tearDown();
     }
 
@@ -72,5 +73,4 @@ class SentinelTest extends RedisTest
         $sentinel = Factory::makeBackendFromSettings($settings);
         $sentinel->get('test');
     }
-
 }
