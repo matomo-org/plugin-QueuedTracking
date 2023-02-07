@@ -1,6 +1,6 @@
 # Piwik QueuedTracking Plugin
 
-[![Build Status](https://travis-ci.com/matomo-org/plugin-QueuedTracking.svg?branch=master)](https://travis-ci.com/matomo-org/plugin-QueuedTracking)
+[![Plugin QueuedTracking Tests](https://github.com/matomo-org/plugin-QueuedTracking/actions/workflows/matomo-tests.yml/badge.svg)](https://github.com/matomo-org/plugin-QueuedTracking/actions/workflows/matomo-tests.yml)
 
 ## Description
 
