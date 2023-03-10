@@ -54,6 +54,21 @@ class Credis_Sentinel
     protected $_password = '';
 
     /**
+     * @var null
+     */
+    private $_timeout;
+
+    /**
+     * @var string
+     */
+    private $_persistent;
+    
+    /**
+     * @var int
+     */
+    private $_db;
+
+    /**
      * Connect with a Sentinel node. Sentinel will do the master and slave discovery
      *
      * @param Credis_Client $client
