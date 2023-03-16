@@ -45,7 +45,11 @@ class Test extends ConsoleCommand
      * execute the task by calling a method of another class and output any useful information.
      *
      * Execute the command like: ./console queuedtracking:test --name="The Piwik Team"
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
      */
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $trackerEnvironment = new Environment('tracker');
@@ -207,7 +211,7 @@ class Test extends ConsoleCommand
         $output->writeln('');
         $output->writeln('<comment>Done</comment>');
 
-        return 0;
+        return self::SUCCESS;
     }
 
     /**

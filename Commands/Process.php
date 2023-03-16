@@ -32,6 +32,12 @@ class Process extends ConsoleCommand
         $this->setDescription('Processes all queued tracking requests in case there are enough requests in the queue and in case they are not already in process by another script. To keep track of the queue use the <comment>--verbose</comment> option or execute the <comment>queuedtracking:monitor</comment> command.');
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     */
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $settings = Queue\Factory::getSettings();
@@ -95,7 +101,7 @@ class Process extends ConsoleCommand
 
         $this->writeSuccessMessage($output, array(sprintf('This worker finished queue processing with %sreq/s (%s requests in %02.2f seconds)', $requestsPerSecond, $numRequestsTracked, $neededTime)));
 
-        return 0;
+        return self::SUCCESS;
     }
 
     private function getNumberOfRequestsPerSecond($numRequestsTracked, $neededTimeInSeconds)

@@ -26,6 +26,12 @@ class Monitor extends ConsoleCommand
         $this->addOption('iterations', null, InputOption::VALUE_REQUIRED, 'If set, will limit the number of monitoring iterations done.');
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     */
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $settings = Queue\Factory::getSettings();
@@ -87,7 +93,7 @@ class Monitor extends ConsoleCommand
             sleep(2);
         }
 
-        return 0;
+        return self::SUCCESS;
     }
 
     /**

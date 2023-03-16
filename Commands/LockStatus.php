@@ -26,6 +26,12 @@ class LockStatus extends ConsoleCommand
         $this->addOption('unlock', null, InputOption::VALUE_REQUIRED, 'If set will unlock the given queue.');
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     */
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $settings = Queue\Factory::getSettings();
@@ -57,6 +63,6 @@ class LockStatus extends ConsoleCommand
             }
         }
 
-        return 0;
+        return self::SUCCESS;
     }
 }
