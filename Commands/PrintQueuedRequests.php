@@ -26,6 +26,12 @@ class PrintQueuedRequests extends ConsoleCommand
         $this->addOption('queue-id', null, InputOption::VALUE_REQUIRED, 'If set, will print only requests of that queue');
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     */
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $settings = Queue\Factory::getSettings();
@@ -55,6 +61,6 @@ class PrintQueuedRequests extends ConsoleCommand
 
         }
 
-        return 0;
+        return self::SUCCESS;
     }
 }
