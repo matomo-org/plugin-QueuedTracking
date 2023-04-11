@@ -17,9 +17,7 @@ use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Processor;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
 use Piwik\Tracker;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 
 class Process extends ConsoleCommand
 {
@@ -33,13 +31,12 @@ class Process extends ConsoleCommand
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
      * @return int
      */
-
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function doExecute(): int
     {
+        $input = $this->getInput();
+        $output = $this->getOutput();
         $settings = Queue\Factory::getSettings();
         if ($settings->isRedisBackend()) {
             $systemCheck = new SystemCheck();
@@ -56,7 +53,7 @@ class Process extends ConsoleCommand
             $output->writeln("<info>Forcing queue ID: </info>" . $queueId);
         }
 
-        if (OutputInterface::VERBOSITY_VERY_VERBOSE <= $output->getVerbosity()) {
+        if ($output->isVeryVerbose()) {
             $GLOBALS['PIWIK_TRACKER_DEBUG'] = true;
         }
 
@@ -99,7 +96,9 @@ class Process extends ConsoleCommand
 
         $trackerEnvironment->destroy();
 
-        $this->writeSuccessMessage($output, array(sprintf('This worker finished queue processing with %sreq/s (%s requests in %02.2f seconds)', $requestsPerSecond, $numRequestsTracked, $neededTime)));
+        $this->writeSuccessMessage(
+            array(sprintf('This worker finished queue processing with %sreq/s (%s requests in %02.2f seconds)', $requestsPerSecond, $numRequestsTracked, $neededTime))
+        );
 
         return self::SUCCESS;
     }

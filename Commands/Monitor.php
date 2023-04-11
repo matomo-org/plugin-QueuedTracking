@@ -12,9 +12,7 @@ namespace Piwik\Plugins\QueuedTracking\Commands;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 
 class Monitor extends ConsoleCommand
 {
@@ -27,13 +25,11 @@ class Monitor extends ConsoleCommand
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
      * @return int
      */
-
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function doExecute(): int
     {
+        $output = $this->getOutput();
         $settings = Queue\Factory::getSettings();
 
         if ($settings->isRedisBackend()) {
@@ -41,7 +37,7 @@ class Monitor extends ConsoleCommand
             $systemCheck->checkRedisIsInstalled();
         }
 
-        $iterations = $this->getIterationsFromArg($input);
+        $iterations = $this->getIterationsFromArg();
         if ($iterations  !== null) {
             $output->writeln("<info>Only running " . $iterations . " iterations.</info>");
         }
@@ -99,12 +95,11 @@ class Monitor extends ConsoleCommand
     /**
      * Loads the `iteration` argument from the commands arguments. `null` indicates no limit supplied.
      *
-     * @param InputInterface $input
      * @return int|null
      */
-    private function getIterationsFromArg(InputInterface $input)
+    private function getIterationsFromArg()
     {
-        $iterations = $input->getOption('iterations');
+        $iterations = $this->getInput()->getOption('iterations');
         if (empty($iterations) && $iterations !== 0 && $iterations !== '0') {
             $iterations = null;
         } elseif (!is_numeric($iterations)) {

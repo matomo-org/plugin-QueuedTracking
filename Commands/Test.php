@@ -12,8 +12,6 @@ use Piwik\Application\Environment;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
 use Piwik\Tracker;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Piwik\Plugins\QueuedTracking\Queue;
 
 /**
@@ -45,13 +43,12 @@ class Test extends ConsoleCommand
      * execute the task by calling a method of another class and output any useful information.
      *
      * Execute the command like: ./console queuedtracking:test --name="The Piwik Team"
-     * @param InputInterface $input
-     * @param OutputInterface $output
      * @return int
      */
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function doExecute(): int
     {
+        $output = $this->getOutput();
         $trackerEnvironment = new Environment('tracker');
         $trackerEnvironment->init();
 
@@ -132,11 +129,11 @@ class Test extends ConsoleCommand
         }
 
         if ($isUsingRedis) {
-            $this->testRedis($redis, 'set', array('testKey', 'value'), 'testKey', $output);
-            $this->testRedis($redis, 'setnx', array('testnxkey', 'value'), 'testnxkey', $output);
-            $this->testRedis($redis, 'setex', array('testexkey', 5, 'value'), 'testexkey', $output);
-            $this->testRedis($redis, 'set', array('testKeyWithNx', 'value', array('nx')), 'testKeyWithNx', $output);
-            $this->testRedis($redis, 'set', array('testKeyWithEx', 'value', array('ex' => 5)), 'testKeyWithEx', $output);
+            $this->testRedis($redis, 'set', ['testKey', 'value'], 'testKey');
+            $this->testRedis($redis, 'setnx', array('testnxkey', 'value'), 'testnxkey');
+            $this->testRedis($redis, 'setex', array('testexkey', 5, 'value'), 'testexkey');
+            $this->testRedis($redis, 'set', array('testKeyWithNx', 'value', array('nx')), 'testKeyWithNx');
+            $this->testRedis($redis, 'set', array('testKeyWithEx', 'value', array('ex' => 5)), 'testKeyWithEx');
         }
 
         $backend->delete('foo');
@@ -232,9 +229,8 @@ class Test extends ConsoleCommand
      * @param $method
      * @param $params
      * @param $keyToCleanUp
-     * @param OutputInterface $output
      */
-    private function testRedis($redis, $method, $params, $keyToCleanUp, OutputInterface $output)
+    private function testRedis($redis, $method, $params, $keyToCleanUp)
     {
         if ($keyToCleanUp) {
             $redis->del($keyToCleanUp);
@@ -252,10 +248,10 @@ class Test extends ConsoleCommand
         $paramsInline = implode(', ', $paramsMapped);
 
         if ($result) {
-            $output->writeln("Success for method $method($paramsInline)");
+            $this->getOutput()->writeln("Success for method $method($paramsInline)");
         } else {
             $errorMessage = $redis->getLastError();
-            $output->writeln("<error>Failure for method $method($paramsInline): $errorMessage</error>");
+            $this->getOutput()->writeln("<error>Failure for method $method($paramsInline): $errorMessage</error>");
         }
 
         if ($keyToCleanUp) {
