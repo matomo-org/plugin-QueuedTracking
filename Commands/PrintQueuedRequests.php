@@ -12,7 +12,6 @@ namespace Piwik\Plugins\QueuedTracking\Commands;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
-use Symfony\Component\Console\Input\InputOption;
 
 class PrintQueuedRequests extends ConsoleCommand
 {
@@ -21,7 +20,7 @@ class PrintQueuedRequests extends ConsoleCommand
     {
         $this->setName('queuedtracking:print-queued-requests');
         $this->setDescription('Prints the requests of each queue that will be processed next.');
-        $this->addOption('queue-id', null, InputOption::VALUE_REQUIRED, 'If set, will print only requests of that queue');
+        $this->addRequiredValueOption('queue-id', null, 'If set, will print only requests of that queue');
     }
 
     /**

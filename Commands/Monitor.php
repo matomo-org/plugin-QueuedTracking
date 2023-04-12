@@ -12,7 +12,6 @@ namespace Piwik\Plugins\QueuedTracking\Commands;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
-use Symfony\Component\Console\Input\InputOption;
 
 class Monitor extends ConsoleCommand
 {
@@ -21,7 +20,7 @@ class Monitor extends ConsoleCommand
     {
         $this->setName('queuedtracking:monitor');
         $this->setDescription('Shows and updates the current state of the queue every 2 seconds.');
-        $this->addOption('iterations', null, InputOption::VALUE_REQUIRED, 'If set, will limit the number of monitoring iterations done.');
+        $this->addRequiredValueOption('iterations', null, 'If set, will limit the number of monitoring iterations done.');
     }
 
     /**

@@ -12,7 +12,6 @@ namespace Piwik\Plugins\QueuedTracking\Commands;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
-use Symfony\Component\Console\Input\InputOption;
 
 class LockStatus extends ConsoleCommand
 {
@@ -21,7 +20,7 @@ class LockStatus extends ConsoleCommand
     {
         $this->setName('queuedtracking:lock-status');
         $this->setDescription('Outputs information for the status of each locked queue. Unlocking a queue is possible as well.');
-        $this->addOption('unlock', null, InputOption::VALUE_REQUIRED, 'If set will unlock the given queue.');
+        $this->addRequiredValueOption('unlock', null, 'If set will unlock the given queue.');
     }
 
     /**
