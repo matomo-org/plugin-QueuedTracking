@@ -1,4 +1,4 @@
-# Piwik QueuedTracking Plugin
+# Matomo QueuedTracking Plugin
 
 [![Plugin QueuedTracking Tests](https://github.com/matomo-org/plugin-QueuedTracking/actions/workflows/matomo-tests.yml/badge.svg)](https://github.com/matomo-org/plugin-QueuedTracking/actions/workflows/matomo-tests.yml)
 
@@ -14,10 +14,10 @@ Have a look at the FAQ for more information.
 ## Support
 
 In case of any issues with the plugin or feature wishes create a new issues here: 
-https://github.com/piwik/plugin-QueuedTracking/issues . In case you experience
+https://github.com/matomo-org/plugin-QueuedTracking/issues . In case you experience
 any problems please post the output of `./console queuedtracking:test` in the issue.
 
 ## TODO
 
-For usage with multiple redis servers we should lock differently:
-http://redis.io/topics/distlock eg using https://github.com/ronnylt/redlock-php
+For usage with multiple Redis servers we should lock differently:
+http://redis.io/topics/distlock e.g. using https://github.com/ronnylt/redlock-php
