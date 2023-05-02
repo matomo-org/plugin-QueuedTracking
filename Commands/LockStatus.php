@@ -12,9 +12,6 @@ namespace Piwik\Plugins\QueuedTracking\Commands;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 
 class LockStatus extends ConsoleCommand
 {
@@ -23,17 +20,16 @@ class LockStatus extends ConsoleCommand
     {
         $this->setName('queuedtracking:lock-status');
         $this->setDescription('Outputs information for the status of each locked queue. Unlocking a queue is possible as well.');
-        $this->addOption('unlock', null, InputOption::VALUE_REQUIRED, 'If set will unlock the given queue.');
+        $this->addRequiredValueOption('unlock', null, 'If set will unlock the given queue.');
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
      * @return int
      */
-
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function doExecute(): int
     {
+        $input = $this->getInput();
+        $output = $this->getOutput();
         $settings = Queue\Factory::getSettings();
         if ($settings->isRedisBackend()) {
             $systemCheck = new SystemCheck();
@@ -48,7 +44,7 @@ class LockStatus extends ConsoleCommand
 
         if ($keyToUnlock && in_array($keyToUnlock, $keys)) {
             $backend->delete($keyToUnlock);
-            $this->writeSuccessMessage($output, array(sprintf('Key %s unlocked', $keyToUnlock)));
+            $this->writeSuccessMessage(array(sprintf('Key %s unlocked', $keyToUnlock)));
         } elseif ($keyToUnlock) {
             $output->writeln(sprintf('<error>%s is not or no longer locked</error>', $keyToUnlock));
             $output->writeln(' ');

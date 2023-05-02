@@ -12,9 +12,6 @@ namespace Piwik\Plugins\QueuedTracking\Commands;
 use Piwik\Plugin\ConsoleCommand;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\SystemCheck;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 
 class PrintQueuedRequests extends ConsoleCommand
 {
@@ -23,17 +20,16 @@ class PrintQueuedRequests extends ConsoleCommand
     {
         $this->setName('queuedtracking:print-queued-requests');
         $this->setDescription('Prints the requests of each queue that will be processed next.');
-        $this->addOption('queue-id', null, InputOption::VALUE_REQUIRED, 'If set, will print only requests of that queue');
+        $this->addRequiredValueOption('queue-id', null, 'If set, will print only requests of that queue');
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
      * @return int
      */
-
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function doExecute(): int
     {
+        $input = $this->getInput();
+        $output = $this->getOutput();
         $settings = Queue\Factory::getSettings();
         if ($settings->isRedisBackend()) {
             $systemCheck = new SystemCheck();
