@@ -16,6 +16,9 @@ use Piwik\Config;
 class Queue
 {
     const PREFIX = 'trackingQueueV1';
+    const JSON_STRING_PARAMS = [
+        'uadata'
+    ];
 
     /**
      * @var Redis
@@ -92,6 +95,7 @@ class Queue
         $requests = array();
         foreach ($values as $value) {
             $params = json_decode($value, true);
+            $this->ensureJsonVarsAreStrings($params);
 
             $request = new RequestSet();
             $request->restoreState($params);
@@ -109,5 +113,27 @@ class Queue
     public function markRequestSetsAsProcessed()
     {
         $this->backend->removeFirstXValuesFromList($this->key, $this->numRequestsToProcessInBulk);
+    }
+
+    /**
+     * Check to make sure that we don't have any params that have already been decoded when a JSON string is expected.
+     * The request array is passed by reference so that any changes are made to the original array. If any params are
+     * found, this simply encodes them into a JSON string again.
+     *
+     * @param array $requestArray
+     * @return void
+     */
+    public function ensureJsonVarsAreStrings(&$requestArray)
+    {
+        if (!is_array($requestArray) || !is_array($requestArray['requests']) || empty($requestArray['requests'][0])) {
+            return;
+        }
+
+        $params = $requestArray['requests'][0];
+        foreach (self::JSON_STRING_PARAMS as $var) {
+            if (!empty($params[$var]) && !is_string($params[$var])) {
+                $requestArray['requests'][0][$var] = json_encode($params[$var]);
+            }
+        }
     }
 }
