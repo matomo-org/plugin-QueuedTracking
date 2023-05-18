@@ -14,6 +14,7 @@ use Piwik\Tracker\TrackerConfig;
 use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Processor;
+use Piwik\Version;
 
 class TestProcessor extends Processor {
 
@@ -221,7 +222,8 @@ class ProcessorTest extends IntegrationTestCase
         $this->acquireAllQueueLocks();
         $requestSetsToRetry = $this->processor->processRequestSets($tracker, $queuedRequestSets);
 
-        $expectedSets = [$requestSet1, $requestSet2];
+        // I couldn't find a param other than uadata that could throw a TypeError and it's not used in older versions
+        $expectedSets = version_compare(Version::VERSION, '4.12.0', '>') ? [$requestSet1, $requestSet2] : [];
         $this->assertEquals($expectedSets, $requestSetsToRetry);
 
         // verify request set 2 contains only valid ones
