@@ -56,7 +56,10 @@ class Handler
                 // empty
             } catch (\Throwable $th) {
                 // Log the error to help with debugging and visibility
-                $message = "There was an error while trying to process a queued tracking request.\nError:\n" . $th->getMessage() . "\nStack trace:\n" . $th->getTraceAsString();
+                $message = "There was an error while trying to process a queued tracking request.";
+                $message .= "\nError:\n" . $th->getMessage() . "\nStack trace:\n" . $th->getTraceAsString();
+                $message .= "\nFailed request:\n" . base64_encode(gzcompress(json_encode($request->getRawParams())));
+                $message .= "\nFailed request set:\n" . base64_encode(gzcompress(json_encode($requestSet->getState())));
                 StaticContainer::get(\Psr\Log\LoggerInterface::class)->warning($message);
 
                 // Wrap any throwables so that they are caught by the try/catch in Processor, which is expecting Exceptions
