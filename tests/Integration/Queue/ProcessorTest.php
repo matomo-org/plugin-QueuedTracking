@@ -204,6 +204,30 @@ class ProcessorTest extends IntegrationTestCase
         $this->assertCount(2, $requestSet5->getRequests());
     }
 
+    public function test_processRequestSets_ShouldCatchTypeError()
+    {
+        $tracker = $this->createTracker();
+        $queuedRequestSets = [
+            $requestSet1 = $this->buildRequestSet(5),
+            $requestSet2 = $this->buildRequestSet(2),
+        ];
+
+        // Make one of the requests have an unexpected value type
+        $requestParams = $requestSet2->getRequests()[1]->getRawParams();
+        // The uadata field is expected to be a JSON string and not an array. It will throw a TypeError during decoding
+        $requestParams['uadata'] = [];
+        $requestSet2->setRequests([$requestSet2->getRequests()[0], new Tracker\Request($requestParams)]);
+
+        $this->acquireAllQueueLocks();
+        $requestSetsToRetry = $this->processor->processRequestSets($tracker, $queuedRequestSets);
+
+        $expectedSets = [$requestSet1, $requestSet2];
+        $this->assertEquals($expectedSets, $requestSetsToRetry);
+
+        // verify request set 2 contains only valid ones
+        $this->assertCount(1, $requestSet2->getRequests());
+    }
+
     public function test_processRequestSets_ShouldReturnAnEmptyArray_IfNoRequestSetsAreGiven()
     {
         $requestSetsToRetry = $this->processor->processRequestSets($this->createTracker(), array());
