@@ -14,6 +14,7 @@ use Piwik\Tracker\TrackerConfig;
 use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Processor;
+use Piwik\Version;
 
 class TestProcessor extends Processor {
 
@@ -202,6 +203,39 @@ class ProcessorTest extends IntegrationTestCase
 
         // verify request set 5 contains only valid ones
         $this->assertCount(2, $requestSet5->getRequests());
+    }
+
+    public function test_processRequestSets_ShouldCatchTypeError()
+    {
+        $tracker = $this->createTracker();
+        $queuedRequestSets = [
+            $requestSet1 = $this->buildRequestSet(5),
+            $requestSet2 = $this->buildRequestSet(2),
+        ];
+
+        // Make one of the requests have an unexpected value type
+        $requestParams = $requestSet2->getRequests()[1]->getRawParams();
+        // The uadata field is expected to be a JSON string and not an array. It will throw a TypeError during decoding
+        $requestParams['uadata'] = [];
+        $requestSet2->setRequests([$requestSet2->getRequests()[0], new Tracker\Request($requestParams)]);
+
+        $this->acquireAllQueueLocks();
+        $requestSetsToRetry = $this->processor->processRequestSets($tracker, $queuedRequestSets);
+
+        // I couldn't find a param other than uadata that could throw a TypeError and it's not used in older versions
+        $isNewerMatomo = version_compare(Version::VERSION, '4.12.0', '>');
+        $expectedSets = $isNewerMatomo ? [$requestSet1, $requestSet2] : [];
+        $expectedRequestCount = $isNewerMatomo ? 1 : 2;
+        $this->assertEquals($expectedSets, $requestSetsToRetry);
+
+        // verify request set 2 contains only valid ones
+        $this->assertCount($expectedRequestCount, $requestSet2->getRequests());
+
+        // If the requests to retry isn't empty, run it again and make sure there's nothing to retry
+        if (!empty($requestSetsToRetry)) {
+            $requestSetsToRetry = $this->processor->processRequestSets($tracker, $requestSetsToRetry);
+            $this->assertEquals([], $requestSetsToRetry);
+        }
     }
 
     public function test_processRequestSets_ShouldReturnAnEmptyArray_IfNoRequestSetsAreGiven()

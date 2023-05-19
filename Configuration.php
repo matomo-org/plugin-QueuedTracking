@@ -16,6 +16,8 @@ class Configuration
     const DEFAULT_NOTIFY_THRESHOLD = 250000;
     const KEY_NOTIFY_EMAILS = 'notify_queue_threshold_emails';
     const KEY_NOTIFY_THRESHOLD = 'notify_queue_threshold_single_queue';
+    const LOG_FAILED_TRACKING_REQUESTS = 'log_failed_tracking_request_body';
+    const LOG_FAILED_TRACKING_REQUESTS_DEFAULT = 0;
 
     public function install()
     {
@@ -74,6 +76,11 @@ class Configuration
         }
 
         return $value;
+    }
+
+    public function shouldLogFailedTrackingRequestsBody(): bool
+    {
+        return (bool) $this->getConfigValue(self::LOG_FAILED_TRACKING_REQUESTS, self::LOG_FAILED_TRACKING_REQUESTS_DEFAULT);
     }
 
     private function getConfig()

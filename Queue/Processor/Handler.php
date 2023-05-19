@@ -10,8 +10,10 @@
 namespace Piwik\Plugins\QueuedTracking\Queue\Processor;
 
 use Piwik\Common;
+use Piwik\Container\StaticContainer;
 use Piwik\Db;
 use Piwik\Exception\UnexpectedWebsiteFoundException;
+use Piwik\Plugins\QueuedTracking\Configuration;
 use Piwik\Tracker;
 use Piwik\Tracker\RequestSet;
 use Exception;
@@ -53,6 +55,20 @@ class Handler
                 $this->count++;
             } catch (UnexpectedWebsiteFoundException $ex) {
                 // empty
+            } catch (\Throwable $th) {
+                // Log the error to help with debugging and visibility
+                $message = "There was an error while trying to process a queued tracking request.";
+                $message .= "\nError:\n" . $th->getMessage() . "\nStack trace:\n" . $th->getTraceAsString();
+                $configuration = new Configuration();
+                if ($configuration->shouldLogFailedTrackingRequestsBody()) {
+                    // Since the config should only be enabled during debugging, we should be alright using plain text
+                    $message .= "\nFailed request set:\n" . json_encode($requestSet->getState());
+                }
+                // TODO - Switch this to use \Piwik\Log\LoggerInterface for Matomo 5 release
+                StaticContainer::get(\Psr\Log\LoggerInterface::class)->warning($message);
+
+                // Wrap any throwables so that they are caught by the try/catch in Processor, which is expecting Exceptions
+                throw ($th instanceof \Exception ? $th : new \Exception($th->getMessage(), $th->getCode(), $th));
             }
         }
 

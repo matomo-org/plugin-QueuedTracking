@@ -114,6 +114,11 @@ __How can I debug in case something goes wrong?__
 * Enable tracker debug mode in `config.ini.php` via `[Tracker] debug=1` if processing requests during tracking is enabled.
 * Use the command `./console queuedtracking:print-queued-requests` to view the next requests to process in each queue. If you execute this command twice within 1-10 minutes, and it outputs the same, the queue is not being processed most likely indicating a problem.
 * You can add the tracking parameter `&queuedtracking=0` to the tracking request to insert a tracking request directly into the database instead of into the queued tracking handler
+* Plugin version 4.0.7 and greater logs a warning level message containing the error and has a new `log_failed_tracking_request_body` configuration. The new config is only for debugging purposes as always recording the request body for failed requests could be a privacy concern and considerably increase the size of the log file. To use the config, you would edit your `config/config.ini.php` to look something like the following:
+```
+[QueuedTracking]
+log_failed_tracking_request_body = 1
+```
 
 __I am using the Log Importer in combination with Queued Tracking, is there something to consider?__
 
