@@ -223,13 +223,19 @@ class ProcessorTest extends IntegrationTestCase
         $requestSetsToRetry = $this->processor->processRequestSets($tracker, $queuedRequestSets);
 
         // I couldn't find a param other than uadata that could throw a TypeError and it's not used in older versions
-        $isOlderMatomo = version_compare(Version::VERSION, '4.12.0', '>');
-        $expectedSets = $isOlderMatomo ? [$requestSet1, $requestSet2] : [];
-        $expectedRequestCount = $isOlderMatomo ? 1 : 2;
+        $isNewerMatomo = version_compare(Version::VERSION, '4.12.0', '>');
+        $expectedSets = $isNewerMatomo ? [$requestSet1, $requestSet2] : [];
+        $expectedRequestCount = $isNewerMatomo ? 1 : 2;
         $this->assertEquals($expectedSets, $requestSetsToRetry);
 
         // verify request set 2 contains only valid ones
         $this->assertCount($expectedRequestCount, $requestSet2->getRequests());
+
+        // If the requests to retry isn't empty, run it again and make sure there's nothing to retry
+        if (!empty($requestSetsToRetry)) {
+            $requestSetsToRetry = $this->processor->processRequestSets($tracker, $requestSetsToRetry);
+            $this->assertEquals([], $requestSetsToRetry);
+        }
     }
 
     public function test_processRequestSets_ShouldReturnAnEmptyArray_IfNoRequestSetsAreGiven()
