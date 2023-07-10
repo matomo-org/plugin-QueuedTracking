@@ -73,16 +73,16 @@ class QueueTest extends IntegrationTestCase
 
         $actual = $this->buildRequestSetWithIdSite(3)->getRequests();
 
-        $this->assertEquals($this->removeTimestamps($expected), $this->removeTimestamps($actual));
+        $this->assertEquals($this->setTimestamps($expected), $this->setTimestamps($actual));
 
         $this->assertTrue($this->buildRequestSetWithIdSite(10) instanceof RequestSet);
         $this->assertCount(10, $this->buildRequestSetWithIdSite(10)->getRequests());
     }
 
-    private function removeTimestamps(array $array): array
+    private function setTimestamps(array $array): array
     {
         foreach ($array as $request) {
-            unset($request->timestamp);
+            $request->setCurrentTimestamp(1);
         }
         return $array;
     }
