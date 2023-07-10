@@ -65,14 +65,26 @@ class QueueTest extends IntegrationTestCase
 
         $this->assertTrue($this->buildRequestSetWithIdSite(3) instanceof RequestSet);
 
-        $this->assertEquals(array(
-            new Request(array('idsite' => 1)),
-            new Request(array('idsite' => 2)),
-            new Request(array('idsite' => 3)),
-        ), $this->buildRequestSetWithIdSite(3)->getRequests());
+        $expected = [
+            new Request(['idsite' => 1]),
+            new Request(['idsite' => 2]),
+            new Request(['idsite' => 3]),
+        ];
+
+        $actual = $this->buildRequestSetWithIdSite(3)->getRequests();
+
+        $this->assertEquals($this->removeTimestamps($expected), $this->removeTimestamps($actual));
 
         $this->assertTrue($this->buildRequestSetWithIdSite(10) instanceof RequestSet);
         $this->assertCount(10, $this->buildRequestSetWithIdSite(10)->getRequests());
+    }
+
+    private function removeTimestamps(array $array): array
+    {
+        foreach ($array as $request) {
+            unset($request->timestamp);
+        }
+        return $array;
     }
 
     public function test_internalBuildRequestsSet_ShouldBeAbleToSpecifyTheSiteId()
