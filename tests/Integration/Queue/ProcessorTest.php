@@ -215,27 +215,18 @@ class ProcessorTest extends IntegrationTestCase
 
         // Make one of the requests have an unexpected value type
         $requestParams = $requestSet2->getRequests()[1]->getRawParams();
-        // The uadata field is expected to be a JSON string and not an array. It will throw a TypeError during decoding
-        $requestParams['uadata'] = [];
+        // The uadata field is expected to be a JSON string and not an array. This shouldn't cause issues
+        $requestParams['uadata'] = ['platform' => 'Windows'];
         $requestSet2->setRequests([$requestSet2->getRequests()[0], new Tracker\Request($requestParams)]);
 
         $this->acquireAllQueueLocks();
         $requestSetsToRetry = $this->processor->processRequestSets($tracker, $queuedRequestSets);
 
         // I couldn't find a param other than uadata that could throw a TypeError and it's not used in older versions
-        $isNewerMatomo = version_compare(Version::VERSION, '4.12.0', '>');
-        $expectedSets = $isNewerMatomo ? [$requestSet1, $requestSet2] : [];
-        $expectedRequestCount = $isNewerMatomo ? 1 : 2;
-        $this->assertEquals($expectedSets, $requestSetsToRetry);
+        $this->assertEquals([], $requestSetsToRetry);
 
         // verify request set 2 contains only valid ones
-        $this->assertCount($expectedRequestCount, $requestSet2->getRequests());
-
-        // If the requests to retry isn't empty, run it again and make sure there's nothing to retry
-        if (!empty($requestSetsToRetry)) {
-            $requestSetsToRetry = $this->processor->processRequestSets($tracker, $requestSetsToRetry);
-            $this->assertEquals([], $requestSetsToRetry);
-        }
+        $this->assertCount(2, $requestSet2->getRequests());
     }
 
     public function test_processRequestSets_ShouldReturnAnEmptyArray_IfNoRequestSetsAreGiven()
