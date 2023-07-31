@@ -3,6 +3,9 @@
 5.0.0
 - Compatibility with Matomo 5.0
  
+4.0.7
+- Improved error handling for tracking requests
+
 4.0.6
 - Started using flushDB instead of flushAll for Redis
 
