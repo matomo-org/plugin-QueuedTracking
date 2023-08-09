@@ -1,5 +1,8 @@
 ## Changelog
 
+5.0.2
+- Fix merge issue in previous release
+
 5.0.1
 - Compatibility with Matomo 5.0.0-b4
 
