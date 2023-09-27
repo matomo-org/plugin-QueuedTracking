@@ -79,27 +79,23 @@ class QueueTest extends IntegrationTestCase
         $this->assertCount(10, $this->buildRequestSetWithIdSite(10)->getRequests());
     }
 
-    private function setTimestamps(array $array): array
-    {
-        foreach ($array as $request) {
-            $request->setCurrentTimestamp(1);
-        }
-        return $array;
-    }
-
     public function test_internalBuildRequestsSet_ShouldBeAbleToSpecifyTheSiteId()
     {
-        $this->assertEquals(array(
-            new Request(array('idsite' => 2)),
-            new Request(array('idsite' => 2)),
-            new Request(array('idsite' => 2)),
-        ), $this->buildRequestSetWithIdSite(3, 2)->getRequests());
+        $expected = [
+            new Request(['idsite' => 2]),
+            new Request(['idsite' => 2]),
+            new Request(['idsite' => 2]),
+        ];
+
+        $actual = $this->buildRequestSetWithIdSite(3, 2)->getRequests();
+
+        $this->assertEquals($this->setTimestamps($expected), $this->setTimestamps($actual));
     }
 
     public function test_internalBuildManyRequestsContainingRequests_ShouldReturnManyRequestObjects()
     {
         $this->assertEquals(array(), $this->buildManyRequestSets(0));
-        $this->assertEquals(array($this->buildRequestSetWithIdSite(1)), $this->buildManyRequestSets(1));
+        $this->assertManyRequestSetsAreEqual(array($this->buildRequestSetWithIdSite(1)), $this->buildManyRequestSets(1));
 
         $this->assertManyRequestSetsAreEqual(array(
             $this->buildRequestSetWithIdSite(1),
@@ -350,4 +346,11 @@ class QueueTest extends IntegrationTestCase
         }
     }
 
+    private function setTimestamps(array $array): array
+    {
+        foreach ($array as $request) {
+            $request->setCurrentTimestamp(1);
+        }
+        return $array;
+    }
 }
