@@ -1,1 +1,6 @@
-{}
+{
+    "QueuedTracking": {
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "एकाधिक होस्ट या पोर्ट केवल तभी कॉन्फ़िगर किए जा सकते हैं जब रेडिस सेंटिनल चालू हो। प्लगइन README आपको बताएगा कि ऐसा कैसे करना है।",
+        "NumHostsNotMatchNumPorts": "कॉन्फ़िगर किए गए होस्ट की संख्या कॉन्फ़िगर किए गए पोर्ट की संख्या से मेल नहीं खाती है।"
+    }
+}
