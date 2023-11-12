@@ -1,1 +1,6 @@
-{}
+{
+    "QueuedTracking": {
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Hainbat ostalari edo ataka konfiguratu daitezke Redis Sentinel gaituta dagoenean. Pluginaren READMEan ikus dezakezu hori nola egin.",
+        "NumHostsNotMatchNumPorts": "Konfiguratutako ostalari kopurua ez dator bat konfiguratutako ataka kopuruarekin."
+    }
+}
