@@ -11,6 +11,7 @@ namespace Piwik\Plugins\QueuedTracking;
 use Piwik\Plugins\QueuedTracking\Queue\Backend;
 use Piwik\Tracker\RequestSet;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
+use Piwik\Config;
 
 class Queue
 {
@@ -34,6 +35,8 @@ class Queue
 
         $this->id  = $id;
         $this->key = self::PREFIX;
+        $host = Config::getInstance()->General['trusted_hosts'][0] ?? false;
+        if ($host !== false) $this->key .= '_'.$host;
 
         if (!empty($id)) {
             $this->key .= '_' . $id;
