@@ -1,1 +1,6 @@
-{}
+{
+    "QueuedTracking": {
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "જ્યારે રેડીસ સેન્ટીનેલ ચાલુ હોય ત્યારે જ બહુવિધ હોસ્ટ અથવા પોર્ટ રૂપરેખાંકિત શકાય છે. પ્લગઇનની README તમને કહેશે કે આવું કેવી રીતે કરવું.",
+        "NumHostsNotMatchNumPorts": "રૂપરેખાંકિત હોસ્ટની સંખ્યા રૂપરેખાંકિત પોર્ટની સંખ્યા સાથે મેળ ખાતી નથી."
+    }
+}
