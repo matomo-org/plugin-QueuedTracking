@@ -30,6 +30,7 @@ class Test extends ConsoleCommand
     protected function configure()
     {
         $this->setName('queuedtracking:test');
+        $this->addRequiredValueOption('skip-max-memory-config-check', null, 'Do not check for MaxMemory config values ');
         $this->setDescription('Test your Redis connection get some information about your current system.');
     }
 
@@ -48,9 +49,12 @@ class Test extends ConsoleCommand
 
     protected function doExecute(): int
     {
+        $input = $this->getInput();
         $output = $this->getOutput();
         $trackerEnvironment = new Environment('tracker');
         $trackerEnvironment->init();
+
+        $shouldSkipCheckingMemoryConfigValues = $input->getOption('skip-max-memory-config-check');
 
         $settings = Queue\Factory::getSettings();
         $isUsingRedis = $settings->isRedisBackend();
@@ -102,7 +106,7 @@ class Test extends ConsoleCommand
         $output->writeln('Memory: ' . var_export($backend->getMemoryStats(), 1));
 
         $redis = $backend->getConnection();
-        if ($isUsingRedis) {
+        if ($isUsingRedis && !$shouldSkipCheckingMemoryConfigValues) {
 
             $evictionPolicy = $this->getRedisConfig($redis, 'maxmemory-policy');
             $output->writeln('MaxMemory Eviction Policy config: ' . $evictionPolicy);
