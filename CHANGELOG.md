@@ -1,5 +1,8 @@
 ## Changelog
 
+5.0.3
+- Added code to skip maxmemory config check when --skip-max-memory-config-check=1
+
 5.0.2
 - Fix merge issue in previous release
 
