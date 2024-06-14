@@ -2,7 +2,7 @@
     "QueuedTracking": {
         "RedisHostFieldTitle": "Redis host or unix socket",
         "RedisHostFieldHelp": "Remote host or unix socket of the Redis server. Max 500 characters are allowed.",
-        "RedisHostFieldHelpExtended": "If your host requires a TLS connection, you can prepend the TLS protocol to your host like: tls://example-host.com",
+        "RedisHostFieldHelpExtended": "If your host requires a TLS connection, you can prepend the TLS protocol to your host like: tls://example-host.com. If that does not work, make sure that certificates are configured correctly on your Matomo server.",
         "RedisHostFieldHelpExtendedSentinel": "As you are using Redis Sentinel, you can use a comma separated list. Make sure to specify as many hosts as you have specified ports. For example to configure two servers “127.0.0.1:26379” and “127.0.0.2:26879” specify “127.0.0.1,127.0.0.2” as host and “26379,26879” as ports.",
         "RedisPortFieldTitle": "Redis port",
         "RedisPortFieldHelp": "Port the Redis server is running on. Value should be between 1 and 65535. Use 0 if you are using unix socket to connect to Redis server.",
