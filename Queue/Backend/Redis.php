@@ -214,7 +214,7 @@ end';
     {
         $this->connectIfNeeded();
 
-        return $this->redis->keys($pattern);
+        return $this->redis->keys($pattern) ?: [];
     }
 
     public function expireIfKeyHasValue($key, $value, $ttlInSeconds)

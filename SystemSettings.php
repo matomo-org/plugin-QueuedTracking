@@ -14,6 +14,8 @@ use Piwik\Settings\FieldConfig;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Piwik;
 use Exception;
+use Piwik\Validators\CharacterLength;
+use Piwik\Validators\NumberRange;
 
 /**
  * Defines Settings for QueuedTracking.
@@ -92,22 +94,21 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         $self = $this;
 
         return $this->makeSetting('redisHost', $default = '127.0.0.1', FieldConfig::TYPE_STRING, function (FieldConfig $field) use ($self) {
-            $field->title = 'Redis host or unix socket';
+            $field->title = Piwik::translate('QueuedTracking_RedisHostFieldTitle');
             $field->condition = 'backend=="redis"';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 500);
-            $field->inlineHelp = 'Remote host or unix socket of the Redis server. Max 500 characters are allowed.';
+            $field->inlineHelp = Piwik::translate('QueuedTracking_RedisHostFieldHelp') . '</br></br>'
+                . Piwik::translate('QueuedTracking_RedisHostFieldHelpExtended') . '</br>';
 
             if ($self->isUsingSentinelBackend()) {
-                $field->inlineHelp .= $self->getInlineHelpSentinelMultipleServers('hosts');
+                $field->inlineHelp .= '</br>' . Piwik::translate('QueuedTracking_RedisHostFieldHelpExtendedSentinel') . '</br>';
             }
 
             $field->validate = function ($value) use ($self) {
                 $self->checkMultipleServersOnlyConfiguredWhenSentinelIsEnabled($value);
 
-                if (strlen($value) > 500) {
-                    throw new \Exception('Max 500 characters allowed');
-                }
+                (new CharacterLength(1, 500))->validate($value);
             };
 
             $field->transform = function ($value) use ($self) {
@@ -128,36 +129,27 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         }
 
         return $this->makeSetting('redisPort', $default, FieldConfig::TYPE_STRING, function (FieldConfig $field) use ($self) {
-            $field->title = 'Redis port';
+            $field->title = Piwik::translate('QueuedTracking_RedisPortFieldTitle');
             $field->condition = 'backend=="redis"';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 100);
-            $field->inlineHelp = 'Port the Redis server is running on. Value should be between 1 and 65535. Use 0 if you are using unix socket to connect to Redis server.';
+            $field->inlineHelp = Piwik::translate('QueuedTracking_RedisPortFieldHelp') . '</br>';
 
             if ($self->isUsingSentinelBackend()) {
-                $field->inlineHelp .= $self->getInlineHelpSentinelMultipleServers('ports');
+                $field->inlineHelp .= '</br>' . Piwik::translate('QueuedTracking_RedisHostFieldHelpExtendedSentinel') . '</br>';
             }
 
-            $field->validate = function ($value) use ($self) {
-                $self->checkMultipleServersOnlyConfiguredWhenSentinelIsEnabled($value);
-                $ports = $self->convertCommaSeparatedValueToArray($value);
-
-                foreach ($ports as $port) {
-                    if (!is_numeric($port)) {
-                        throw new \Exception('A port has to be a number');
+            if (!$self->isUsingSentinelBackend()) {
+                $field->validators[] = new NumberRange(1, 65535);
+            } else {
+                $field->validate = function ($value) use ($self) {
+                    $ports = explode(',', $value);
+                    foreach ($ports as $port) {
+                        (new NumberRange(1, 65535))->validate(trim($port));
                     }
+                };
+            }
 
-                    $port = (int) $port;
-
-                    if ($port < 1 && !$this->isUsingUnixSocket()) {
-                        throw new \Exception('Port has to be at least 1');
-                    }
-
-                    if ($port >= 65535) {
-                        throw new \Exception('Port should be max 65535');
-                    }
-                }
-            };
             $field->transform = function ($value) use ($self) {
                 $ports = $self->convertCommaSeparatedValueToArray($value);
                 $ports = array_map('intval', $ports);
@@ -170,21 +162,13 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     private function createRedisTimeoutSetting()
     {
         $setting = $this->makeSetting('redisTimeout', $default = 0.0, FieldConfig::TYPE_FLOAT, function (FieldConfig $field) {
-            $field->title = 'Redis timeout';
+            $field->title = Piwik::translate('QueuedTracking_RedisTimeoutFieldTitle');
             $field->condition = 'backend=="redis"';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 5);
-            $field->inlineHelp = 'Redis connection timeout in seconds. "0.0" meaning unlimited. Can be a float eg "2.5" for a connection timeout of 2.5 seconds.';
-            $field->validate = function ($value) {
-
-                if (!is_numeric($value)) {
-                    throw new \Exception('Timeout should be numeric, eg "0.1"');
-                }
-
-                if (strlen($value) > 5) {
-                    throw new \Exception('Max 5 characters allowed');
-                }
-            };
+            $field->inlineHelp = Piwik::translate('QueuedTracking_RedisTimeoutFieldTitle') . '</br>';
+            $field->validators[] = new NumberRange();
+            $field->validators[] = new CharacterLength(1, 5);
         });
 
         // we do not expose this one to the UI currently. That's on purpose
@@ -197,21 +181,11 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     {
         $numQueueWorkers = new NumWorkers('numQueueWorkers', $default = 1, FieldConfig::TYPE_INT, $this->pluginName);
         $numQueueWorkers->setConfigureCallback(function (FieldConfig $field) {
-            $field->title = 'Number of queue workers';
+            $field->title = Piwik::translate('QueuedTracking_NumberOfQueueWorkersFieldTitle');
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 5);
-            $field->inlineHelp = 'Number of allowed maximum queue workers. Accepts a number between 1 and 16. Best practice is to set the number of CPUs you want to make available for queue processing. Be aware you need to make sure to start the workers manually. We recommend to not use 9-15 workers, rather use 8 or 16 as the queue might not be distributed evenly into different queues.';
-            $field->validate = function ($value) {
-
-                if (!is_numeric($value)) {
-                    throw new \Exception('Number of queue workers should be an integer, eg "6"');
-                }
-
-                $value = (int) $value;
-                if ($value > 16 || $value < 1) {
-                    throw new \Exception('Only 1-16 workers allowed');
-                }
-            };
+            $field->inlineHelp = Piwik::translate('QueuedTracking_NumberOfQueueWorkersFieldHelp') . '</br>';
+            $field->validators[] = new NumberRange(1, 16);
         });
 
         $this->addSetting($numQueueWorkers);
@@ -222,36 +196,25 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     private function createRedisPasswordSetting()
     {
         return $this->makeSetting('redisPassword', $default = '', FieldConfig::TYPE_STRING, function (FieldConfig $field) {
-            $field->title = 'Redis password';
+            $field->title = Piwik::translate('QueuedTracking_RedisPasswordFieldTitle');
             $field->condition = 'backend=="redis"';
             $field->uiControl = FieldConfig::UI_CONTROL_PASSWORD;
             $field->uiControlAttributes = array('size' => 128);
-            $field->inlineHelp = 'Password set on the Redis server, if any. Redis can be instructed to require a password before allowing clients to execute commands.';
-            $field->validate = function ($value) {
-                if (is_string($value) && strlen($value) > 128) {
-                    throw new \Exception('Max 128 characters allowed');
-                }
-            };
+            $field->inlineHelp = Piwik::translate('QueuedTracking_RedisPasswordFieldHelp') . '</br>';
+            $field->validators[] = new CharacterLength(null, 128);
         });
     }
 
     private function createRedisDatabaseSetting()
     {
         return $this->makeSetting('redisDatabase', $default = 0, FieldConfig::TYPE_INT, function (FieldConfig $field) {
-            $field->title = 'Redis database';
+            $field->title = Piwik::translate('QueuedTracking_RedisDatabaseFieldTitle');
             $field->condition = 'backend=="redis"';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 5);
-            $field->inlineHelp = 'In case you are using Redis for caching make sure to use a different database.';
-            $field->validate = function ($value) {
-                if (!is_numeric($value) || false !== strpos($value, '.')) {
-                    throw new \Exception('The database has to be an integer');
-                }
-
-                if (strlen($value) > 5) {
-                    throw new \Exception('Max 5 digits allowed');
-                }
-            };
+            $field->inlineHelp = Piwik::translate('QueuedTracking_RedisDatabaseFieldHelp') . '</br>';
+            $field->validators[] = new NumberRange();
+            $field->validators[] = new CharacterLength(1, 5);
         });
     }
 
@@ -260,9 +223,9 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         $self = $this;
 
         return $this->makeSetting('queueEnabled', $default = false, FieldConfig::TYPE_BOOL, function (FieldConfig $field) use ($self) {
-            $field->title = 'Queue enabled';
+            $field->title = Piwik::translate('QueuedTracking_QueueEnabledFieldTitle');
             $field->uiControl = FieldConfig::UI_CONTROL_CHECKBOX;
-            $field->inlineHelp = 'If enabled, all tracking requests will be written into a queue instead of the directly into the database. Requires a Redis server and phpredis PHP extension if using Redis as a backend.';
+            $field->inlineHelp = Piwik::translate('QueuedTracking_QueueEnabledFieldHelp') . '</br>';
             $field->validate = function ($value) use ($self) {
                 $value = (bool) $value;
 
@@ -285,35 +248,21 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     private function createNumRequestsToProcessSetting()
     {
         return $this->makeSetting('numRequestsToProcess', $default = 25, FieldConfig::TYPE_INT, function (FieldConfig $field) {
-            $field->title = 'Number of requests that are processed in one batch';
+            $field->title = Piwik::translate('QueuedTracking_NumRequestsToProcessFieldTitle');
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 3);
-            $field->inlineHelp = 'Defines how many requests will be picked out of the queue and processed at once. Enter a number which is >= 1.';
-            $field->validate = function ($value, $setting) {
-
-                if (!is_numeric($value)) {
-                    throw new \Exception('Value should be a number');
-                }
-
-                if ((int) $value < 1) {
-                    throw new \Exception('Number should be 1 or higher');
-                }
-            };
+            $field->inlineHelp = Piwik::translate('QueuedTracking_NumRequestsToProcessFieldHelp') . '</br>';
+            $field->validators[] = new NumberRange(1);
         });
     }
 
     private function createProcessInTrackingRequestSetting()
     {
         return $this->makeSetting('processDuringTrackingRequest', $default = true, FieldConfig::TYPE_BOOL, function (FieldConfig $field) {
-            $field->title = 'Process during tracking request';
+            $field->title = Piwik::translate('QueuedTracking_ProcessDuringRequestFieldTitle');
             $field->uiControl = FieldConfig::UI_CONTROL_CHECKBOX;
-            $field->inlineHelp = 'If enabled, we will process all requests within a queue during a normal tracking request once there are enough requests in the queue. This will not slow down the tracking request. If disabled, you have to setup a cronjob that executes the "./console queuedtracking:process" console command eg every minute to process the queue.';
+            $field->inlineHelp = Piwik::translate('QueuedTracking_ProcessDuringRequestFieldHelp', ['<code>', '</code>']) . '</br>';
         });
-    }
-
-    public function getInlineHelpSentinelMultipleServers($nameOfSetting)
-    {
-        return 'As you are using Redis Sentinel, you can define multiple ' . $nameOfSetting . ' comma separated. Make sure to specify as many hosts as you have specified ports. For example to configure two servers "127.0.0.1:26379" and "127.0.0.2:26879" specify "127.0.0.1,127.0.0.2" as host and "26379,26879" as ports.';
     }
 
     public function checkMultipleServersOnlyConfiguredWhenSentinelIsEnabled($value)
@@ -354,37 +303,33 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     private function createBackendSetting()
     {
         return $this->makeSetting('backend', $default = 'redis', FieldConfig::TYPE_STRING, function (FieldConfig $field) {
-            $field->title = 'Backend';
+            $field->title = Piwik::translate('QueuedTracking_BackendSettingFieldTitle');
             $field->uiControl = FieldConfig::UI_CONTROL_SINGLE_SELECT;
             $field->availableValues = array('redis' => 'Redis', 'mysql' => 'MySQL');
-            $field->inlineHelp = 'Select the backend you want to use for this feature. If you do not have any experience with Redis or it is not available on your server, we recommend to use Mysql.';
+            $field->inlineHelp = Piwik::translate('QueuedTracking_BackendSettingFieldHelp') . '</br>';
         });
     }
 
     private function createUseSentinelBackend()
     {
         return $this->makeSetting('useSentinelBackend', $default = false, FieldConfig::TYPE_BOOL, function (FieldConfig $field) {
-            $field->title = 'Enable Redis Sentinel';
+            $field->title = Piwik::translate('QueuedTracking_UseSentinelFieldTitle');
             $field->uiControl = FieldConfig::UI_CONTROL_CHECKBOX;
             $field->uiControlAttributes = array('size' => 3);
             $field->condition = 'backend=="redis"';
-            $field->inlineHelp = 'If enabled, the Redis Sentinel feature will be used. Make sure to update host and port if needed. Once you have enabled and saved the change, you will be able to specify multiple hosts and ports comma separated.';
+            $field->inlineHelp = Piwik::translate('QueuedTracking_UseSentinelFieldHelp') . '</br>';
         });
     }
 
     private function createSetSentinelMasterName()
     {
         return $this->makeSetting('sentinelMasterName', $default = 'mymaster', FieldConfig::TYPE_STRING, function (FieldConfig $field) {
-            $field->title = 'Redis Sentinel Master name';
+            $field->title = Piwik::translate('QueuedTracking_MasterNameFieldTitle');
             $field->condition = 'backend=="redis"';
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 200);
-            $field->inlineHelp = 'The sentinel master name only needs to be configured if Sentinel is enabled.';
-            $field->validate = function ($value) {
-                if (!empty($value) && strlen($value) > 200) {
-                    throw new \Exception('Max 200 characters are allowed');
-                }
-            };
+            $field->inlineHelp = Piwik::translate('QueuedTracking_MasterNameFieldHelp') . '</br>';
+            $field->validators[] = new CharacterLength(0, 200);
             $field->transform = function ($value) {
                 if (empty($value)) {
                     return '';
