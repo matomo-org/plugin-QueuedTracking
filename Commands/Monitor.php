@@ -74,8 +74,8 @@ class Monitor extends ConsoleCommand
             $message = sprintf('%s (%s) request sets left in queue. %s used memory (%s peak). %d workers active.        ',
                                array_sum($numInQueue),
                                implode('+', $numInQueue),
-                               $memory['used_memory_human'],
-                               $memory['used_memory_peak_human'],
+                               $memory['used_memory_human'] ?? 'Unknown',
+                               $memory['used_memory_peak_human'] ?? 'unknown',
                                $lock->getNumberOfAcquiredLocks());
             $output->write("\x0D");
             $output->write($message);
