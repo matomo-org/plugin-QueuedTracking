@@ -1,5 +1,6 @@
 {
     "QueuedTracking": {
+        "ExceptionValueIsNotInt": "The value is not an integer",
         "RedisHostFieldTitle": "Redis host or unix socket",
         "RedisHostFieldHelp": "Remote host or unix socket of the Redis server. Max 500 characters are allowed.",
         "RedisHostFieldHelpExtended": "If your host requires a TLS connection, you can prepend the TLS protocol to your host like: tls://example-host.com. If that does not work, make sure that certificates are configured correctly on your Matomo server.",

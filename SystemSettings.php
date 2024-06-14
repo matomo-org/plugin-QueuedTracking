@@ -58,6 +58,14 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     /** @var Setting */
     public $sentinelMasterName;
 
+    protected function assignValueIsIntValidator (FieldConfig $field) {
+        $field->validate = function ($value) {
+            if ((is_string($value) && !ctype_digit($value)) || (!is_string($value) && !is_int($value))) {
+                throw new \Exception(Piwik::translate('QueuedTracking_ExceptionValueIsNotInt'));
+            }
+        };
+    }
+
     protected function init()
     {
         $this->backend = $this->createBackendSetting();
@@ -139,16 +147,18 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
                 $field->inlineHelp .= '</br>' . Piwik::translate('QueuedTracking_RedisHostFieldHelpExtendedSentinel') . '</br>';
             }
 
-            if (!$self->isUsingSentinelBackend()) {
-                $field->validators[] = new NumberRange(1, 65535);
-            } else {
-                $field->validate = function ($value) use ($self) {
+            $field->validate = function ($value) use ($self) {
+                $self->checkMultipleServersOnlyConfiguredWhenSentinelIsEnabled($value);
+
+                if (!$self->isUsingSentinelBackend()) {
+                    (new NumberRange(1, 65535))->validate($value);
+                } else {
                     $ports = explode(',', $value);
                     foreach ($ports as $port) {
                         (new NumberRange(1, 65535))->validate(trim($port));
                     }
-                };
-            }
+                }
+            };
 
             $field->transform = function ($value) use ($self) {
                 $ports = $self->convertCommaSeparatedValueToArray($value);
@@ -185,6 +195,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 5);
             $field->inlineHelp = Piwik::translate('QueuedTracking_NumberOfQueueWorkersFieldHelp') . '</br>';
+            $this->assignValueIsIntValidator($field);
             $field->validators[] = new NumberRange(1, 16);
         });
 
@@ -215,6 +226,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
             $field->inlineHelp = Piwik::translate('QueuedTracking_RedisDatabaseFieldHelp') . '</br>';
             $field->validators[] = new NumberRange();
             $field->validators[] = new CharacterLength(1, 5);
+            $this->assignValueIsIntValidator($field);
         });
     }
 
