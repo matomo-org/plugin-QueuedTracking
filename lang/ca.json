@@ -1,6 +1,33 @@
 {
     "QueuedTracking": {
+        "BackendSettingFieldHelp": "Seleccioneu el backend que voleu utilitzar per a aquesta funció. Si no teniu cap experiència amb Redis o no està disponible al vostre servidor, us recomanem que utilitzeu Mysql.",
+        "BackendSettingFieldTitle": "Backend",
+        "ExceptionValueIsNotInt": "El valor no és un nombre enter",
+        "MasterNameFieldHelp": "El nom del Sentinel Master només s'ha de configurar si Sentinel està habilitat.",
+        "MasterNameFieldTitle": "Nom de Redis Sentinel Master",
         "MultipleServersOnlyConfigurableIfSentinelEnabled": "Només es poden configurar múltiples hostes o ports quan Redis Sentinel està activat. El connector README us indicarà com fer-ho.",
-        "NumHostsNotMatchNumPorts": "El nombre d'hostes configurats no coincideix amb el nombre de ports configurats."
+        "NumHostsNotMatchNumPorts": "El nombre d'hostes configurats no coincideix amb el nombre de ports configurats.",
+        "NumRequestsToProcessFieldHelp": "Defineix quantes sol·licituds es recolliran de la cua i es processaran alhora. Introduïu un número que sigui &gt;= 1.",
+        "NumRequestsToProcessFieldTitle": "Nombre de sol·licituds que es processen en un lot",
+        "NumberOfQueueWorkersFieldHelp": "Nombre màxim de treballadors de cua permesos. Accepta un número entre 1 i 16. La millor pràctica és establir el nombre de CPU que voleu que estiguin disponibles per al processament de la cua. Tingueu en compte que heu d'assegurar-vos d'iniciar els treballadors manualment. Us recomanem que no utilitzeu entre 9 i 15 treballadors, sinó que en utilitzeu 8 o 16, ja que és possible que la cua no es distribueixi uniformement en diferents cues.",
+        "NumberOfQueueWorkersFieldTitle": "Nombre de treballadors de la cua",
+        "ProcessDuringRequestFieldHelp": "Si està activat, processarem totes les sol·licituds d'una cua durant una sol·licitud de seguiment normal quan hi hagi prou sol·licituds a la cua. Això no retardarà la sol·licitud de seguiment. Si està desactivat, heu de configurar un cronjob que executi l'ordre de la consola %1$s./console queuedtracking:process%2$s, per exemple, cada minut per processar la cua.",
+        "ProcessDuringRequestFieldTitle": "Procés durant la sol·licitud de seguiment",
+        "QueueEnabledFieldHelp": "Si està activat, totes les sol·licituds de seguiment s'escriuran en una cua en comptes de directament a la base de dades. Requereix un servidor Redis i una extensió PHP phpredis si s'utilitza Redis com a backend.",
+        "QueueEnabledFieldTitle": "S'ha activat la cua",
+        "RedisDatabaseFieldHelp": "En cas que utilitzeu Redis per a la memòria cau, assegureu-vos d'utilitzar una base de dades diferent.",
+        "RedisDatabaseFieldTitle": "Base de dades Redis",
+        "RedisHostFieldHelp": "Amfitrió remot o sòcol Unix del servidor Redis. Es permeten un màxim de 500 caràcters.",
+        "RedisHostFieldHelpExtended": "Si el vostre amfitrió requereix una connexió TLS, podeu anteposar el protocol TLS al vostre amfitrió com: tls://example-host.com. Si això no funciona, assegureu-vos que els certificats estiguin configurats correctament al vostre servidor Matomo.",
+        "RedisHostFieldHelpExtendedSentinel": "Quan utilitzeu Redis Sentinel, podeu utilitzar una llista separada per comes. Assegureu-vos d'especificar tants hosts com ports heu especificat. Per exemple, per configurar dos servidors \"127.0.0.1:26379\" i \"127.0.0.2:26879\" especifiqueu \"127.0.0.1,127.0.0.2\" com a host i \"26379,26879\" com a ports.",
+        "RedisHostFieldTitle": "Amfitrió Redis o sòcol Unix",
+        "RedisPasswordFieldHelp": "Contrasenya establerta al servidor Redis, si n'hi ha. Es pot indicar a Redis que requereixi una contrasenya abans de permetre que els clients executin ordres.",
+        "RedisPasswordFieldTitle": "Contrasenya de Redis",
+        "RedisPortFieldHelp": "Port on el servidor Redis s'està executant. El valor ha d'estar entre 1 i 65535. Utilitzeu 0 si utilitzeu un sòcol Unix per connectar-vos al servidor Redis.",
+        "RedisPortFieldTitle": "Port de Redis",
+        "RedisTimeoutFieldHelp": "Temps d'espera de connexió Redis en segons. \"0.0\" significa il·limitat. Pot ser un flotant, per exemple, \"2,5\" per a un temps d'espera de connexió de 2,5 segons.",
+        "RedisTimeoutFieldTitle": "Temps d'espera de Redis",
+        "UseSentinelFieldHelp": "Si està activada, s'utilitzarà la funció Redis Sentinel. Assegureu-vos d'actualitzar l'amfitrió i el port si cal. Un cop hàgiu habilitat i desat el canvi, podreu especificar diversos hosts i ports separats per comes.",
+        "UseSentinelFieldTitle": "Activa Redis Sentinel"
     }
 }
