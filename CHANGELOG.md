@@ -1,5 +1,9 @@
 ## Changelog
 
+5.0.5
+- Improved plugin reliability
+- Added system settings to list of text that can be translated
+
 5.0.4
 - Added plugin category for Marketplace
 
