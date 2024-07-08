@@ -1,6 +1,9 @@
 {
     "QueuedTracking": {
+        "ExceptionValueIsNotInt": "La valeur n'est pas un entier",
         "MultipleServersOnlyConfigurableIfSentinelEnabled": "Plusieurs hôtes ou ports ne peuvent être configurés que lorsque Redis Sentinel est activé. Le plugin README vous dira comment faire.",
-        "NumHostsNotMatchNumPorts": "Le nombre d'hôtes configurés est différent du nombre de ports configurés."
+        "NumHostsNotMatchNumPorts": "Le nombre d'hôtes configurés est différent du nombre de ports configurés.",
+        "RedisHostFieldHelp": "Hôte distant ou socket unix du serveur Redis. Un maximum de 500 caractères est autorisé.",
+        "RedisHostFieldTitle": "Hôte Redis ou socket unix"
     }
 }
