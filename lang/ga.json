@@ -1,1 +1,33 @@
-{}
+{
+    "QueuedTracking": {
+        "BackendSettingFieldHelp": "Roghnaigh an t-inneall is mian leat a úsáid don ghné seo. Mura bhfuil aon taithí agat le Redis nó mura bhfuil sé ar fáil ar do fhreastalaí, molaimid Mysql a úsáid.",
+        "BackendSettingFieldTitle": "Inneall",
+        "ExceptionValueIsNotInt": "Ní slánuimhir é an luach",
+        "MasterNameFieldHelp": "Ní gá an máistirainm fairtheora a chumrú ach amháin má tá Sentinel cumasaithe.",
+        "MasterNameFieldTitle": "Redis Sentinel ainm Máistir",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Ní féidir le hóstach iolrach nó poirt a chumrú ach amháin nuair atá Redis Sentinel ar siúl. Inseoidh an breiseán README duit conas é sin a dhéanamh.",
+        "NumHostsNotMatchNumPorts": "Ní hionann líon na n-óstach cumraithe agus líon na bport cumraithe.",
+        "NumRequestsToProcessFieldHelp": "Sainmhíníonn sé cé mhéad iarratas a phiocadh amach as an scuaine agus a phróiseáil ag an am céanna. Cuir isteach uimhir atá &gt;= 1.",
+        "NumRequestsToProcessFieldTitle": "Líon na n-iarratas a phróiseáiltear in aon bhaisc amháin",
+        "NumberOfQueueWorkersFieldHelp": "Líon na n-oibrithe scuaine uasta a cheadaítear. Glacann sé le huimhir idir 1 agus 16. Is é an cleachtas is fearr ná líon na LAP a theastaíonn uait a chur ar fáil le haghaidh próiseála scuaine a shocrú. Bí ar an eolas go gcaithfidh tú a chinntiú na hoibrithe a thosú de láimh. Molaimid gan 9-15 oibrí a úsáid, ach 8 nó 16 a úsáid mar go mb’fhéidir nach mbeadh an scuaine roinnte go cothrom i scuainí éagsúla.",
+        "NumberOfQueueWorkersFieldTitle": "Líon na n-oibrithe scuaine",
+        "ProcessDuringRequestFieldHelp": "Má tá sé cumasaithe, próiseálfaimid gach iarratas laistigh de scuaine le linn gnáthiarratas rianaithe a luaithe a bheidh dóthain iarratas sa scuaine. Ní mhoilleoidh sé seo an t-iarratas rianaithe. Má tá tú díchumasaithe, caithfidh tú cronjob a shocrú a fheidhmíonn an %1$s./console queuedtracking:próiseáil %2$s ordú consóil m.sh. gach nóiméad chun an scuaine a phróiseáil.",
+        "ProcessDuringRequestFieldTitle": "Próiseas le linn iarratais rianaithe",
+        "QueueEnabledFieldHelp": "Má tá sé cumasaithe, scríobhfar gach iarratas rianaithe isteach i scuaine seachas iad go díreach isteach sa bhunachar sonraí. Teastaíonn freastalaí Redis agus síneadh PHP phpredis má tá Redis á úsáid mar inneall.",
+        "QueueEnabledFieldTitle": "Tá scuaine cumasaithe",
+        "RedisDatabaseFieldHelp": "I gcás go bhfuil tú ag baint úsáide as Redis le haghaidh taisce a dhéanamh cinnte a úsáid bunachar sonraí eile.",
+        "RedisDatabaseFieldTitle": "Bunachar sonraí Redis saor in aisce,",
+        "RedisHostFieldHelp": "Cianóstach nó soicéad unix den fhreastalaí Redis. Ceadaítear 500 carachtar ar a mhéad.",
+        "RedisHostFieldHelpExtended": "Má tá nasc TLS ag teastáil ó d’óstach, is féidir leat an prótacal TLS a ligean ar aghaidh chuig d’óstach mar: tls://example-host.com. Mura n-oibríonn sin, cinntigh go bhfuil na deimhnithe cumraithe i gceart ar do fhreastalaí Matomo.",
+        "RedisHostFieldHelpExtendedSentinel": "Toisc go bhfuil Redis Sentinel á úsáid agat, is féidir leat liosta scartha le camóg a úsáid. Déan cinnte an oiread óstach a shonrú agus a bhfuil calafoirt sonraithe agat. Mar shampla chun dhá fhreastalaí a chumrú “127.0.0.1:26379” agus “127.0.0.2:26879” sonraigh “127.0.0.1,127.0.0.2” mar óstach agus “26379,26879” mar phoirt.",
+        "RedisHostFieldTitle": "Redis ósta nó soicéad unix",
+        "RedisPasswordFieldHelp": "Pasfhocal socraithe ar an bhfreastalaí Redis, más ann dó. Is féidir treoir a thabhairt do Redis pasfhocal a éileamh sula gceadaítear do chliaint orduithe a fhorghníomhú.",
+        "RedisPasswordFieldTitle": "Redis pasfhocal",
+        "RedisPortFieldHelp": "Port an fhreastalaí Redis ar siúl. Ba chóir go mbeadh an luach idir 1 agus 65535. Bain úsáid as 0 má tá tú ag baint úsáide as soicéad unix chun ceangal le freastalaí Redis.",
+        "RedisPortFieldTitle": "Redis port",
+        "RedisTimeoutFieldHelp": "Redis am istigh ceangail i soicindí. Ciallaíonn “0.0” gan teorainn. Is féidir leis a bheith ina snámhán m.sh. “2.5” le haghaidh teorainn ama ceangail 2.5 soicind.",
+        "RedisTimeoutFieldTitle": "Teorainn ama Redis",
+        "UseSentinelFieldHelp": "Má tá sé cumasaithe, úsáidfear an ghné Redis Sentinel. Déan cinnte an t-óstach agus an port a nuashonrú más gá. Nuair a bheidh an t-athrú cumasaithe agus sábháilte agat, beidh tú in ann óstach iolrach agus port scartha le camóga a shonrú.",
+        "UseSentinelFieldTitle": "Cumasaigh Redis Sentinel"
+    }
+}
