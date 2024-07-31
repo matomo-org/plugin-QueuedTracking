@@ -1,5 +1,8 @@
 ## Changelog
 
+5.0.6
+- Fixed unable to configure redis socket with port 0
+
 5.0.5
 - Improved plugin reliability
 - Added system settings to list of text that can be translated
