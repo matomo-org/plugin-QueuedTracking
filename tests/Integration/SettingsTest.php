@@ -50,9 +50,9 @@ class SettingsTest extends IntegrationTestCase
     public function test_redisPort_ShouldFail_IfPortIsTooLow()
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('The value needs to be at least 1');
+        $this->expectExceptionMessage('The value needs to be at least 0');
 
-        $this->settings->redisPort->setValue(0);
+        $this->settings->redisPort->setValue(-1);
     }
 
     public function test_redisPort_ShouldFail_IfPortIsTooHigh()
@@ -61,6 +61,12 @@ class SettingsTest extends IntegrationTestCase
         $this->expectExceptionMessage('The value should be at most 65535');
 
         $this->settings->redisPort->setValue(65536);
+    }
+
+    public function test_redisPort_ShouldNotFail_IfPortIsZero()
+    {
+        $this->settings->redisPort->setValue(0);
+        $this->assertEquals(0, $this->settings->redisPort->getValue());
     }
 
     public function test_redisTimeout_ShouldFail_IfTooLong()
@@ -250,8 +256,8 @@ class SettingsTest extends IntegrationTestCase
     public function test_redisPort_ShouldNotFailAndConvertToIntWhenMultipleValuesGiven_IfSentinelIsEnabled()
     {
         $this->enableRedisSentinel();
-        $this->settings->redisPort->setValue('55 , 44.34 ');
-        $this->assertSame('55,44', $this->settings->redisPort->getValue());
+        $this->settings->redisPort->setValue('55 , 44.34, 0 ');
+        $this->assertSame('55,44,0', $this->settings->redisPort->getValue());
     }
 
     public function test_redisPort_ShouldValidateEachPortSeparately_WhenManySpecified()
@@ -260,7 +266,7 @@ class SettingsTest extends IntegrationTestCase
         $this->expectExceptionMessage('The value is not a number');
 
         $this->enableRedisSentinel();
-        $this->settings->redisPort->setValue('55 , 44.34, 4mk ');
+        $this->settings->redisPort->setValue('55, 0 , 44.34, 4mk ');
         $this->assertSame('55,44', $this->settings->redisPort->getValue());
     }
 

@@ -151,11 +151,11 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
                 $self->checkMultipleServersOnlyConfiguredWhenSentinelIsEnabled($value);
 
                 if (!$self->isUsingSentinelBackend()) {
-                    (new NumberRange(1, 65535))->validate($value);
+                    (new NumberRange(0, 65535))->validate($value);
                 } else {
                     $ports = explode(',', $value);
                     foreach ($ports as $port) {
-                        (new NumberRange(1, 65535))->validate(trim($port));
+                        (new NumberRange(0, 65535))->validate(trim($port));
                     }
                 }
             };
