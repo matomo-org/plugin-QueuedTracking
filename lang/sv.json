@@ -1,6 +1,19 @@
 {
     "QueuedTracking": {
+        "ExceptionValueIsNotInt": "Värdet är inte ett heltal",
         "MultipleServersOnlyConfigurableIfSentinelEnabled": "Flera värdar eller portar kan bara konfigureras när Redis Sentinel är på. Insticksprogrammets README kommer att förklara hur du gör det.",
-        "NumHostsNotMatchNumPorts": "Antalet konfigurerade värdar matchar inte antalet konfigurerade portar."
+        "NumHostsNotMatchNumPorts": "Antalet konfigurerade värdar matchar inte antalet konfigurerade portar.",
+        "NumRequestsToProcessFieldHelp": "Definierar hur många förfrågningar som väljs ut ur kön för att bearbetas i klump. Ange ett nummer större än 1.",
+        "NumRequestsToProcessFieldTitle": "Antal förfrågningar som bearbetas i en klump",
+        "QueueEnabledFieldTitle": "Kö aktiverad",
+        "RedisDatabaseFieldHelp": "Om du använder Redis som cache behöver du använda en annan databas.",
+        "RedisDatabaseFieldTitle": "Redis-databas",
+        "RedisHostFieldHelp": "Värd eller unix-socket för Redis-server. Maximalt 500 tecken godtas.",
+        "RedisHostFieldTitle": "Redis-värd eller unix-socket",
+        "RedisPasswordFieldHelp": "Lösenordet sätts på Redis-servern, om något nu finns. Redis kan instrueras att kräva ett lösenord före den tillåter klienter att köra kommandon.",
+        "RedisPasswordFieldTitle": "Redis-lösenord",
+        "RedisPortFieldHelp": "Porten som Redis-servern körs på. Värdet ska vara mellan 1 och 65535. Använd 0 ifall du använder en unix-socket för att ansluta till Redis-servern.",
+        "RedisPortFieldTitle": "Redis-port",
+        "UseSentinelFieldTitle": "Aktivera Redis Sentinel"
     }
 }
