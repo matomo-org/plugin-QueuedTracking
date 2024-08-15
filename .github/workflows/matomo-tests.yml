@@ -56,6 +56,7 @@ jobs:
           redis-service: true
           artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
           upload-artifacts: ${{ matrix.php == '7.2' && matrix.target == 'maximum_supported_matomo' }}
+          mysql-engine: 'Tidb'
   UI:
     runs-on: ubuntu-20.04
     steps:
@@ -74,3 +75,4 @@ jobs:
           redis-service: true
           artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
           upload-artifacts: true
+          mysql-engine: 'Tidb'
