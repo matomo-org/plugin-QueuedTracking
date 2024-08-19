@@ -39,7 +39,7 @@ class Sentinel extends Redis
 
                 if (!empty($master)) {
                     if (!class_exists('\Redis') && $this->timeout == 0) {
-                        $this->timeout === 0.05;
+                        $this->timeout = 0.05;
                     }
 
                     $client = new \Credis_Client($master[0], $master[1], $this->timeout, $persistent = false, $this->database, $this->password);
