@@ -1,5 +1,8 @@
 ## Changelog
 
+5.0.7 - 2024-08-26
+- Fixed old redis sentinel config issue
+
 5.0.6
 - Fixed unable to configure redis socket with port 0
 
