@@ -26,6 +26,9 @@ class Process extends ConsoleCommand
         $this->setName('queuedtracking:process');
         $this->addRequiredValueOption('queue-id', null, 'If set, will only work on that specific queue. For example "0" or "1" (if there are multiple queues). Not recommended when only one worker is in use. If for example 4 workers are in use, you may want to use 0, 1, 2, or 3.');
         $this->addRequiredValueOption('force-num-requests-process-at-once', null, 'If defined, it overwrites the setting of how many requests will be picked out of the queue and processed at once. Must be a number which is >= 1. By default, the configured value from the settings will be used. This can be useful for example if you want to process every single request within the queue. If otherwise a batch size of say 100 is configured, then there may be otherwise 99 requests left in the queue. It can be also useful for testing purposes.');
+        $this->addRequiredValueOption('cycle', 'c', 'The proccess will automatically loop for "n" cycle time(s), set "0" to infinite.', 1);
+        $this->addRequiredValueOption('sleep', 's', 'Take a nap for "n" second(s) before recycle, minimum is 1 second.', 1);
+        $this->addRequiredValueOption('delay', 'd', 'Delay before finished', 0);
         $this->setDescription('Processes all queued tracking requests in case there are enough requests in the queue and in case they are not already in process by another script. To keep track of the queue use the <comment>--verbose</comment> option or execute the <comment>queuedtracking:monitor</comment> command.');
     }
 
@@ -76,29 +79,77 @@ class Process extends ConsoleCommand
             throw new \Exception('Number of requests to process must be a number and at least 1');
         }
 
-        $output->writeln("<info>Starting to process request sets, this can take a while</info>");
-
         register_shutdown_function(function () use ($queueManager) {
             $queueManager->unlock();
         });
 
-        $startTime = microtime(true);
-        $processor = new Processor($queueManager);
-        $processor->setNumberOfMaxBatchesToProcess(500);
-        $tracker   = $processor->process();
 
-        $neededTime = (microtime(true) - $startTime);
-        $numRequestsTracked = $tracker->getCountOfLoggedRequests();
-        $requestsPerSecond  = $this->getNumberOfRequestsPerSecond($numRequestsTracked, $neededTime);
 
-        Piwik::postEvent('Tracker.end');
+        $numberOfProcessCycle = $input->getOption('cycle');
+        if (!is_numeric($numberOfProcessCycle)) throw new \Exception('"cycle" needs to be numeric');
+        $numberOfProcessCycle = (int)$numberOfProcessCycle;
+        $infiniteCycle = $numberOfProcessCycle == 0;
+        
+        $delayedBeforeFinish = (int)$input->getOption('delay');
 
+        $napster = max(1, $input->getOption('sleep'));
+        if (!is_numeric($napster)) throw new \Exception('"nap" needs to be numeric');
+        $napster = (int)$napster;
+
+        $lastTimeGotMoreThanZeroTrackedReq = microtime(true);
+        $originalNumberOfRequestsToProcessAtSameTime = $queueManager->getNumberOfRequestsToProcessAtSameTime();
+
+        $killIT = false;
+        $signalTrap = function() use (&$killIT) {$killIT = true;};
+        pcntl_signal(SIGINT, $signalTrap);
+        pcntl_signal(SIGTERM, $signalTrap);
+
+        while ($killIT == false and ($numberOfProcessCycle > 0 || $infiniteCycle)) {
+            pcntl_signal_dispatch();
+            
+            $wipingOutQueue = false;
+            if (microtime(true) - $lastTimeGotMoreThanZeroTrackedReq > 10) {
+                $queueManager->setNumberOfRequestsToProcessAtSameTime(1);
+                $wipingOutQueue = true;
+                $lastTimeGotMoreThanZeroTrackedReq = microtime(true);
+            }
+
+            if ($wipingOutQueue) $output->writeln("<fg=red;bg=white;options=bold> TRYING TO WIPE OUT THE QUEUE </>");
+            $output->writeln("<info>Starting to process request sets, this can take a while</info>");
+
+            $startTime = microtime(true);
+            $processor = new Processor($queueManager);
+            $processor->setNumberOfMaxBatchesToProcess(500);
+            $tracker   = $processor->process();
+
+            $neededTime = (microtime(true) - $startTime);
+            $numRequestsTracked = $tracker->getCountOfLoggedRequests();
+            $requestsPerSecond  = $this->getNumberOfRequestsPerSecond($numRequestsTracked, $neededTime);
+
+            $this->writeSuccessMessage(
+                array(sprintf('This worker finished queue processing with %sreq/s (%s requests in %02.2f seconds)', $requestsPerSecond, $numRequestsTracked, $neededTime))
+            );
+            Piwik::postEvent('Tracker.end');
+
+            if ($numRequestsTracked > 0) $lastTimeGotMoreThanZeroTrackedReq = microtime(true);
+
+            if (!$infiniteCycle) $numberOfProcessCycle--;
+            if ($numberOfProcessCycle > 0 || $infiniteCycle) {
+                $cTogo = $infiniteCycle ? "infinite" : $numberOfProcessCycle;
+                $output->writeln("===========================================================================");
+                $output->writeln("<comment>Taking a nap for {$napster} second(s) before re-run the process. <info>({$cTogo})</info> cyle(s) to go.</comment>");
+                $output->writeln("===========================================================================");
+                sleep($napster);
+            }
+
+            if ($wipingOutQueue) $queueManager->setNumberOfRequestsToProcessAtSameTime($originalNumberOfRequestsToProcessAtSameTime);
+        }
+
+        // Piwik::postEvent('Tracker.end');
         $trackerEnvironment->destroy();
 
-        $this->writeSuccessMessage(
-            array(sprintf('This worker finished queue processing with %sreq/s (%s requests in %02.2f seconds)', $requestsPerSecond, $numRequestsTracked, $neededTime))
-        );
-
+        if ($delayedBeforeFinish > 0 and !$killIT) sleep($delayedBeforeFinish);
+        
         return self::SUCCESS;
     }
 
