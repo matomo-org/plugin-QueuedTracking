@@ -86,7 +86,7 @@ class Monitor extends ConsoleCommand
         while (1) {
             pcntl_signal_dispatch();
 
-            if (microtime(true) - $lastStatsTimer >= 2 or $keyPressed != "")
+            if (microtime(true) - $lastStatsTimer >= 2 || $keyPressed != "")
             {
                 $qCurrentPage = min(max($qCurrentPage, 1), $qPageCount);
            

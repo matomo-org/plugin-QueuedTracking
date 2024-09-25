@@ -58,8 +58,14 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     /** @var Setting */
     public $sentinelMasterName;
 
-    /** @var Array */
-    protected $availableRedisBackendType = array(1=>"Stand Alone", 2=>"Sentinel", 3=>"Cluster");    
+    public function getAvailableRedisBackendType()
+    {
+        return array(
+            1=>Piwik::translate('QueuedTracking_AvailableRedisBackendTypeStandAlone'), 
+            2=>Piwik::translate('QueuedTracking_AvailableRedisBackendTypeSentinel'), 
+            3=>Piwik::translate('QueuedTracking_AvailableRedisBackendTypeCluster')
+        );
+    }
 
     protected function assignValueIsIntValidator (FieldConfig $field) {
         $field->validate = function ($value) {
@@ -95,9 +101,9 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         return $this->useWhatRedisBackendType->getValue() === 3;
     }
 
-    public function getRedisType($string=true)
+    public function getRedisType()
     {
-        return $this->availableRedisBackendType[(int)$this->useWhatRedisBackendType->getValue()];
+        return $this->useWhatRedisBackendType->getValue();
     }
 
     public function getSentinelMasterName()
@@ -122,7 +128,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
             $field->inlineHelp = Piwik::translate('QueuedTracking_RedisHostFieldHelp') . '</br></br>'
                 . Piwik::translate('QueuedTracking_RedisHostFieldHelpExtended') . '</br>';
 
-            if ($self->isUsingSentinelBackend() or $self->isUsingClusterBackend()) {
+            if ($self->isUsingSentinelBackend() || $self->isUsingClusterBackend()) {
                 $field->inlineHelp .= '</br>' . Piwik::translate('QueuedTracking_RedisHostFieldHelpExtendedSentinel') . '</br>';
             }
 
@@ -156,14 +162,14 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
             $field->uiControlAttributes = array('size' => 100);
             $field->inlineHelp = Piwik::translate('QueuedTracking_RedisPortFieldHelp') . '</br>';
 
-            if ($self->isUsingSentinelBackend() or $self->isUsingClusterBackend()) {
+            if ($self->isUsingSentinelBackend() || $self->isUsingClusterBackend()) {
                 $field->inlineHelp .= '</br>' . Piwik::translate('QueuedTracking_RedisHostFieldHelpExtendedSentinel') . '</br>';
             }
 
             $field->validate = function ($value) use ($self) {
                 $self->checkMultipleServersOnlyConfiguredWhenSentinelIsEnabled($value);
 
-                if ($self->isUsingSentinelBackend() or $self->isUsingClusterBackend()) {
+                if ($self->isUsingSentinelBackend() || $self->isUsingClusterBackend()) {
                     $ports = explode(',', $value);
                     foreach ($ports as $port) {
                         (new NumberRange(0, 65535))->validate(trim($port));
@@ -292,7 +298,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
 
     public function checkMultipleServersOnlyConfiguredWhenSentinelIsEnabled($value)
     {
-        if ($this->isUsingSentinelBackend() or $this->isUsingClusterBackend()) {
+        if ($this->isUsingSentinelBackend() || $this->isUsingClusterBackend()) {
             return;
         }
 
@@ -340,7 +346,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         return $this->makeSetting('useWhatRedisBackendType', $default = 1, FieldConfig::TYPE_INT, function (FieldConfig $field) {
             $field->title = 'Redis type';
             $field->uiControl = FieldConfig::UI_CONTROL_RADIO;
-            $field->availableValues = $this->availableRedisBackendType;
+            $field->availableValues = $this->getAvailableRedisBackendType();
             $field->condition = 'backend=="redis"';
             $field->inlineHelp = Piwik::translate('QueuedTracking_WhatRedisBackEndType') . '</br>';
         });
