@@ -44,7 +44,7 @@ Example crontab entry that starts the processor every minute:
 
 `* * * * * cd /piwik && ./console queuedtracking:process >/dev/null 2>&1`
 
-Example Supervisor entry that will starts 16 processor/worker with 10 loop cycle times and auto restart:
+Example Supervisor entry that will start 16 processors/workers with 10 loop cycle times and auto restart:
 
 ```ini
 [program:matomo]
