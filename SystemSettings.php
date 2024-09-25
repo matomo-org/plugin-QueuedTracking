@@ -58,7 +58,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     /** @var Setting */
     public $sentinelMasterName;
 
-    public function getAvailableRedisBackendType()
+    public function getAvailableRedisBackendTypes()
     {
         return array(
             1=>Piwik::translate('QueuedTracking_AvailableRedisBackendTypeStandAlone'), 
@@ -346,7 +346,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         return $this->makeSetting('useWhatRedisBackendType', $default = 1, FieldConfig::TYPE_INT, function (FieldConfig $field) {
             $field->title = 'Redis type';
             $field->uiControl = FieldConfig::UI_CONTROL_RADIO;
-            $field->availableValues = $this->getAvailableRedisBackendType();
+            $field->availableValues = $this->getAvailableRedisBackendTypes();
             $field->condition = 'backend=="redis"';
             $field->inlineHelp = Piwik::translate('QueuedTracking_WhatRedisBackEndType') . '</br>';
         });
