@@ -99,14 +99,7 @@ class Process extends ConsoleCommand
         $lastTimeGotMoreThanZeroTrackedReq = microtime(true);
         $originalNumberOfRequestsToProcessAtSameTime = $queueManager->getNumberOfRequestsToProcessAtSameTime();
 
-        $killIT = false;
-        $signalTrap = function() use (&$killIT) {$killIT = true;};
-        pcntl_signal(SIGINT, $signalTrap);
-        pcntl_signal(SIGTERM, $signalTrap);
-
-        while ($killIT == false and ($numberOfProcessCycle > 0 || $infiniteCycle)) {
-            pcntl_signal_dispatch();
-            
+        while ($numberOfProcessCycle > 0 || $infiniteCycle) {
             $wipingOutQueue = false;
             if (microtime(true) - $lastTimeGotMoreThanZeroTrackedReq > 10) {
                 $queueManager->setNumberOfRequestsToProcessAtSameTime(1);
@@ -148,7 +141,7 @@ class Process extends ConsoleCommand
         // Piwik::postEvent('Tracker.end');
         $trackerEnvironment->destroy();
 
-        if ($delayedBeforeFinish > 0 and !$killIT) sleep($delayedBeforeFinish);
+        if ($delayedBeforeFinish > 0) sleep($delayedBeforeFinish);
         
         return self::SUCCESS;
     }

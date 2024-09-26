@@ -32,7 +32,7 @@ requests using the [Piwik console](http://developer.piwik.org/guides/piwik-on-th
 * Disable the setting "Process during tracking request" in the Piwik UI under "Settings => Plugin Settings"
 * Setup a cronjob that executes the command `./console queuedtracking:process` for instance every minute
 * That's it
-* Or, you can use the [Supervisor](http://supervisord.org/) as a cron alternative.
+* Or, if you have __"non WINDOWS OS"__ you can use the [Supervisor](http://supervisord.org/) as a cron alternative.
 
 The `queuedtracking:process` command will make sure to process all queued tracking requests whenever possible and the
 command will exit as soon as there are not enough requests queued anymore. That's why you should setup a cronjob to start

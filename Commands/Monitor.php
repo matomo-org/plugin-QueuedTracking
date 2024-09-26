@@ -37,6 +37,11 @@ class Monitor extends ConsoleCommand
             $systemCheck->checkRedisIsInstalled();
         }
 
+        if (!$this->isPcntlFunctionAvailable()) {
+            $output->write(str_repeat("\r\n", 100));
+            $output->write("\e[".(100)."A");
+        }
+
         $iterations = $this->getIterationsFromArg();
         if ($iterations  !== null) {
             $output->writeln("<info>Only running " . $iterations . " iterations.</info>");
@@ -68,9 +73,14 @@ class Monitor extends ConsoleCommand
         $qCount         = count($queues);
         $qPerPAge       = min(max($this->getPerPageFromArg(), 1), $qCount);
         $qPageCount     = ceil($qCount / $qPerPAge);
-        $signalTrap     = function() {print("\e[u\e[?25h");die;};
-        pcntl_signal(SIGINT, $signalTrap);
-        pcntl_signal(SIGTERM, $signalTrap);
+
+        $signalTrap = function() use ($output) {$output->writeln("\e[u\e[?25h"); die;};
+        if ($this->isPcntlFunctionAvailable())
+        {
+            pcntl_signal(SIGINT, $signalTrap);
+            pcntl_signal(SIGTERM, $signalTrap);    
+        }
+        
         readline_callback_handler_install('', function() {});
         stream_set_blocking (STDIN, false);
 
@@ -84,7 +94,7 @@ class Monitor extends ConsoleCommand
         $diffSumInQueue = 0;
         $keyPressed = "";
         while (1) {
-            pcntl_signal_dispatch();
+            if ($this->isPcntlFunctionAvailable()) pcntl_signal_dispatch();
 
             if (microtime(true) - $lastStatsTimer >= 2 || $keyPressed != "")
             {
@@ -152,13 +162,12 @@ class Monitor extends ConsoleCommand
                     case "B": $qCurrentPage -= 10; break;
                     case ",": $qCurrentPage = 1; break;
                     case ".": $qCurrentPage = $qPageCount; break;
-                    case "q": break 2;
+                    case "q": $signalTrap();
                 }
             }
             usleep(5000);
         }
 
-        $signalTrap();
         return self::SUCCESS;
     }
 
@@ -200,5 +209,15 @@ class Monitor extends ConsoleCommand
             }
         }
         return $perPage;
+    }
+
+    private function isPcntlFunctionAvailable()
+    {
+        if (extension_loaded('pcntl') && function_exists('pcntl_signal') && function_exists('pcntl_signal_dispatch'))
+        {
+            return true;
+        }
+
+        return false;
     }
 }
