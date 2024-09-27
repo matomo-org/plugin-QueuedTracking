@@ -214,7 +214,9 @@ class Manager
     protected function getQueueIdForVisitor($visitorId)
     {
         $visitorId = strtolower(substr($visitorId, 0, 3));
-        if (ctype_xdigit($visitorId) === true) {$id = hexdec($visitorId);}
+        if (ctype_xdigit($visitorId) === true) {
+            $id = hexdec($visitorId);
+        }
         else {
             $pos1 = ord($visitorId);
             $pos2 = isset($visitorId[1]) ? ord($visitorId[1]) : $pos1;

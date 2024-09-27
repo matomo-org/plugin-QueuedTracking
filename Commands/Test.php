@@ -225,7 +225,9 @@ class Test extends ConsoleCommand
         if ($redis instanceof \RedisCluster) {
             $config = $redis->config('CONFIG', 'GET', $configName);
             unset($config[0]);
-        } else {$config = $redis->config('GET', $configName);}
+        } else {
+           $config = $redis->config('GET', $configName);
+        }
 
         $value = strtolower(array_shift($config));
         return $value;

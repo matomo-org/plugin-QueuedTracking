@@ -94,7 +94,9 @@ class Monitor extends ConsoleCommand
         $diffSumInQueue = 0;
         $keyPressed = "";
         while (1) {
-            if ($this->isPcntlFunctionAvailable()) pcntl_signal_dispatch();
+            if ($this->isPcntlFunctionAvailable()) {
+              pcntl_signal_dispatch();
+           }   
 
             if (microtime(true) - $lastStatsTimer >= 2 || $keyPressed != "")
             {

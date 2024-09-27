@@ -93,7 +93,9 @@ class Process extends ConsoleCommand
         $delayedBeforeFinish = (int)$input->getOption('delay');
 
         $napster = max(1, $input->getOption('sleep'));
-        if (!is_numeric($napster)) throw new \Exception('"nap" needs to be numeric');
+        if (!is_numeric($napster)) {
+         throw new \Exception('"nap" needs to be numeric');
+       }
         $napster = (int)$napster;
 
         $lastTimeGotMoreThanZeroTrackedReq = microtime(true);
