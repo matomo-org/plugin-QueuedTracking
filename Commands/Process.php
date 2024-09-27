@@ -86,7 +86,9 @@ class Process extends ConsoleCommand
 
 
         $numberOfProcessCycle = $input->getOption('cycle');
-        if (!is_numeric($numberOfProcessCycle)) throw new \Exception('"cycle" needs to be numeric');
+        if (!is_numeric($numberOfProcessCycle)) {
+            throw new \Exception('"cycle" needs to be numeric');
+        }
         $numberOfProcessCycle = (int)$numberOfProcessCycle;
         $infiniteCycle = $numberOfProcessCycle == 0;
         
@@ -94,8 +96,8 @@ class Process extends ConsoleCommand
 
         $napster = max(1, $input->getOption('sleep'));
         if (!is_numeric($napster)) {
-         throw new \Exception('"nap" needs to be numeric');
-       }
+            throw new \Exception('"nap" needs to be numeric');
+        }
         $napster = (int)$napster;
 
         $lastTimeGotMoreThanZeroTrackedReq = microtime(true);
@@ -109,7 +111,9 @@ class Process extends ConsoleCommand
                 $lastTimeGotMoreThanZeroTrackedReq = microtime(true);
             }
 
-            if ($wipingOutQueue) $output->writeln("<fg=red;bg=white;options=bold> TRYING TO WIPE OUT THE QUEUE </>");
+            if ($wipingOutQueue) {
+                $output->writeln("<fg=red;bg=white;options=bold> TRYING TO WIPE OUT THE QUEUE </>");
+            }
             $output->writeln("<info>Starting to process request sets, this can take a while</info>");
 
             $startTime = microtime(true);
@@ -126,9 +130,13 @@ class Process extends ConsoleCommand
             );
             Piwik::postEvent('Tracker.end');
 
-            if ($numRequestsTracked > 0) $lastTimeGotMoreThanZeroTrackedReq = microtime(true);
+            if ($numRequestsTracked > 0) {
+                $lastTimeGotMoreThanZeroTrackedReq = microtime(true);
+            }
 
-            if (!$infiniteCycle) $numberOfProcessCycle--;
+            if (!$infiniteCycle) {
+                $numberOfProcessCycle--;
+            }
             if ($numberOfProcessCycle > 0 || $infiniteCycle) {
                 $cTogo = $infiniteCycle ? "infinite" : $numberOfProcessCycle;
                 $output->writeln("===========================================================================");
@@ -137,13 +145,17 @@ class Process extends ConsoleCommand
                 sleep($napster);
             }
 
-            if ($wipingOutQueue) $queueManager->setNumberOfRequestsToProcessAtSameTime($originalNumberOfRequestsToProcessAtSameTime);
+            if ($wipingOutQueue) {
+                $queueManager->setNumberOfRequestsToProcessAtSameTime($originalNumberOfRequestsToProcessAtSameTime);
+            }
         }
 
         // Piwik::postEvent('Tracker.end');
         $trackerEnvironment->destroy();
 
-        if ($delayedBeforeFinish > 0) sleep($delayedBeforeFinish);
+        if ($delayedBeforeFinish > 0) {
+            sleep($delayedBeforeFinish);
+        }
         
         return self::SUCCESS;
     }

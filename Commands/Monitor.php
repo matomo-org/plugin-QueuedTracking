@@ -74,7 +74,10 @@ class Monitor extends ConsoleCommand
         $qPerPAge       = min(max($this->getPerPageFromArg(), 1), $qCount);
         $qPageCount     = ceil($qCount / $qPerPAge);
 
-        $signalTrap = function() use ($output) {$output->writeln("\e[u\e[?25h"); die;};
+        $signalTrap = function() use ($output) {
+            $output->writeln("\e[u\e[?25h");
+            die;
+        };
         if ($this->isPcntlFunctionAvailable())
         {
             pcntl_signal(SIGINT, $signalTrap);
@@ -92,36 +95,38 @@ class Monitor extends ConsoleCommand
         $lastStatsTimer = microtime(true) - 2;
         $lastSumInQueue = false;
         $diffSumInQueue = 0;
-        $keyPressed = "";
+        $keyPressed     = "";
         while (1) {
             if ($this->isPcntlFunctionAvailable()) {
-              pcntl_signal_dispatch();
-           }   
+                pcntl_signal_dispatch();
+            }   
 
             if (microtime(true) - $lastStatsTimer >= 2 || $keyPressed != "")
             {
                 $qCurrentPage = min(max($qCurrentPage, 1), $qPageCount);
-           
                 $memory = $backend->getMemoryStats(); // I know this will only work with redis currently as it is not defined in backend interface etc. needs to be refactored once we add another backend
-    
+                
                 $sumInQueue = 0;
-                foreach ($queues as $sumQ) 
-                {$sumInQueue += $sumQ->getNumberOfRequestSetsInQueue();}
+                foreach ($queues as $sumQ) {
+                    $sumInQueue += $sumQ->getNumberOfRequestSetsInQueue();
+                }
 
                 if ($lastSumInQueue !== false) {
                     $diffSumInQueue = $lastSumInQueue - $sumInQueue;
                     $diffRps        = round($diffSumInQueue / (microtime(true) - $lastStatsTimer), 2);
-                    $diffSumInQueue = $diffSumInQueue <0? "<fg=red;options=bold>".abs($diffRps)."</>":"<fg=green;options=bold>{$diffRps}</>";
+                    $diffSumInQueue = $diffSumInQueue < 0 ? "<fg=red;options=bold>".abs($diffRps)."</>" : "<fg=green;options=bold>{$diffRps}</>";
                 }
     
                 $numInQueue = 0;
-                for ($idxPage=0;$idxPage<$qPerPAge;$idxPage++) {
+                for ($idxPage = 0; $idxPage < $qPerPAge; $idxPage++) {
                     $idx = ($qCurrentPage - 1) * $qPerPAge + $idxPage;
                     if (isset($queues[$idx])) {
                         $q = $queues[$idx]->getNumberOfRequestSetsInQueue();
                         $numInQueue += (int)$q;
                         $output->writeln(str_pad($idx, 10, " ", STR_PAD_LEFT)." | ".str_pad(number_format($q), 16, " ", STR_PAD_LEFT));
-                    } else {$output->writeln(str_pad("", 10)." | ".str_pad("", 16));}
+                    } else {
+                        $output->writeln(str_pad("", 10)." | ".str_pad("", 16));
+                    }
                 }
     
                 $output->writeln(str_repeat("-", 30));
@@ -142,8 +147,9 @@ class Monitor extends ConsoleCommand
         
                 if (!is_null($iterations)) {
                     $iterationCount += 1;
-                    if ($iterationCount >= $iterations)
-                    {break;}
+                    if ($iterationCount >= $iterations) {
+                        break;
+                    }
                 }
 
                 $lastSumInQueue = $sumInQueue;
@@ -151,22 +157,36 @@ class Monitor extends ConsoleCommand
             }
 
             $keyStroke  = stream_get_contents(STDIN, 3);
-            $keyPressed = strlen($keyStroke) == 3 ? $keyStroke[2] : (strlen($keyStroke) >0? $keyStroke[0]:"");
+            $keyPressed = strlen($keyStroke) == 3 ? $keyStroke[2] : (strlen($keyStroke) > 0 ? $keyStroke[0] : "");
             if ($keyPressed != "" and in_array($keyPressed, array(".", ",", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "q"))) {
                 switch ($keyPressed) {
                     case "0": case "1": case "2": case "3": case "4": 
                     case "5": case "6": case "7": case "8": case "9":
                         $keyPressed = $keyPressed != "0" ? $keyPressed : "10";
-                        $qCurrentPage = floor(($qCurrentPage-0.1)/10)*10+(int)$keyPressed; break;
-                    case "C": $qCurrentPage++; break;
-                    case "D": $qCurrentPage--; break;
-                    case "A": $qCurrentPage += 10; break;
-                    case "B": $qCurrentPage -= 10; break;
-                    case ",": $qCurrentPage = 1; break;
-                    case ".": $qCurrentPage = $qPageCount; break;
-                    case "q": $signalTrap();
+                        $qCurrentPage = floor(($qCurrentPage - 0.1) / 10) * 10 + (int)$keyPressed; break;
+                    case "C": 
+                        $qCurrentPage++;
+                        break;
+                    case "D": 
+                        $qCurrentPage--;
+                        break;
+                    case "A": 
+                        $qCurrentPage += 10;
+                        break;
+                    case "B": 
+                        $qCurrentPage -= 10;
+                        break;
+                    case ",": 
+                        $qCurrentPage = 1;
+                        break;
+                    case ".": 
+                        $qCurrentPage = $qPageCount;
+                        break;
+                    case "q":
+                        $signalTrap();
                 }
             }
+
             usleep(5000);
         }
 
@@ -215,8 +235,7 @@ class Monitor extends ConsoleCommand
 
     private function isPcntlFunctionAvailable()
     {
-        if (extension_loaded('pcntl') && function_exists('pcntl_signal') && function_exists('pcntl_signal_dispatch'))
-        {
+        if (extension_loaded('pcntl') && function_exists('pcntl_signal') && function_exists('pcntl_signal_dispatch')) {
             return true;
         }
 

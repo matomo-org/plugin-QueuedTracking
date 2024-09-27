@@ -77,7 +77,7 @@ class RedisCluster extends Redis
         $bytes /= (1 << (10 * $pow)); 
        
         return round($bytes, $precision) . $units[$pow]; 
-    }     
+    }
 
     public function getMemoryStats()
     {
@@ -86,14 +86,12 @@ class RedisCluster extends Redis
         $hosts = explode(',', $this->host);
         $ports = explode(',', $this->port);
 
-        $memory = array
-        (
+        $memory = array (
             'used_memory_human' => 0,
             'used_memory_peak_human' => 0
         );
 
-        foreach ($hosts as $idx=>$host) 
-        {
+        foreach ($hosts as $idx=>$host) {
             $info = $this->redis->info(array($host, (int)$ports[$idx]), 'memory');
             $memory['used_memory_human'] += $info['used_memory'] ?? 0;
             $memory['used_memory_peak_human'] += $info['used_memory_peak'] ?? 0;
@@ -285,8 +283,9 @@ end';
         $hosts = explode(',', $this->host);
         $ports = explode(',', $this->port);
 
-        foreach ($hosts as $idx=>$host) 
-        {$this->redis->flushDB(array($host, (int)$ports[$idx]));}
+        foreach ($hosts as $idx=>$host) {
+            $this->redis->flushDB(array($host, (int)$ports[$idx]));
+        }
     }
 
     private function connectIfNeeded()

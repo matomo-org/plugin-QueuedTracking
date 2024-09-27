@@ -226,7 +226,7 @@ class Test extends ConsoleCommand
             $config = $redis->config('CONFIG', 'GET', $configName);
             unset($config[0]);
         } else {
-           $config = $redis->config('GET', $configName);
+            $config = $redis->config('GET', $configName);
         }
 
         $value = strtolower(array_shift($config));
