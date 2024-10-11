@@ -181,7 +181,7 @@ class SettingsTest extends IntegrationTestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('The value should be at most 16');
 
-        $this->settings->numQueueWorkers->setValue('17');
+        $this->settings->numQueueWorkers->setValue('4097');
     }
 
     public function test_numQueueWorkers_ShouldFail_IfTooLow()
