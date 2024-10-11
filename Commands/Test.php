@@ -75,7 +75,7 @@ class Test extends ConsoleCommand
         $output->writeln('Timeout: ' . $settings->redisTimeout->getValue());
         $output->writeln('Password: ' . $settings->redisPassword->getValue());
         $output->writeln('Database: ' . $settings->redisDatabase->getValue());
-        $output->writeln('UseSentinelBackend: ' . (int) $settings->useSentinelBackend->getValue());
+        $output->writeln('RedisBackendType: ' . $settings->getRedisType());
         $output->writeln('SentinelMasterName: ' . $settings->sentinelMasterName->getValue());
 
         $output->writeln('');
@@ -222,9 +222,14 @@ class Test extends ConsoleCommand
      */
     private function getRedisConfig($redis, $configName)
     {
-        $config = $redis->config('GET', $configName);
-        $value = strtolower(array_shift($config));
+        if ($redis instanceof \RedisCluster) {
+            $config = $redis->config('CONFIG', 'GET', $configName);
+            unset($config[0]);
+        } else {
+            $config = $redis->config('GET', $configName);
+        }
 
+        $value = strtolower(array_shift($config));
         return $value;
     }
 
