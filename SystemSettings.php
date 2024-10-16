@@ -343,14 +343,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     }
 
     private function createUseWhatRedisBackendType()
-    {        
-        $old_useSentinelBackend = new SystemSetting('useSentinelBackend', $default = false, FieldConfig::TYPE_BOOL, $this->pluginName);
-        $tmp_useWhatRedisBackendType = new SystemSetting('useWhatRedisBackendType', $default = 0, FieldConfig::TYPE_INT, $this->pluginName);
-        if ($tmp_useWhatRedisBackendType->getValue() == 0) {
-            $tmp_useWhatRedisBackendType->setValue($old_useSentinelBackend->getValue() == true ? 2 : 1);
-            parent::save();
-        }        
-        
+    {
         return $this->makeSetting('useWhatRedisBackendType', $default = 0, FieldConfig::TYPE_INT, function (FieldConfig $field) {
             $field->title = 'Redis type';
             $field->uiControl = FieldConfig::UI_CONTROL_RADIO;
