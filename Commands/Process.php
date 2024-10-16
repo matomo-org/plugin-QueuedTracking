@@ -140,7 +140,7 @@ class Process extends ConsoleCommand
             if ($numberOfProcessCycle > 0 || $infiniteCycle) {
                 $cTogo = $infiniteCycle ? "infinite" : $numberOfProcessCycle;
                 $output->writeln("===========================================================================");
-                $output->writeln("<comment>Taking a nap for {$napster} second(s) before re-run the process. <info>({$cTogo})</info> cyle(s) to go.</comment>");
+                $output->writeln("<comment>Taking a nap for {$napster} second(s), before re-running the process. <info>({$cTogo})</info> cyle(s) to go.</comment>");
                 $output->writeln("===========================================================================");
                 sleep($napster);
             }
