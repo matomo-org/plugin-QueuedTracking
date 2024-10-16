@@ -37,10 +37,8 @@ class Monitor extends ConsoleCommand
             $systemCheck->checkRedisIsInstalled();
         }
 
-        if (!$this->isPcntlFunctionAvailable()) {
-            $output->write(str_repeat("\r\n", 100));
-            $output->write("\e[".(100)."A");
-        }
+        $output->write(str_repeat("\r\n", 100));
+        $output->write("\e[".(100)."A");
 
         $iterations = $this->getIterationsFromArg();
         if ($iterations  !== null) {
@@ -73,16 +71,6 @@ class Monitor extends ConsoleCommand
         $qCount         = count($queues);
         $qPerPAge       = min(max($this->getPerPageFromArg(), 1), $qCount);
         $qPageCount     = ceil($qCount / $qPerPAge);
-
-        $signalTrap = function() use ($output) {
-            $output->writeln("\e[u\e[?25h");
-            die;
-        };
-        if ($this->isPcntlFunctionAvailable())
-        {
-            pcntl_signal(SIGINT, $signalTrap);
-            pcntl_signal(SIGTERM, $signalTrap);    
-        }
         
         readline_callback_handler_install('', function() {});
         stream_set_blocking (STDIN, false);
@@ -90,19 +78,19 @@ class Monitor extends ConsoleCommand
         $output->writeln(str_repeat("-", 30));
         $output->writeln("<fg=black;bg=white;options=bold>".str_pad(" Q INDEX", 10).str_pad(" | REQUEST SETS", 20)."</>");
         $output->writeln(str_repeat("-", 30));
-        $output->write("\e[?25l");
         
         $lastStatsTimer = microtime(true) - 2;
         $lastSumInQueue = false;
         $diffSumInQueue = 0;
         $keyPressed     = "";
-        while (1) {
-            if ($this->isPcntlFunctionAvailable()) {
-                pcntl_signal_dispatch();
-            }   
 
+        $output->write(str_repeat("\r\n", $qPerPAge + 5));
+
+        while (1) {
             if (microtime(true) - $lastStatsTimer >= 2 || $keyPressed != "")
             {
+                $output->write("\e[".($qPerPAge + 5)."A");
+
                 $qCurrentPage = min(max($qCurrentPage, 1), $qPageCount);
                 $memory = $backend->getMemoryStats(); // I know this will only work with redis currently as it is not defined in backend interface etc. needs to be refactored once we add another backend
                 
@@ -141,10 +129,7 @@ class Monitor extends ConsoleCommand
                     $memory['used_memory_peak_human'] ?? 'Unknown', 
                     $lock->getNumberOfAcquiredLocks()
                 ));
-                $output->write("\e[s");
-                $output->write("\e[0G");
-                $output->write("\e[".($qPerPAge + 5)."A");
-        
+
                 if (!is_null($iterations)) {
                     $iterationCount += 1;
                     if ($iterationCount >= $iterations) {
@@ -183,7 +168,8 @@ class Monitor extends ConsoleCommand
                         $qCurrentPage = $qPageCount;
                         break;
                     case "q":
-                        $signalTrap();
+                        $output->writeln('');
+                        die;
                 }
             }
 
@@ -231,14 +217,5 @@ class Monitor extends ConsoleCommand
             }
         }
         return $perPage;
-    }
-
-    private function isPcntlFunctionAvailable()
-    {
-        if (extension_loaded('pcntl') && function_exists('pcntl_signal') && function_exists('pcntl_signal_dispatch')) {
-            return true;
-        }
-
-        return false;
     }
 }
