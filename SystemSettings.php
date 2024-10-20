@@ -214,9 +214,9 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
             $field->title = Piwik::translate('QueuedTracking_NumberOfQueueWorkersFieldTitle');
             $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
             $field->uiControlAttributes = array('size' => 5);
-            $field->inlineHelp = Piwik::translate('QueuedTracking_NumberOfQueueWorkersFieldHelp') . '</br>';
+            $field->inlineHelp = Piwik::translate('QueuedTracking_NumberOfQueueWorkersFieldHelpNew') . '</br>';
             $this->assignValueIsIntValidator($field);
-            $field->validators[] = new NumberRange(1, 16);
+            $field->validators[] = new NumberRange(1, 4096);
         });
 
         $this->addSetting($numQueueWorkers);
