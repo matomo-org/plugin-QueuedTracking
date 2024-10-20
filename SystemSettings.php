@@ -344,7 +344,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
 
     private function createUseWhatRedisBackendType()
     {
-        return $this->makeSetting('useWhatRedisBackendType', $default = 0, FieldConfig::TYPE_INT, function (FieldConfig $field) {
+        return $this->makeSetting('useWhatRedisBackendType', $default = 1, FieldConfig::TYPE_INT, function (FieldConfig $field) {
             $field->title = 'Redis type';
             $field->uiControl = FieldConfig::UI_CONTROL_RADIO;
             $field->availableValues = $this->getAvailableRedisBackendTypes();
