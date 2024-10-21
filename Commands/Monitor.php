@@ -37,9 +37,6 @@ class Monitor extends ConsoleCommand
             $systemCheck->checkRedisIsInstalled();
         }
 
-        $output->write(str_repeat("\r\n", 100));
-        $output->write("\e[" . (100) . "A");
-
         $iterations = $this->getIterationsFromArg();
         if ($iterations  !== null) {
             $output->writeln("<info>Only running " . $iterations . " iterations.</info>");
@@ -104,7 +101,7 @@ class Monitor extends ConsoleCommand
                 if ($lastSumInQueue !== false) {
                     $diffSumInQueue = $lastSumInQueue - $sumInQueue;
                     $diffRps        = round($diffSumInQueue / (microtime(true) - $lastStatsTimer), 2);
-                    $diffSumInQueue = $diffSumInQueue < 0 ? "<fg=red;options=bold>" . abs($diffRps) . "</>" : "<fg=green;options=bold>{$diffRps}</>";
+                    $diffSumInQueue = $diffSumInQueue < 0 ? "<fg=red;options=bold>" . number_format(abs($diffRps)) . "</>" : "<fg=green;options=bold>" . number_format($diffRps) . "</>";
                 }
 
                 $numInQueue = 0;

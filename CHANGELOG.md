@@ -1,5 +1,10 @@
 ## Changelog
 
+5.1.0 - 2021-10-21
+- Increased number of queue tracking workers to 4096
+- Enhance queue monitor and process commands
+- Added Redis cluster option 
+
 5.0.7 - 2024-08-26
 - Fixed old redis sentinel config issue
 
