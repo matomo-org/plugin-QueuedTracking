@@ -90,6 +90,8 @@ There should be only one Redis server to make sure the data will be replayed in 
 If you want to configure Redis HA (High Availability) it is possible to use Redis Sentinel see further down.
 We currently write into the Redis default database by default but you can configure to use a different one.
 
+You can also use a "Redis Cluster" to distribute all tracking requests data across multiple Redis masters/shards, complete with the HA feature.
+
 __Why do some tests fail on my local Piwik instance?__
 
 Make sure the requirements mentioned above are met and Redis needs to run on 127.0.0.1:6379 with no password for the

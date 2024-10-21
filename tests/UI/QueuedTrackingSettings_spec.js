@@ -52,7 +52,7 @@ describe("QueuedTrackingSettings", function () {
     it("should display the settings page with sentinel enabled", async function () {
 
         testEnvironment.overrideConfig('QueuedTracking', {
-            useSentinelBackend: '1'
+            useWhatRedisBackendType: '2'
         });
         testEnvironment.save();
 
