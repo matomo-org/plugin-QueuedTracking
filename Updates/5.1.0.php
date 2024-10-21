@@ -17,9 +17,9 @@ use Piwik\Settings\Plugin\SystemSetting;
 use Piwik\Settings\FieldConfig;
 
 /**
- * Update for version 5.0.8.
+ * Update for version 5.1.0.
  */
-class Updates_5_0_8 extends PiwikUpdates
+class Updates_5_1_0 extends PiwikUpdates
 {
     public function __construct(MigrationFactory $factory)
     {
