@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -6,6 +7,7 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\QueuedTracking\Queue\Backend;
 
 use Piwik\Log;
@@ -32,7 +34,6 @@ class Redis implements Backend
         try {
             $this->connectIfNeeded();
             return 'TEST' === $this->redis->echo('TEST');
-
         } catch (\Exception $e) {
             Log::debug($e->getMessage());
         }
@@ -117,11 +118,11 @@ class Redis implements Backend
 
         $this->connectIfNeeded();
         $values = $this->redis->lRange($key, 0, $numValues - 1);
-        foreach($values as $key => $value) {
+        foreach ($values as $key => $value) {
             $tmpValue = @gzuncompress($value); // Avoid warning if not compressed
-            
+
             // if empty, string is not compressed. Use original value
-            if(empty($tmpValue)) {
+            if (empty($tmpValue)) {
                 $values[$key] = $value;
             } else {
                 $values[$key] = $tmpValue;

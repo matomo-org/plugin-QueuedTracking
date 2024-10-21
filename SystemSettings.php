@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -6,10 +7,10 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\QueuedTracking;
 
 use Piwik\Plugins\QueuedTracking\Settings\NumWorkers;
-use Piwik\Settings\Plugin\SystemSetting;
 use Piwik\Settings\Setting;
 use Piwik\Settings\FieldConfig;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
@@ -62,13 +63,14 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     public function getAvailableRedisBackendTypes()
     {
         return array(
-            1=>Piwik::translate('QueuedTracking_AvailableRedisBackendTypeStandAlone'), 
-            2=>Piwik::translate('QueuedTracking_AvailableRedisBackendTypeSentinel'), 
-            3=>Piwik::translate('QueuedTracking_AvailableRedisBackendTypeCluster')
+            1 => Piwik::translate('QueuedTracking_AvailableRedisBackendTypeStandAlone'),
+            2 => Piwik::translate('QueuedTracking_AvailableRedisBackendTypeSentinel'),
+            3 => Piwik::translate('QueuedTracking_AvailableRedisBackendTypeCluster')
         );
     }
 
-    protected function assignValueIsIntValidator (FieldConfig $field) {
+    protected function assignValueIsIntValidator(FieldConfig $field)
+    {
         $field->validate = function ($value) {
             if ((is_string($value) && !ctype_digit($value)) || (!is_string($value) && !is_int($value))) {
                 throw new \Exception(Piwik::translate('QueuedTracking_ExceptionValueIsNotInt'));
@@ -402,5 +404,4 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
             }
         }
     }
-
 }

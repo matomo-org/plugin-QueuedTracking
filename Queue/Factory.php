@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -70,18 +71,16 @@ class Factory
             } else {
                 $redis = new Queue\Backend\Sentinel();
                 $redis->setSentinelMasterName($masterName);
-                $redis->setDatabase($database);                
+                $redis->setDatabase($database);
             }
-        }
-        elseif($settings->isUsingClusterBackend()) {
+        } elseif ($settings->isUsingClusterBackend()) {
             $redis = new Queue\Backend\RedisCluster();
         } else {
             $redis = new Queue\Backend\Redis();
-            $redis->setDatabase($database);            
+            $redis->setDatabase($database);
         }
 
         $redis->setConfig($host, $port, $timeout, $password);
         return $redis;
     }
-
 }

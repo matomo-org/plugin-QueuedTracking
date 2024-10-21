@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -13,7 +14,8 @@ use Piwik\Tests\Framework\Mock\Tracker;
 use Piwik\Tests\Framework\Mock\Tracker\Db;
 use Piwik\Tests\Framework\TestCase\UnitTestCase;
 
-class TestHandler extends Handler {
+class TestHandler extends Handler
+{
     private $handlerDb;
 
     public function getDb()
@@ -93,5 +95,4 @@ class HandlerTest extends UnitTestCase
         $this->assertEquals($this->transactionId, $this->db->rollbackTransactionId);
         $this->assertFalse($this->db->commitTransactionId);
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -20,7 +21,6 @@ use Piwik\Plugins\QueuedTracking\Queue\Lock;
  */
 class LockTest extends IntegrationTestCase
 {
-
     protected $testRequiresRedis = false;
 
     /**
@@ -143,5 +143,4 @@ class LockTest extends IntegrationTestCase
     {
         return new Lock($redis);
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -6,6 +7,7 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\QueuedTracking\tests\Unit;
 
 use Piwik\Config;
@@ -78,6 +80,4 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
         Config::getInstance()->QueuedTracking = array();
         $this->assertEquals(Configuration::$DEFAULT_NOTIFY_EMAILS, $this->configuration->getNotifyEmails());
     }
-
-
 }

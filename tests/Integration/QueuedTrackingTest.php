@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -7,6 +8,7 @@
  */
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration;
+
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Plugins\QueuedTracking\QueuedTracking;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
@@ -75,5 +77,4 @@ class QueuedTrackingTest extends IntegrationTestCase
 
         $this->assertTrue($handler instanceof Handler);
     }
-
 }

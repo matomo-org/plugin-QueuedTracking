@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -6,6 +7,7 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\QueuedTracking;
 
 use Piwik\Config;
@@ -13,11 +15,11 @@ use Piwik\Config;
 class Configuration
 {
     public static $DEFAULT_NOTIFY_EMAILS = [];
-    const DEFAULT_NOTIFY_THRESHOLD = 250000;
-    const KEY_NOTIFY_EMAILS = 'notify_queue_threshold_emails';
-    const KEY_NOTIFY_THRESHOLD = 'notify_queue_threshold_single_queue';
-    const LOG_FAILED_TRACKING_REQUESTS = 'log_failed_tracking_request_body';
-    const LOG_FAILED_TRACKING_REQUESTS_DEFAULT = 0;
+    public const DEFAULT_NOTIFY_THRESHOLD = 250000;
+    public const KEY_NOTIFY_EMAILS = 'notify_queue_threshold_emails';
+    public const KEY_NOTIFY_THRESHOLD = 'notify_queue_threshold_single_queue';
+    public const LOG_FAILED_TRACKING_REQUESTS = 'log_failed_tracking_request_body';
+    public const LOG_FAILED_TRACKING_REQUESTS_DEFAULT = 0;
 
     public function install()
     {

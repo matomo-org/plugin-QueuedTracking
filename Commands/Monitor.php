@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -15,7 +16,6 @@ use Piwik\Plugins\QueuedTracking\SystemCheck;
 
 class Monitor extends ConsoleCommand
 {
-
     protected function configure()
     {
         $this->setName('queuedtracking:monitor');
@@ -38,7 +38,7 @@ class Monitor extends ConsoleCommand
         }
 
         $output->write(str_repeat("\r\n", 100));
-        $output->write("\e[".(100)."A");
+        $output->write("\e[" . (100) . "A");
 
         $iterations = $this->getIterationsFromArg();
         if ($iterations  !== null) {
@@ -63,22 +63,25 @@ class Monitor extends ConsoleCommand
         }
 
         $output->writeln(sprintf('Up to <info>%d</> workers will be used', $manager->getNumberOfAvailableQueues()));
-        $output->writeln(sprintf('Processor will start once there are at least <info>%s</> request sets in the queue',
-                                 $manager->getNumberOfRequestsToProcessAtSameTime()));
+        $output->writeln(sprintf(
+            'Processor will start once there are at least <info>%s</> request sets in the queue',
+            $manager->getNumberOfRequestsToProcessAtSameTime()
+        ));
         $iterationCount = 0;
-        
+
         $qCurrentPage   = 1;
         $qCount         = count($queues);
         $qPerPAge       = min(max($this->getPerPageFromArg(), 1), $qCount);
         $qPageCount     = ceil($qCount / $qPerPAge);
-        
-        readline_callback_handler_install('', function() {});
-        stream_set_blocking (STDIN, false);
+
+        readline_callback_handler_install('', function () {
+        });
+        stream_set_blocking(STDIN, false);
 
         $output->writeln(str_repeat("-", 30));
-        $output->writeln("<fg=black;bg=white;options=bold>".str_pad(" Q INDEX", 10).str_pad(" | REQUEST SETS", 20)."</>");
+        $output->writeln("<fg=black;bg=white;options=bold>" . str_pad(" Q INDEX", 10) . str_pad(" | REQUEST SETS", 20) . "</>");
         $output->writeln(str_repeat("-", 30));
-        
+
         $lastStatsTimer = microtime(true) - 2;
         $lastSumInQueue = false;
         $diffSumInQueue = 0;
@@ -87,13 +90,12 @@ class Monitor extends ConsoleCommand
         $output->write(str_repeat("\r\n", $qPerPAge + 5));
 
         while (1) {
-            if (microtime(true) - $lastStatsTimer >= 2 || $keyPressed != "")
-            {
-                $output->write("\e[".($qPerPAge + 5)."A");
+            if (microtime(true) - $lastStatsTimer >= 2 || $keyPressed != "") {
+                $output->write("\e[" . ($qPerPAge + 5) . "A");
 
                 $qCurrentPage = min(max($qCurrentPage, 1), $qPageCount);
                 $memory = $backend->getMemoryStats(); // I know this will only work with redis currently as it is not defined in backend interface etc. needs to be refactored once we add another backend
-                
+
                 $sumInQueue = 0;
                 foreach ($queues as $sumQ) {
                     $sumInQueue += $sumQ->getNumberOfRequestSetsInQueue();
@@ -102,31 +104,34 @@ class Monitor extends ConsoleCommand
                 if ($lastSumInQueue !== false) {
                     $diffSumInQueue = $lastSumInQueue - $sumInQueue;
                     $diffRps        = round($diffSumInQueue / (microtime(true) - $lastStatsTimer), 2);
-                    $diffSumInQueue = $diffSumInQueue < 0 ? "<fg=red;options=bold>".abs($diffRps)."</>" : "<fg=green;options=bold>{$diffRps}</>";
+                    $diffSumInQueue = $diffSumInQueue < 0 ? "<fg=red;options=bold>" . abs($diffRps) . "</>" : "<fg=green;options=bold>{$diffRps}</>";
                 }
-    
+
                 $numInQueue = 0;
                 for ($idxPage = 0; $idxPage < $qPerPAge; $idxPage++) {
                     $idx = ($qCurrentPage - 1) * $qPerPAge + $idxPage;
                     if (isset($queues[$idx])) {
                         $q = $queues[$idx]->getNumberOfRequestSetsInQueue();
                         $numInQueue += (int)$q;
-                        $output->writeln(str_pad($idx, 10, " ", STR_PAD_LEFT)." | ".str_pad(number_format($q), 16, " ", STR_PAD_LEFT));
+                        $output->writeln(str_pad($idx, 10, " ", STR_PAD_LEFT) . " | " . str_pad(number_format($q), 16, " ", STR_PAD_LEFT));
                     } else {
-                        $output->writeln(str_pad("", 10)." | ".str_pad("", 16));
+                        $output->writeln(str_pad("", 10) . " | " . str_pad("", 16));
                     }
                 }
-    
+
                 $output->writeln(str_repeat("-", 30));
-                $output->writeln("<fg=black;bg=white;options=bold>".str_pad(" ".($qCount)." Q", 10)." | ".str_pad(number_format($sumInQueue)." R", 16)."</>");
+                $output->writeln("<fg=black;bg=white;options=bold>" . str_pad(" " . ($qCount) . " Q", 10) . " | " . str_pad(number_format($sumInQueue) . " R", 16) . "</>");
                 $output->writeln(str_repeat("-", 30));
                 $output->writeln(sprintf(
-                    "Q [%s-%s] | <info>page %s/%s</> | <comment>press (0-9.,q) or arrow(L,R,U,D)</> | diff/sec %s         \n".
-                    "%s used memory (%s peak). <info>%d</> workers active.".str_repeat(" ", 15), 
-                    ($idx - $qPerPAge + 1), 
-                    $idx, $qCurrentPage, $qPageCount, $diffSumInQueue,
-                    $memory['used_memory_human'] ?? 'Unknown', 
-                    $memory['used_memory_peak_human'] ?? 'Unknown', 
+                    "Q [%s-%s] | <info>page %s/%s</> | <comment>press (0-9.,q) or arrow(L,R,U,D)</> | diff/sec %s         \n" .
+                    "%s used memory (%s peak). <info>%d</> workers active." . str_repeat(" ", 15),
+                    ($idx - $qPerPAge + 1),
+                    $idx,
+                    $qCurrentPage,
+                    $qPageCount,
+                    $diffSumInQueue,
+                    $memory['used_memory_human'] ?? 'Unknown',
+                    $memory['used_memory_peak_human'] ?? 'Unknown',
                     $lock->getNumberOfAcquiredLocks()
                 ));
 
@@ -145,26 +150,35 @@ class Monitor extends ConsoleCommand
             $keyPressed = strlen($keyStroke) == 3 ? $keyStroke[2] : (strlen($keyStroke) > 0 ? $keyStroke[0] : "");
             if ($keyPressed != "" and in_array($keyPressed, array(".", ",", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "q"))) {
                 switch ($keyPressed) {
-                    case "0": case "1": case "2": case "3": case "4": 
-                    case "5": case "6": case "7": case "8": case "9":
-                        $keyPressed = $keyPressed != "0" ? $keyPressed : "10";
-                        $qCurrentPage = floor(($qCurrentPage - 0.1) / 10) * 10 + (int)$keyPressed; break;
-                    case "C": 
+                    case "0":
+                    case "1":
+                    case "2":
+                    case "3":
+                    case "4":
+                    case "5":
+                    case "6":
+                    case "7":
+                    case "8":
+                    case "9":
+                                    $keyPressed = $keyPressed != "0" ? $keyPressed : "10";
+                                    $qCurrentPage = floor(($qCurrentPage - 0.1) / 10) * 10 + (int)$keyPressed;
+                        break;
+                    case "C":
                         $qCurrentPage++;
                         break;
-                    case "D": 
+                    case "D":
                         $qCurrentPage--;
                         break;
-                    case "A": 
+                    case "A":
                         $qCurrentPage += 10;
                         break;
-                    case "B": 
+                    case "B":
                         $qCurrentPage -= 10;
                         break;
-                    case ",": 
+                    case ",":
                         $qCurrentPage = 1;
                         break;
-                    case ".": 
+                    case ".":
                         $qCurrentPage = $qPageCount;
                         break;
                     case "q":
@@ -204,7 +218,7 @@ class Monitor extends ConsoleCommand
      * Loads the `perpage` argument from the commands arguments.
      *
      * @return int|null
-     */    
+     */
     private function getPerPageFromArg()
     {
         $perPage = $this->getInput()->getOption('perpage');

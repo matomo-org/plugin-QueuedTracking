@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -15,8 +16,8 @@ use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 use Piwik\Tests\Framework\Fixture;
 use Piwik\Tests\Framework\Mock\Tracker\RequestSet;
 
-class TestHandler extends Handler {
-
+class TestHandler extends Handler
+{
     public function getTransactionId()
     {
         return $this->transactionId;
@@ -46,13 +47,13 @@ class HandlerTest extends IntegrationTestCase
         parent::setUp();
 
         Fixture::createWebsite('2014-01-02 03:04:05');
-        
+
         $this->handler = $this->createHandler();
         $this->tracker = new Tracker();
 
         $this->handler->init($this->tracker);
     }
-    
+
     public function tearDown(): void
     {
         $this->handler->rollBack($this->tracker);
@@ -273,12 +274,12 @@ class HandlerTest extends IntegrationTestCase
         $cookieBackup = $_COOKIE;
 
         $requestSet = $this->buildRequestSet(2);
-        $requestSet->setEnvironment(array('server' => array('myserver' => 0), 'cookie' => array('testcookie'=> 7)));
+        $requestSet->setEnvironment(array('server' => array('myserver' => 0), 'cookie' => array('testcookie' => 7)));
 
         $this->handler->process($this->tracker, $requestSet);
 
         $this->assertEquals(array('myserver' => 0), $_SERVER);
-        $this->assertEquals(array('testcookie'=> 7), $_COOKIE);
+        $this->assertEquals(array('testcookie' => 7), $_COOKIE);
 
         $_SERVER = $serverBackup;
         $_COOKIE = $cookieBackup;
@@ -288,5 +289,4 @@ class HandlerTest extends IntegrationTestCase
     {
         return new TestHandler();
     }
-
 }

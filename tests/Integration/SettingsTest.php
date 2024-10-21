@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -452,5 +453,4 @@ class SettingsTest extends IntegrationTestCase
             array('foo,bar,baz', array('foo', 'bar', 'baz'))
         );
     }
-
 }

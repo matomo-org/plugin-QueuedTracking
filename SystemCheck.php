@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -6,6 +7,7 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\QueuedTracking;
 
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
@@ -31,5 +33,4 @@ class SystemCheck
             throw new \Exception('At least Redis server 2.8.0 is required');
         }
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -15,7 +16,6 @@ use Piwik\Plugins\QueuedTracking\SystemCheck;
 
 class PrintQueuedRequests extends ConsoleCommand
 {
-
     protected function configure()
     {
         $this->setName('queuedtracking:print-queued-requests');
@@ -54,7 +54,6 @@ class PrintQueuedRequests extends ConsoleCommand
             $output->writeln(var_export($requests, 1));
 
             $output->writeln(sprintf('<info>These were the requests of queue %s. Use <comment>--queue-id=%s</comment> to print only information for this queue.</info>', $thisQueueId, $thisQueueId));
-
         }
 
         return self::SUCCESS;
