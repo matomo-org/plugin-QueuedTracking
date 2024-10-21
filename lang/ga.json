@@ -1,5 +1,8 @@
 {
     "QueuedTracking": {
+        "AvailableRedisBackendTypeCluster": "Braisle",
+        "AvailableRedisBackendTypeSentinel": "Fairtheoir",
+        "AvailableRedisBackendTypeStandAlone": "Neamhspleách",
         "BackendSettingFieldHelp": "Roghnaigh an t-inneall is mian leat a úsáid don ghné seo. Mura bhfuil aon taithí agat le Redis nó mura bhfuil sé ar fáil ar do fhreastalaí, molaimid Mysql a úsáid.",
         "BackendSettingFieldTitle": "Inneall",
         "ExceptionValueIsNotInt": "Ní slánuimhir é an luach",
@@ -29,6 +32,7 @@
         "RedisTimeoutFieldHelp": "Redis am istigh ceangail i soicindí. Ciallaíonn “0.0” gan teorainn. Is féidir leis a bheith ina snámhán m.sh. “2.5” le haghaidh teorainn ama ceangail 2.5 soicind.",
         "RedisTimeoutFieldTitle": "Teorainn ama Redis",
         "UseSentinelFieldHelp": "Má tá sé cumasaithe, úsáidfear an ghné Redis Sentinel. Déan cinnte an t-óstach agus an port a nuashonrú más gá. Nuair a bheidh an t-athrú cumasaithe agus sábháilte agat, beidh tú in ann óstach iolrach agus port scartha le camóga a shonrú.",
-        "UseSentinelFieldTitle": "Cumasaigh Redis Sentinel"
+        "UseSentinelFieldTitle": "Cumasaigh Redis Sentinel",
+        "WhatRedisBackEndType": "Roghnaigh cén cineál redis a úsáidfear. Déan cinnte an t-óstach agus an port a nuashonrú más gá. Nuair a bheidh an t-athrú roghnaithe agus sábháilte agat, beidh tú in ann óstaigh agus poirt iolracha a shonrú ag baint úsáide as liostaí scartha le camóg don chineál “Sentinel” agus “Cnuasach” amháin."
     }
 }
