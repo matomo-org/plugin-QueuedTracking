@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -20,7 +21,9 @@ use Piwik\Settings\FieldConfig;
  */
 class Updates_5_0_8 extends PiwikUpdates
 {
-    public function __construct(MigrationFactory $factory) {}
+    public function __construct(MigrationFactory $factory)
+    {
+    }
 
     public function doUpdate(Updater $updater)
     {
@@ -29,6 +32,6 @@ class Updates_5_0_8 extends PiwikUpdates
         if ($tmp_useWhatRedisBackendType->getValue() == 0) {
             $tmp_useWhatRedisBackendType->setValue($old_useSentinelBackend->getValue() == true ? 2 : 1);
             $tmp_useWhatRedisBackendType->save();
-        }          
+        }
     }
 }

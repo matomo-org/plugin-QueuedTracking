@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -21,7 +22,6 @@ use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
  */
 class FactoryTest extends IntegrationTestCase
 {
-
     public function test_makeQueueManager_shouldReturnAQueueInstance()
     {
         $queue = Factory::makeQueueManager($this->createRedisBackend());
@@ -98,5 +98,4 @@ class FactoryTest extends IntegrationTestCase
         $settings = Factory::getSettings();
         $this->assertEquals(0.7, $settings->redisTimeout->getValue());
     }
-
 }

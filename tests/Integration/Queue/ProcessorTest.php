@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -14,10 +15,9 @@ use Piwik\Tracker\TrackerConfig;
 use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Processor;
-use Piwik\Version;
 
-class TestProcessor extends Processor {
-
+class TestProcessor extends Processor
+{
     public function processRequestSets(Tracker $tracker, $queuedRequestSets)
     {
         return parent::processRequestSets($tracker, $queuedRequestSets);
@@ -60,7 +60,7 @@ class ProcessorTest extends IntegrationTestCase
         parent::setUp();
 
         Fixture::createWebsite('2014-01-02 03:04:05');
-        
+
         $this->backend = $this->createMySQLBackend();
 
         $this->lock = new Queue\Lock($this->backend);
@@ -181,7 +181,7 @@ class ProcessorTest extends IntegrationTestCase
         $requestSetsToRetry = $this->processor->processRequestSets($tracker, $queuedRequestSets);
 
         $this->assertEquals(array(), $requestSetsToRetry);
-        $this->assertSame(5+1+1+3, $tracker->getCountOfLoggedRequests());
+        $this->assertSame(5 + 1 + 1 + 3, $tracker->getCountOfLoggedRequests());
     }
 
     public function test_processRequestSets_ShouldReturnOnlyValidRequestSetsInCaseThereIsAFaultyOne()
@@ -282,7 +282,7 @@ class ProcessorTest extends IntegrationTestCase
 
         $tracker = $this->processor->process($this->createTracker());
 
-        $this->assertSame(1+5+1+2+1+4, $tracker->getCountOfLoggedRequests());
+        $this->assertSame(1 + 5 + 1 + 2 + 1 + 4, $tracker->getCountOfLoggedRequests());
         $this->assertNumberOfRequestSetsLeftInQueue(0);
     }
 
@@ -361,7 +361,7 @@ class ProcessorTest extends IntegrationTestCase
 
         $this->queue->setNumberOfRequestsToProcessAtSameTime(1);
         $requestSet = $this->buildRequestSet(5);
-        $requestSet->setEnvironment(array('server' => array('test' => 1), 'cookie' => array('testcookie'=> 7)));
+        $requestSet->setEnvironment(array('server' => array('test' => 1), 'cookie' => array('testcookie' => 7)));
         $this->queue->addRequestSetToQueues($requestSet);
 
         $tracker = $this->process();

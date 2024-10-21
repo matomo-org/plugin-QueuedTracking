@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -130,7 +131,7 @@ class RedisTest extends IntegrationTestCase
         $this->assertTrue($this->redis->hasAtLeastXRequestsQueued($this->emptyListKey, 1));
         $this->assertFalse($this->redis->hasAtLeastXRequestsQueued($this->emptyListKey, 2));
 
-        $this->redis->appendValuesToList($this->emptyListKey, range(1,11));
+        $this->redis->appendValuesToList($this->emptyListKey, range(1, 11));
         $this->assertTrue($this->redis->hasAtLeastXRequestsQueued($this->emptyListKey, 10));
         $this->assertTrue($this->redis->hasAtLeastXRequestsQueued($this->emptyListKey, 11));
         $this->assertTrue($this->redis->hasAtLeastXRequestsQueued($this->emptyListKey, 12));
@@ -329,5 +330,4 @@ class RedisTest extends IntegrationTestCase
         $keys    = $backend->getKeysMatchingPattern('*fere*');
         $this->assertEquals(array(), $keys);
     }
-
 }

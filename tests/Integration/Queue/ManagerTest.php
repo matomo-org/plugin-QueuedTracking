@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -19,7 +20,6 @@ class TestManager extends Queue\Manager
     {
         return parent::getQueueIdForVisitor($visitorId);
     }
-
 }
 
 /**
@@ -268,11 +268,11 @@ class ManagerTest extends IntegrationTestCase
         }
 
         $this->assertSame(26, $this->manager->getNumberOfRequestSetsInAllQueues());
-        $this->assertNumberOfRequestSetsInQueueEquals(3,  $queueId = 0);
+        $this->assertNumberOfRequestSetsInQueueEquals(3, $queueId = 0);
         $this->assertNumberOfRequestSetsInQueueEquals(9, $queueId = 1);
-        $this->assertNumberOfRequestSetsInQueueEquals(7,  $queueId = 2);
+        $this->assertNumberOfRequestSetsInQueueEquals(7, $queueId = 2);
         $this->assertNumberOfRequestSetsInQueueEquals(7, $queueId = 3);
-        $this->assertNumberOfRequestSetsInQueueEquals(0,  $queueId = 4); // this queue is not available
+        $this->assertNumberOfRequestSetsInQueueEquals(0, $queueId = 4); // this queue is not available
     }
 
     public function test_addRequestSetToQueues_getNumberOfRequestSetsInAllQueues_shouldMoveAllInSameQueue_IfAllHaveSameUID()
@@ -455,5 +455,4 @@ class ManagerTest extends IntegrationTestCase
             $this->manager->addRequestSetToQueues($this->buildRequestSetWithIdSite(1));
         }
     }
-
 }

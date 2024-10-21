@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -15,7 +16,6 @@ use Piwik\Plugins\QueuedTracking\SystemCheck;
 
 class LockStatus extends ConsoleCommand
 {
-
     protected function configure()
     {
         $this->setName('queuedtracking:lock-status');

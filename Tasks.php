@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -6,6 +7,7 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\QueuedTracking;
 
 use Piwik\Common;
@@ -94,7 +96,6 @@ class Tasks extends \Piwik\Plugin\Tasks
     {
         $settings = Queue\Factory::getSettings();
         if ($settings->isMysqlBackend() && $settings->queueEnabled->getValue()) {
-
             $db = Db::get();
             $prefix = Common::prefixTable(MySQL::QUEUED_TRACKING_TABLE_PREFIX);
             $tables = $db->fetchCol("SHOW TABLES LIKE '" . $prefix . "%'");
@@ -104,5 +105,4 @@ class Tasks extends \Piwik\Plugin\Tasks
             Db::optimizeTables($tables, $force);
         }
     }
-
 }

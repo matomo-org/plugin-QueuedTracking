@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -73,5 +74,4 @@ class NumWorkersTest extends IntegrationTestCase
         $this->assertSame(0, $queues[2]->getNumberOfRequestSetsInQueue());
         $this->assertSame(0, $queues[3]->getNumberOfRequestSetsInQueue());
     }
-
 }

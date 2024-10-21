@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -16,7 +17,6 @@ use Piwik\Concurrency\LockBackend;
  */
 interface Backend extends LockBackend
 {
-
     public function appendValuesToList($key, $values);
 
     public function getFirstXValuesFromList($key, $numValues);

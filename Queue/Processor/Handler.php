@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -126,5 +127,4 @@ class Handler
     {
         return Tracker::getDatabase();
     }
-
 }

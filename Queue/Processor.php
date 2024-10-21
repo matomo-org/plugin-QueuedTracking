@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -94,7 +95,6 @@ class Processor
         $emptyQueueVisitCounts = array();
 
         try {
-
             while ($queue = $this->queueManager->lockNext()) {
                 Common::printDebug('Acquired lock for queue ' . $queue->getId());
 
@@ -157,7 +157,6 @@ class Processor
 
                 $this->queueManager->unlock();
             }
-
         } catch (Exception $e) {
             Common::printDebug('Failed to process a request set: ' . $e->getMessage());
 
@@ -243,5 +242,4 @@ class Processor
         $this->handler->rollBack($tracker);
         throw new LockExpiredException(sprintf("Rolled back during %s as we no longer have lock or the lock was never acquired. So far tracker processed %s requests", $activity, $tracker->getCountOfLoggedRequests()));
     }
-
 }

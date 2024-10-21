@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -20,16 +21,26 @@ use Piwik\Tracker;
 
 class Process extends ConsoleCommand
 {
-
     protected function configure()
     {
         $this->setName('queuedtracking:process');
-        $this->addRequiredValueOption('queue-id', null, 'If set, will only work on that specific queue. For example "0" or "1" (if there are multiple queues). Not recommended when only one worker is in use. If for example 4 workers are in use, you may want to use 0, 1, 2, or 3.');
-        $this->addRequiredValueOption('force-num-requests-process-at-once', null, 'If defined, it overwrites the setting of how many requests will be picked out of the queue and processed at once. Must be a number which is >= 1. By default, the configured value from the settings will be used. This can be useful for example if you want to process every single request within the queue. If otherwise a batch size of say 100 is configured, then there may be otherwise 99 requests left in the queue. It can be also useful for testing purposes.');
+        $this->addRequiredValueOption(
+            'queue-id',
+            null,
+            'If set, will only work on that specific queue. For example "0" or "1" (if there are multiple queues). Not recommended when only one worker is in use. If for example 4 workers are in use, you may want to use 0, 1, 2, or 3.'
+        );
+        $this->addRequiredValueOption(
+            'force-num-requests-process-at-once',
+            null,
+            'If defined, it overwrites the setting of how many requests will be picked out of the queue and processed at once. Must be a number which is >= 1. By default, the configured value from the settings will be used.' .
+            ' This can be useful for example if you want to process every single request within the queue.' .
+            ' If otherwise a batch size of say 100 is configured, then there may be otherwise 99 requests left in the queue. It can be also useful for testing purposes.'
+        );
         $this->addRequiredValueOption('cycle', 'c', 'The proccess will automatically loop for "n" cycle time(s), set "0" to infinite.', 1);
         $this->addRequiredValueOption('sleep', 's', 'Take a nap for "n" second(s) before recycle, minimum is 1 second.', 1);
         $this->addRequiredValueOption('delay', 'd', 'Delay before finished', 0);
-        $this->setDescription('Processes all queued tracking requests in case there are enough requests in the queue and in case they are not already in process by another script. To keep track of the queue use the <comment>--verbose</comment> option or execute the <comment>queuedtracking:monitor</comment> command.');
+        $this->setDescription('Processes all queued tracking requests in case there are enough requests in the queue and in case they are not already in process by another script. To keep track of the queue use the <comment>--verbose</comment>' .
+            ' option or execute the <comment>queuedtracking:monitor</comment> command.');
     }
 
     /**
@@ -91,7 +102,7 @@ class Process extends ConsoleCommand
         }
         $numberOfProcessCycle = (int)$numberOfProcessCycle;
         $infiniteCycle = $numberOfProcessCycle == 0;
-        
+
         $delayedBeforeFinish = (int)$input->getOption('delay');
 
         $napster = max(1, $input->getOption('sleep'));
@@ -156,7 +167,7 @@ class Process extends ConsoleCommand
         if ($delayedBeforeFinish > 0) {
             sleep($delayedBeforeFinish);
         }
-        
+
         return self::SUCCESS;
     }
 

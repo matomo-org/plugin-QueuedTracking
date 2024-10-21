@@ -1,15 +1,16 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
  * @link https://matomo.org
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
- * 
+ *
  */
+
 namespace Piwik\Plugins\QueuedTracking\Queue\Backend;
 
 use Piwik\Log;
-use Piwik\Plugins\QueuedTracking\Queue\Backend;
 
 class RedisCluster extends Redis
 {
@@ -32,7 +33,6 @@ class RedisCluster extends Redis
         try {
             $this->connectIfNeeded();
             return 'TEST' === $this->redis->echo('TEST_ECHO', 'TEST');
-
         } catch (\Exception $e) {
             Log::debug($e->getMessage());
         }
@@ -67,16 +67,17 @@ class RedisCluster extends Redis
      * @param int|float|double $bytes byte number.
      * @param int $precision decimal round.
      * * @return string
-     */    
-    private function formatBytes($bytes, $precision = 2) { 
-        $units = array('B', 'K', 'M', 'G', 'T'); 
-       
-        $bytes = max($bytes, 0); 
-        $pow = floor(($bytes ? log($bytes) : 0) / log(1024)); 
-        $pow = min($pow, count($units) - 1); 
-        $bytes /= (1 << (10 * $pow)); 
-       
-        return round($bytes, $precision) . $units[$pow]; 
+     */
+    private function formatBytes($bytes, $precision = 2)
+    {
+        $units = array('B', 'K', 'M', 'G', 'T');
+
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        $bytes /= (1 << (10 * $pow));
+
+        return round($bytes, $precision) . $units[$pow];
     }
 
     public function getMemoryStats()
@@ -91,7 +92,7 @@ class RedisCluster extends Redis
             'used_memory_peak_human' => 0
         );
 
-        foreach ($hosts as $idx=>$host) {
+        foreach ($hosts as $idx => $host) {
             $info = $this->redis->info(array($host, (int)$ports[$idx]), 'memory');
             $memory['used_memory_human'] += $info['used_memory'] ?? 0;
             $memory['used_memory_peak_human'] += $info['used_memory_peak'] ?? 0;
@@ -149,11 +150,11 @@ class RedisCluster extends Redis
 
         $this->connectIfNeeded();
         $values = $this->redis->lRange($key, 0, $numValues - 1);
-        foreach($values as $key => $value) {
+        foreach ($values as $key => $value) {
             $tmpValue = @gzuncompress($value); // Avoid warning if not compressed
-            
+
             // if empty, string is not compressed. Use original value
-            if(empty($tmpValue)) {
+            if (empty($tmpValue)) {
                 $values[$key] = $value;
             } else {
                 $values[$key] = $tmpValue;
@@ -283,7 +284,7 @@ end';
         $hosts = explode(',', $this->host);
         $ports = explode(',', $this->port);
 
-        foreach ($hosts as $idx=>$host) {
+        foreach ($hosts as $idx => $host) {
             $this->redis->flushDB(array($host, (int)$ports[$idx]));
         }
     }
@@ -307,7 +308,7 @@ end';
         $hostsPorts = array_map(fn($host, $port): string => "$host:$port", $hosts, $ports);
 
         try {
-            $this->redis = new \RedisCluster(NULL, $hostsPorts, $this->timeout, $this->timeout, true, $this->password);       
+            $this->redis = new \RedisCluster(null, $hostsPorts, $this->timeout, $this->timeout, true, $this->password);
             return true;
         } catch (Exception $e) {
             throw new Exception('Could not connect to redis cluster: ' . $e->getMessage());

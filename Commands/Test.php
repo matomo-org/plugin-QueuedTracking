@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -91,7 +92,7 @@ class Test extends ConsoleCommand
 
                 $extension = new \ReflectionExtension('redis');
                 $output->writeln('PHPRedis version: ' . $extension->getVersion());
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $output->writeln('No PHPRedis extension (not a problem if sentinel is used):' . $e->getMessage());
             }
         }
@@ -107,12 +108,14 @@ class Test extends ConsoleCommand
 
         $redis = $backend->getConnection();
         if ($isUsingRedis && !$shouldSkipCheckingMemoryConfigValues) {
-
             $evictionPolicy = $this->getRedisConfig($redis, 'maxmemory-policy');
             $output->writeln('MaxMemory Eviction Policy config: ' . $evictionPolicy);
 
             if ($evictionPolicy !== 'allkeys-lru' && $evictionPolicy !== 'noeviction') {
-                $output->writeln('<error>The eviction policy can likely lead to errors when memory is low. We recommend to use eviction policy <comment>allkeys-lru</comment> or alternatively <comment>noeviction</comment>. Read more here: http://redis.io/topics/lru-cache</error>');
+                $output->writeln(
+                    '<error>The eviction policy can likely lead to errors when memory is low. We recommend to use eviction policy <comment>allkeys-lru</comment> or alternatively <comment>noeviction</comment>.' .
+                    ' Read more here: http://redis.io/topics/lru-cache</error>'
+                );
             }
 
             $evictionPolicy = $this->getRedisConfig($redis, 'maxmemory');
@@ -126,7 +129,7 @@ class Test extends ConsoleCommand
             $output->writeln('Redis is connected: ' . (int) $redis->isConnected());
         }
 
-        if ($backend->testConnection()){
+        if ($backend->testConnection()) {
             $output->writeln('Connection works in general');
         } else {
             $output->writeln('Connection does not actually work: ' . $redis->getLastError());
@@ -144,7 +147,7 @@ class Test extends ConsoleCommand
         if (!$backend->setIfNotExists('foo', 'bar', 5)) {
             $message = "setIfNotExists(foo, bar, 1) does not work, most likely we won't be able to acquire a lock: " . $backend->getLastError();
             $output->writeln($message);
-        } else{
+        } else {
             $initialTtl = $backend->getTimeToLive('foo');
             if ($initialTtl >= 3000 && $initialTtl <= 5000) {
                 $output->writeln('Initial expire seems to be set correctly');
@@ -195,7 +198,6 @@ class Test extends ConsoleCommand
         $backend->appendValuesToList('fooList', array('value1', 'value2', 'value3'));
         $values = $backend->getFirstXValuesFromList('fooList', 2);
         if ($values == array('value1', 'value2')) {
-
             $backend->removeFirstXValuesFromList('fooList', 1);
             $backend->removeFirstXValuesFromList('fooList', 1);
             $values = $backend->getFirstXValuesFromList('fooList', 2);
@@ -204,7 +206,6 @@ class Test extends ConsoleCommand
             } else {
                 $output->writeln('List feature seems to work only partially: ' . var_export($values, 1));
             }
-
         } else {
             $output->writeln('<error>List feature seems to not work fine: ' . $redis->getLastError() . '</error>');
         }
@@ -247,11 +248,11 @@ class Test extends ConsoleCommand
 
         $result = call_user_func_array(array($redis, $method), $params);
 
-        $paramsMapped = array_map(function($item) {
+        $paramsMapped = array_map(function ($item) {
             if (is_string($item)) {
                 return $item;
             }
-            
+
             return str_replace(["\r", "\n", "  "], '', var_export($item, true));
         }, $params);
         $paramsInline = implode(', ', $paramsMapped);

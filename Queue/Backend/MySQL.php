@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -6,6 +7,7 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL v3 or later
  *
  */
+
 namespace Piwik\Plugins\QueuedTracking\Queue\Backend;
 
 use Piwik\Common;
@@ -16,7 +18,7 @@ use Piwik\Plugins\QueuedTracking\Queue\Backend;
 
 class MySQL implements Backend
 {
-    const QUEUED_TRACKING_TABLE_PREFIX = 'queuedtracking_';
+    public const QUEUED_TRACKING_TABLE_PREFIX = 'queuedtracking_';
 
     private $table = 'queuedtracking_queue';
     private $tableListPrefix = 'queuedtracking_list_';
@@ -57,10 +59,12 @@ class MySQL implements Backend
         $dbSettings = new Db\Settings();
         $engine = $dbSettings->getEngine();
 
-        $statement = sprintf("CREATE TABLE IF NOT EXISTS `%s` ( %s ) ENGINE=%s DEFAULT CHARSET=utf8 ;",
+        $statement = sprintf(
+            "CREATE TABLE IF NOT EXISTS `%s` ( %s ) ENGINE=%s DEFAULT CHARSET=utf8 ;",
             $table,
             $createDefinition,
-            $engine);
+            $engine
+        );
 
         // DbHelper::createTable() won't work in tracker mode!
         Db::get()->query($statement);
@@ -70,7 +74,6 @@ class MySQL implements Backend
     {
         try {
             return '1' == Db::get()->fetchOne('SELECT 1');
-
         } catch (\Exception $e) {
             Log::debug($e->getMessage());
         }
@@ -105,7 +108,6 @@ class MySQL implements Backend
             $value = gzcompress($value);
 
             try {
-
                 $result = Db::query($query, array($value));
 
                 if ($result === false) {
@@ -115,11 +117,9 @@ class MySQL implements Backend
                 }
 
                 unset($result);
-
             } catch (\Exception $e) {
                 // anything else but Mysqli in tracker mode (eg PDO or Mysqli in regular mode)
                 if ($this->isErrorTableNotExists($e)) {
-
                     // we create list tables only on demand
                     $this->createListTable($key);
                     Db::query($query, array($value));
@@ -265,22 +265,26 @@ class MySQL implements Backend
         // todo: we could combine get() and keyExists() in one query!
         if ($this->keyExists($key)) {
             // most of the time an expired key should not exist... we don't want to lock the row unncessarily therefore we check first
-            // if value exists... 
+            // if value exists...
             $sql = sprintf('DELETE FROM %s WHERE queue_key = ? and not (%s)', $this->tablePrefixed, $this->getQueryPartExpiryTime());
             Db::query($sql, array($key));
         }
 
-        $query = sprintf('INSERT INTO %s (`queue_key`, `queue_value`, `expiry_time`) 
+        $query = sprintf(
+            'INSERT INTO %s (`queue_key`, `queue_value`, `expiry_time`) 
                                  VALUES (?,?,(UNIX_TIMESTAMP() + ?))',
-            $this->tablePrefixed);
+            $this->tablePrefixed
+        );
         // we make sure to update the row if the key is expired and consider it as "deleted"
 
         try {
             $query = Db::query($query, array($key, $value, (int) $ttlInSeconds));
         } catch (\Exception $e) {
-            if ($e->getCode() == 23000
+            if (
+                $e->getCode() == 23000
                 || strpos($e->getMessage(), 'Duplicate entry') !== false
-                || strpos($e->getMessage(), ' 1062 ') !== false) {
+                || strpos($e->getMessage(), ' 1062 ') !== false
+            ) {
                 return false;
             }
             throw $e;
@@ -431,5 +435,4 @@ class MySQL implements Backend
             $this->dropTable($table);
         }
     }
-
 }

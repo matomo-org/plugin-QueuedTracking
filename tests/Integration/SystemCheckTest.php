@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -74,5 +75,4 @@ class SystemCheckTest extends IntegrationTestCase
 
         return Factory::makeBackendFromSettings($settings);
     }
-
 }

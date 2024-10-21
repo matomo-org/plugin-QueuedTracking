@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -10,7 +11,7 @@ namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue\Backend;
 
 use Piwik\Db;
 use Piwik\Plugins\QueuedTracking\Queue\Backend\MySQL;
-use \Piwik\Tests\Framework\TestCase\IntegrationTestCase;
+use Piwik\Tests\Framework\TestCase\IntegrationTestCase;
 
 /**
  * @group QueuedTracking
@@ -147,7 +148,7 @@ class MysqlTest extends IntegrationTestCase
         $this->assertTrue($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 1));
         $this->assertFalse($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 2));
 
-        $this->backend->appendValuesToList($this->emptyListKey, range(1,11));
+        $this->backend->appendValuesToList($this->emptyListKey, range(1, 11));
         $this->assertTrue($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 10));
         $this->assertTrue($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 11));
         $this->assertTrue($this->backend->hasAtLeastXRequestsQueued($this->emptyListKey, 12));
@@ -370,5 +371,4 @@ class MysqlTest extends IntegrationTestCase
         $keys    = $backend->getKeysMatchingPattern('*fere*');
         $this->assertEquals(array(), $keys);
     }
-
 }

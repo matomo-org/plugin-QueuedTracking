@@ -1,4 +1,5 @@
 <?php
+
 /**
 * Matomo - free/libre analytics platform
 *
@@ -7,7 +8,6 @@
 */
 
 namespace Piwik\Plugins\QueuedTracking\tests\Framework\Mock\Tracker;
-
 
 class Response extends \Piwik\Tests\Framework\Mock\Tracker\Response
 {

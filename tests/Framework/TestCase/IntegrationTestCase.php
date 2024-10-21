@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Matomo - free/libre analytics platform
  *
@@ -120,7 +121,6 @@ class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTes
             } else {
                 $requests[] = new Request(array('idsite' => '1', 'index' => $i));
             }
-
         }
 
         $set = new RequestSet();
@@ -128,6 +128,4 @@ class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTes
 
         return $set;
     }
-
-
 }
