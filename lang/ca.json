@@ -1,5 +1,8 @@
 {
     "QueuedTracking": {
+        "AvailableRedisBackendTypeCluster": "Clúster",
+        "AvailableRedisBackendTypeSentinel": "Sentinella",
+        "AvailableRedisBackendTypeStandAlone": "Autònom",
         "BackendSettingFieldHelp": "Seleccioneu el backend que voleu utilitzar per a aquesta funció. Si no teniu cap experiència amb Redis o no està disponible al vostre servidor, us recomanem que utilitzeu Mysql.",
         "BackendSettingFieldTitle": "Backend",
         "ExceptionValueIsNotInt": "El valor no és un nombre enter",
@@ -29,6 +32,7 @@
         "RedisTimeoutFieldHelp": "Temps d'espera de connexió Redis en segons. \"0.0\" significa il·limitat. Pot ser un flotant, per exemple, \"2,5\" per a un temps d'espera de connexió de 2,5 segons.",
         "RedisTimeoutFieldTitle": "Temps d'espera de Redis",
         "UseSentinelFieldHelp": "Si està activada, s'utilitzarà la funció Redis Sentinel. Assegureu-vos d'actualitzar l'amfitrió i el port si cal. Un cop hàgiu habilitat i desat el canvi, podreu especificar diversos hosts i ports separats per comes.",
-        "UseSentinelFieldTitle": "Activa Redis Sentinel"
+        "UseSentinelFieldTitle": "Activa Redis Sentinel",
+        "WhatRedisBackEndType": "Seleccioneu quin tipus de redis voleu utilitzar. Assegureu-vos d'actualitzar l'amfitrió i el port si cal. Un cop hàgiu seleccionat i desat el canvi, podreu especificar diversos hosts i ports utilitzant llistes separades per comes només per al tipus \"Sentinel\" i \"Cluster\"."
     }
 }
