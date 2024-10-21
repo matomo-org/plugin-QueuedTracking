@@ -71,8 +71,10 @@ class Monitor extends ConsoleCommand
         $qPerPAge       = min(max($this->getPerPageFromArg(), 1), $qCount);
         $qPageCount     = ceil($qCount / $qPerPAge);
 
-        readline_callback_handler_install('', function () {
-        });
+        if (function_exists('readline_callback_handler_install')) {
+            readline_callback_handler_install('', function () {
+            });
+        }
         stream_set_blocking(STDIN, false);
 
         $output->writeln(str_repeat("-", 30));

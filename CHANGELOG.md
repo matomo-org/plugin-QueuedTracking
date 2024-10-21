@@ -1,5 +1,8 @@
 ## Changelog
 
+5.1.0 - 2021-10-22
+- Fixes fatal error on Windows due to readline_callback_handler_install method not present
+
 5.1.0 - 2021-10-21
 - Increased number of queue tracking workers to 4096
 - Enhance queue monitor and process commands
