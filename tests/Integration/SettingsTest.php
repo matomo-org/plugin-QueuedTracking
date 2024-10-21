@@ -179,9 +179,9 @@ class SettingsTest extends IntegrationTestCase
     public function test_numQueueWorkers_ShouldFail_IfTooHigh()
     {
         $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('The value should be at most 16');
+        $this->expectExceptionMessage('The value should be at most 4096');
 
-        $this->settings->numQueueWorkers->setValue('17');
+        $this->settings->numQueueWorkers->setValue('4097');
     }
 
     public function test_numQueueWorkers_ShouldFail_IfTooLow()
@@ -236,13 +236,27 @@ class SettingsTest extends IntegrationTestCase
         $this->assertSame('test', $this->settings->sentinelMasterName->getValue());
     }
 
-    public function test_useSentinelBackend()
+    public function test_useWhatRedisBackendType()
     {
-        $this->settings->useSentinelBackend->setValue('0');
-        $this->assertFalse($this->settings->useSentinelBackend->getValue());
+        $this->settings->useWhatRedisBackendType->setValue(1);
+        $this->assertFalse($this->settings->isUsingSentinelBackend());
 
-        $this->settings->useSentinelBackend->setValue('1');
-        $this->assertTrue($this->settings->useSentinelBackend->getValue());
+        $this->settings->useWhatRedisBackendType->setValue(3);
+        $this->assertFalse($this->settings->isUsingSentinelBackend());
+
+        $this->settings->useWhatRedisBackendType->setValue(2);
+        $this->assertTrue($this->settings->isUsingSentinelBackend());
+    }
+
+    public function testIsUsingClusterBackend()
+    {
+        $this->settings->useWhatRedisBackendType->setValue(1);
+        $this->assertFalse($this->settings->isUsingClusterBackend());
+        $this->settings->useWhatRedisBackendType->setValue(2);
+        $this->assertFalse($this->settings->isUsingClusterBackend());
+
+        $this->settings->useWhatRedisBackendType->setValue(3);
+        $this->assertTrue($this->settings->isUsingClusterBackend());
     }
 
     public function test_redisPort_ShouldFailWhenMultipleValuesGiven_IfSentinelNotEnabled()
@@ -290,9 +304,9 @@ class SettingsTest extends IntegrationTestCase
         $this->assertFalse($this->settings->queueEnabled->getValue());
     }
 
-    public function test_useSentinelBackend_ShouldBeDisabledByDefault()
+    public function test_useWhatRedisBackendType_ShouldBe1Default()
     {
-        $this->assertFalse($this->settings->useSentinelBackend->getValue());
+        $this->assertSame(1, $this->settings->useWhatRedisBackendType->getValue());
     }
 
     public function test_sentinelMasterName_shouldHaveValueByDefault()

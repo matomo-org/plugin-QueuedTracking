@@ -35,7 +35,7 @@ class IntegrationTestCase extends \Piwik\Tests\Framework\TestCase\IntegrationTes
 
     protected function enableRedisSentinel($master = 'mymaster')
     {
-        Config::getInstance()->QueuedTracking = array('useSentinelBackend' => '1', 'sentinelMasterName' => $master);
+        Config::getInstance()->QueuedTracking = array('useWhatRedisBackendType' => '2', 'sentinelMasterName' => $master);
     }
 
     protected function disableRedisSentinel()

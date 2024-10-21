@@ -63,13 +63,13 @@ class FactoryTest extends IntegrationTestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('You must configure a sentinel master name');
 
-        Config::getInstance()->QueuedTracking = array('useSentinelBackend' => '1', 'sentinelMasterName' => '');
+        Config::getInstance()->QueuedTracking = array('useWhatRedisBackendType' => '2', 'sentinelMasterName' => '');
         Factory::makeBackend();
     }
 
     public function test_makeBackend_shouldReturnASentinelInstanceIfConfigured()
     {
-        Config::getInstance()->QueuedTracking = array('useSentinelBackend' => '1', 'sentinelMasterName' => 'mymaster');
+        Config::getInstance()->QueuedTracking = array('useWhatRedisBackendType' => '2', 'sentinelMasterName' => 'mymaster');
         $backend = Factory::makeBackend();
         Config::getInstance()->QueuedTracking = array();
         $this->assertTrue($backend instanceof Queue\Backend\Sentinel);

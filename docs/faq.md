@@ -32,6 +32,7 @@ requests using the [Piwik console](http://developer.piwik.org/guides/piwik-on-th
 * Disable the setting "Process during tracking request" in the Piwik UI under "Settings => Plugin Settings"
 * Setup a cronjob that executes the command `./console queuedtracking:process` for instance every minute
 * That's it
+* Or, if you have __"non WINDOWS OS"__ you can use the [Supervisor](http://supervisord.org/) as a cron alternative.
 
 The `queuedtracking:process` command will make sure to process all queued tracking requests whenever possible and the
 command will exit as soon as there are not enough requests queued anymore. That's why you should setup a cronjob to start
@@ -42,6 +43,28 @@ queued requests at a time.
 Example crontab entry that starts the processor every minute:
 
 `* * * * * cd /piwik && ./console queuedtracking:process >/dev/null 2>&1`
+
+Example Supervisor entry that will start 16 processors/workers with 10 loop cycle times and auto restart:
+
+```ini
+[program:matomo]
+directory=/path/to/your/matomo
+command=/path/to/your/php /path/to/your/matomo/console queuedtracking:process --queue-id=%(process_num)s -c 10 -s 2 -d 5
+process_name=queuedtracking-%(process_num)s
+
+#change the number according to how many worker(s) you have
+numprocs=16
+
+numprocs_start=0
+stopsignal=TERM
+autostart=true
+autorestart=true
+stopwaitsecs=120
+#priority=1000
+stdout_logfile=/dev/null
+stdout_logfile_maxbytes=0
+redirect_stderr=true
+```
 
 __Can I keep track of the state of the queue?__
 
@@ -66,6 +89,8 @@ Make sure to have enough memory to save all tracking requests in the queue. One 
 There should be only one Redis server to make sure the data will be replayed in the same order as they were recorded.
 If you want to configure Redis HA (High Availability) it is possible to use Redis Sentinel see further down.
 We currently write into the Redis default database by default but you can configure to use a different one.
+
+You can also use a "Redis Cluster" to distribute all tracking requests data across multiple Redis masters/shards, complete with the HA feature.
 
 __Why do some tests fail on my local Piwik instance?__
 
