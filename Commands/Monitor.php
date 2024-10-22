@@ -264,13 +264,5 @@ class Monitor extends ConsoleCommand
     private function interactiveCapability()
     {
         return function_exists('readline_callback_handler_install');
-            return false;
-        }
-        
-        if (function_exists('readline_callback_handler_install') == false) {
-            return false;
-        }
-
-        return true;
     }
 }
