@@ -75,9 +75,10 @@ class Monitor extends ConsoleCommand
         $qCount         = count($queues);
         $qPerPAge       = min(max($this->getPerPageFromArg(), 1), $qCount);
         $qPageCount     = ceil($qCount / $qPerPAge);
-        
+
         if ($this->interactiveCapability()) {
-            readline_callback_handler_install('', function () {});
+            readline_callback_handler_install('', function () {
+            });
             stream_set_blocking(STDIN, false);
         }
 
@@ -126,7 +127,7 @@ class Monitor extends ConsoleCommand
                 $output->writeln("<fg=black;bg=white;options=bold>" . str_pad(" " . ($qCount) . " Q", 10) . " | " . str_pad(number_format($sumInQueue) . " R", 16) . "</>");
                 $output->writeln(str_repeat("-", 30));
                 $output->writeln(sprintf(
-                    "Q [%s-%s] | <info>page %s/%s</>" . ($this->interactiveCapability() ? " | <comment>press (0-9.,q) or arrow(L,R,U,D)</>" : " | <error>use -p arg to jump to specific page</>"). " | diff/sec %s         \n" .
+                    "Q [%s-%s] | <info>page %s/%s</>" . ($this->interactiveCapability() ? " | <comment>press (0-9.,q) or arrow(L,R,U,D)</>" : " | <error>use -p arg to jump to specific page</>") . " | diff/sec %s         \n" .
                     "%s used memory (%s peak). <info>%d</> workers active." . str_repeat(" ", 15),
                     ($idx - $qPerPAge + 1),
                     $idx,
