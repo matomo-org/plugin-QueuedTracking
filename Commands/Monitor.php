@@ -19,9 +19,14 @@ class Monitor extends ConsoleCommand
     protected function configure()
     {
         $this->setName('queuedtracking:monitor');
-        $this->setDescription("Shows and updates the current state of the queue every 2 seconds.\n  Key ,=first page, .=last page, 0-9=move to page section, arrow LEFT=prev page, RIGHT=next page, UP=next 10 pages, DOWN=prev 10 pages, q=quit");
+        if ($this->interactiveCapability()) {
+            $this->setDescription("Shows and updates the current state of the queue every 2 seconds.\n  Key ,=first page, .=last page, 0-9=move to page section, arrow LEFT=prev page, RIGHT=next page, UP=next 10 pages, DOWN=prev 10 pages, q=quit");
+        } else {
+            $this->setDescription("Shows and updates the current state of the queue every 2 seconds.");
+        }
         $this->addRequiredValueOption('iterations', null, 'If set, will limit the number of monitoring iterations done.');
-        $this->addRequiredValueOption('perpage', 'p', 'Number of queue worker displayed per page.', 16);
+        $this->addRequiredValueOption('rowperpage', 'r', 'Number of queue worker displayed per page.', 16);
+        $this->addRequiredValueOption('jumptopage', 'p', 'Jump to page (p).', 1);
     }
 
     /**
@@ -66,14 +71,15 @@ class Monitor extends ConsoleCommand
         ));
         $iterationCount = 0;
 
-        $qCurrentPage   = 1;
+        $qCurrentPage   = $this->getJumpToPageFromArg();
         $qCount         = count($queues);
         $qPerPAge       = min(max($this->getPerPageFromArg(), 1), $qCount);
         $qPageCount     = ceil($qCount / $qPerPAge);
-
-        readline_callback_handler_install('', function () {
-        });
-        stream_set_blocking(STDIN, false);
+        
+        if ($this->interactiveCapability()) {
+            readline_callback_handler_install('', function () {});
+            stream_set_blocking(STDIN, false);
+        }
 
         $output->writeln(str_repeat("-", 30));
         $output->writeln("<fg=black;bg=white;options=bold>" . str_pad(" Q INDEX", 10) . str_pad(" | REQUEST SETS", 20) . "</>");
@@ -88,7 +94,7 @@ class Monitor extends ConsoleCommand
 
         while (1) {
             if (microtime(true) - $lastStatsTimer >= 2 || $keyPressed != "") {
-                $output->write("\e[" . ($qPerPAge + 5) . "A");
+                $output->write("\e[" . ($qPerPAge + 5) . "A\e[0G");
 
                 $qCurrentPage = min(max($qCurrentPage, 1), $qPageCount);
                 $memory = $backend->getMemoryStats(); // I know this will only work with redis currently as it is not defined in backend interface etc. needs to be refactored once we add another backend
@@ -120,7 +126,7 @@ class Monitor extends ConsoleCommand
                 $output->writeln("<fg=black;bg=white;options=bold>" . str_pad(" " . ($qCount) . " Q", 10) . " | " . str_pad(number_format($sumInQueue) . " R", 16) . "</>");
                 $output->writeln(str_repeat("-", 30));
                 $output->writeln(sprintf(
-                    "Q [%s-%s] | <info>page %s/%s</> | <comment>press (0-9.,q) or arrow(L,R,U,D)</> | diff/sec %s         \n" .
+                    "Q [%s-%s] | <info>page %s/%s</>" . ($this->interactiveCapability() ? " | <comment>press (0-9.,q) or arrow(L,R,U,D)</>" : " | <error>use -p arg to jump to specific page</>"). " | diff/sec %s         \n" .
                     "%s used memory (%s peak). <info>%d</> workers active." . str_repeat(" ", 15),
                     ($idx - $qPerPAge + 1),
                     $idx,
@@ -143,44 +149,46 @@ class Monitor extends ConsoleCommand
                 $lastStatsTimer = microtime(true);
             }
 
-            $keyStroke  = stream_get_contents(STDIN, 3);
-            $keyPressed = strlen($keyStroke) == 3 ? $keyStroke[2] : (strlen($keyStroke) > 0 ? $keyStroke[0] : "");
-            if ($keyPressed != "" and in_array($keyPressed, array(".", ",", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "q"))) {
-                switch ($keyPressed) {
-                    case "0":
-                    case "1":
-                    case "2":
-                    case "3":
-                    case "4":
-                    case "5":
-                    case "6":
-                    case "7":
-                    case "8":
-                    case "9":
-                                    $keyPressed = $keyPressed != "0" ? $keyPressed : "10";
-                                    $qCurrentPage = floor(($qCurrentPage - 0.1) / 10) * 10 + (int)$keyPressed;
-                        break;
-                    case "C":
-                        $qCurrentPage++;
-                        break;
-                    case "D":
-                        $qCurrentPage--;
-                        break;
-                    case "A":
-                        $qCurrentPage += 10;
-                        break;
-                    case "B":
-                        $qCurrentPage -= 10;
-                        break;
-                    case ",":
-                        $qCurrentPage = 1;
-                        break;
-                    case ".":
-                        $qCurrentPage = $qPageCount;
-                        break;
-                    case "q":
-                        $output->writeln('');
-                        die;
+            if ($this->interactiveCapability()) {
+                $keyStroke  = stream_get_contents(STDIN, 3);
+                $keyPressed = strlen($keyStroke) == 3 ? $keyStroke[2] : (strlen($keyStroke) > 0 ? $keyStroke[0] : "");
+                if ($keyPressed != "" and in_array($keyPressed, array(".", ",", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "q"))) {
+                    switch ($keyPressed) {
+                        case "0":
+                        case "1":
+                        case "2":
+                        case "3":
+                        case "4":
+                        case "5":
+                        case "6":
+                        case "7":
+                        case "8":
+                        case "9":
+                                        $keyPressed = $keyPressed != "0" ? $keyPressed : "10";
+                                        $qCurrentPage = floor(($qCurrentPage - 0.1) / 10) * 10 + (int)$keyPressed;
+                            break;
+                        case "C":
+                            $qCurrentPage++;
+                            break;
+                        case "D":
+                            $qCurrentPage--;
+                            break;
+                        case "A":
+                            $qCurrentPage += 10;
+                            break;
+                        case "B":
+                            $qCurrentPage -= 10;
+                            break;
+                        case ",":
+                            $qCurrentPage = 1;
+                            break;
+                        case ".":
+                            $qCurrentPage = $qPageCount;
+                            break;
+                        case "q":
+                            $output->writeln('');
+                            die;
+                    }
                 }
             }
 
@@ -212,21 +220,57 @@ class Monitor extends ConsoleCommand
     }
 
     /**
-     * Loads the `perpage` argument from the commands arguments.
+     * Loads the `rowperpage` argument from the commands arguments.
      *
      * @return int|null
      */
     private function getPerPageFromArg()
     {
-        $perPage = $this->getInput()->getOption('perpage');
+        $perPage = $this->getInput()->getOption('rowperpage');
         if (!is_numeric($perPage)) {
-            throw new \Exception('perpage needs to be numeric');
+            throw new \Exception('rowperpage needs to be numeric');
         } else {
             $perPage = (int)$perPage;
             if ($perPage <= 0) {
-                throw new \Exception('perpage needs to be a non-zero positive number');
+                throw new \Exception('rowperpage needs to be a non-zero positive number');
             }
         }
         return $perPage;
+    }
+
+    /**
+     * Loads the `jumptopage` argument from the commands arguments.
+     *
+     * @return int|null
+     */
+    private function getJumpToPageFromArg()
+    {
+        $perPage = $this->getInput()->getOption('jumptopage');
+        if (!is_numeric($perPage)) {
+            throw new \Exception('jumptopage needs to be numeric');
+        } else {
+            $perPage = (int)$perPage;
+            if ($perPage <= 0) {
+                throw new \Exception('jumptopage needs to be a non-zero positive number');
+            }
+        }
+        return $perPage;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    private function interactiveCapability()
+    {
+        if (str_starts_with(strtoupper(PHP_OS), 'WIN')) {
+            return false;
+        }
+        
+        if (function_exists('readline_callback_handler_install') == false) {
+            return false;
+        }
+
+        return true;
     }
 }
