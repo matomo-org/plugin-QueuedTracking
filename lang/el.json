@@ -1,5 +1,8 @@
 {
     "QueuedTracking": {
+        "AvailableRedisBackendTypeCluster": "Cluster",
+        "AvailableRedisBackendTypeSentinel": "Sentinel",
+        "AvailableRedisBackendTypeStandAlone": "Stand-alone",
         "BackendSettingFieldHelp": "Επιλέξτε το πίσω μέρος που θέλετε να χρησιμοποιείτε για αυτό το χαρακτηριστικό. Αν δεν έχετε εμπειρία με το Redis ή αν δεν είναι διαθέσιμο στο διακομιστή σας, προτείνουμε τη χρήση της Mysql.",
         "BackendSettingFieldTitle": "Πίσω μέρος (backend)",
         "ExceptionValueIsNotInt": "Η τιμή δεν είναι ακέραιος",
@@ -29,6 +32,7 @@
         "RedisTimeoutFieldHelp": "Ο χρόνος λήξης απόκρισης του Redis σε δευτερόλεπτα. Το \"0.0\" σημαίνει χωρίς όριο. Μπορεί να είναι δεκαδικός αριθμός, πχ \"2.5\" για χρόνο λήξης απόκρισης 2.5 δευτερόλεπτα.",
         "RedisTimeoutFieldTitle": "Χρόνος λήξης απόκρισης του Redis",
         "UseSentinelFieldHelp": "Αν είναι ενεργό, θα χρησιμοποιηθεί το χαρακτηριστικό Redis Sentinel. Βεβαιωθείτε να ενημερώσετε το όνομα διακομιστή και τη θύρα αν απαιτηθεί. Από τη στιγμή που θα το ενεργοποιήσετε και αποθηκεύσετε την αλλαγή, θα μπορείτε να καθορίζετε πολλαπλούς διακομιστές και θύρες χωρισμένα με κόμμα.",
-        "UseSentinelFieldTitle": "Ενεργοποίηση του Redis Sentinel"
+        "UseSentinelFieldTitle": "Ενεργοποίηση του Redis Sentinel",
+        "WhatRedisBackEndType": "Επιλέξτε ποιο τύπο redis θα χρησιμοποιήσετε. Βεβαιωθείτε να ενημερώσετε το διακομιστή και θύρα αν χρειάζεται. Αφού έχετε κάνει και αποθηκεύσει την αλλαγή, θα μπορείτε να καθορίσετε πολλαπλούς διακομιστές και θύρες με λίστες και χρήση του κόμματος ως διαχωριστή μόνο για τους τύπους \"Sentinel\" και \"Cluster\"."
     }
 }
