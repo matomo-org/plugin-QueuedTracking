@@ -263,7 +263,7 @@ class Monitor extends ConsoleCommand
      */
     private function interactiveCapability()
     {
-        if (str_starts_with(strtoupper(PHP_OS), 'WIN')) {
+        return function_exists('readline_callback_handler_install');
             return false;
         }
         
