@@ -1,5 +1,8 @@
 ## Changelog
 
+5.1.1 - 2021-10-23
+- Fixed fatal error when running queuedtracking:monitor command on Windows
+
 5.1.0 - 2021-10-21
 - Increased number of queue tracking workers to 4096
 - Enhance queue monitor and process commands
