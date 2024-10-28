@@ -1,6 +1,28 @@
 {
     "QueuedTracking": {
+        "AvailableRedisBackendTypeSentinel": "Sentinel",
+        "AvailableRedisBackendTypeStandAlone": "Më vete",
+        "BackendSettingFieldHelp": "Përzgjidhni mekanizmin e pasmë që doni të përdoret për këtë veçori. Nëse s’keni përvojë me Redis, ose s’është i pranishëm në shërbyesin tuaj, rekomandojmë përdorimin e Mysql-së.",
+        "BackendSettingFieldTitle": "Mekanizëm i pasmë",
+        "ExceptionValueIsNotInt": "Vlera s’është numër i plotë",
+        "MasterNameFieldHelp": "Emri për master sentinel lypset të formësohet vetëm nëse është aktivizuar Sentinel-i.",
+        "MasterNameFieldTitle": "Emër Master Sentinel Redis",
         "MultipleServersOnlyConfigurableIfSentinelEnabled": "Disa strehë ose porta njëherësh mund të formësohen vetëm kur Redis Sentinel është i aktivizuar. README i shtojcës do t’ju mësojë si ta bëni.",
-        "NumHostsNotMatchNumPorts": "Numri i strehëve të formësuara nuk përputhet me numrin e portave të formësuara."
+        "NumHostsNotMatchNumPorts": "Numri i strehëve të formësuara nuk përputhet me numrin e portave të formësuara.",
+        "NumRequestsToProcessFieldHelp": "Përcakton sa kërkesa do të merren prej radhës dhe përpunohen në një herë. Jepni një numër që është &gt;= 1.",
+        "NumRequestsToProcessFieldTitle": "Numër kërkesash që përpunohen në një herë",
+        "ProcessDuringRequestFieldHelp": "Në u aktivizoftë, do të përpunojmë krejt kërkesat brenda një radhe gjatë një during a normal tracking request once there are enough requests in the queue. This will not slow down the tracking request. If disabled, you have to setup a cronjob that executes the %1$s./console queuedtracking:process%2$s console command eg every minute to process the queue.",
+        "ProcessDuringRequestFieldTitle": "Përpunoje gjatë ndjekjes së kërkesës",
+        "QueueEnabledFieldHelp": "Në u aktivizoftë, krejt kërkesat e gjurmimit do të shkruhen në një radhë, në vend se drejt e te baza e të dhënave. Lyp një shërbyes Redis dhe zgjerimin PHP phpredis, nëse përdoret Redis si mekanizëm i pasmë.",
+        "QueueEnabledFieldTitle": "Radhë e aktivizuar",
+        "RedisDatabaseFieldHelp": "Në rast se po përdorni Redis për ruajtje në fshehtinë, sigurohuni të përdorni një tjetër bazë të dhënash.",
+        "RedisDatabaseFieldTitle": "Bazë të dhënash Redis",
+        "RedisHostFieldTitle": "Strehë Redis, ose socket Unix",
+        "RedisPasswordFieldHelp": "Fjalëkalim i caktuar te shërbyesi Redis, në pastë. Redis mund të udhëzohet të kërkojë një fjalëkalim, para se të lejojë klientë të ekzekutojnë urdhra.",
+        "RedisPasswordFieldTitle": "Fjalëkalim për Redis",
+        "RedisPortFieldTitle": "Portë Redis",
+        "RedisTimeoutFieldTitle": "Mbarim kohe për Redis",
+        "UseSentinelFieldTitle": "Aktivizo Redis Sentinel",
+        "WhatRedisBackEndType": "Përzgjidhni cili lloj Redis të përdoret. Mos harroni të përditësoni strehën dhe portën, në u dashtë. Pasi të keni përzgjedhur dhe ruajtur ndryshimet, do të jeni në gjendje të tregoni strehë dhe porta të shumta, duke përdorur lista elementësh të ndarë me presje, vetëm për llojin “Sentinel” dhe “Cluster”."
     }
 }
