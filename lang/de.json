@@ -1,6 +1,26 @@
 {
     "QueuedTracking": {
+        "AvailableRedisBackendTypeCluster": "Cluster",
+        "AvailableRedisBackendTypeStandAlone": "Eigenständig",
+        "BackendSettingFieldTitle": "Backend",
+        "ExceptionValueIsNotInt": "Der Wert ist keine Ganzzahl",
         "MultipleServersOnlyConfigurableIfSentinelEnabled": "Mehrere Hosts oder Ports können erst konfiguriert werden, wenn Redis Sentinel aktiviert wurde. In der README des Plugins erfahren Sie, wie Sie dies tun können.",
-        "NumHostsNotMatchNumPorts": "Die Anzahl der konfigurierten Hosts stimmt nicht mit der Anzahl der konfigurierten Ports überein."
+        "NumHostsNotMatchNumPorts": "Die Anzahl der konfigurierten Hosts stimmt nicht mit der Anzahl der konfigurierten Ports überein.",
+        "NumRequestsToProcessFieldHelp": "Definiert, wie viele Anfragen gleichzeitig aus der Warteschlange ausgewählt und bearbeitet werden. Geben Sie eine Zahl ein, die &gt;= 1 ist.",
+        "NumRequestsToProcessFieldTitle": "Anzahl der Anfragen, die in einer Charge verarbeitet werden",
+        "ProcessDuringRequestFieldHelp": "Wenn aktiviert, werden wir alle Anfragen innerhalb einer Warteschlange während einer normalen Aufzeichnungsanfrage verarbeiten, sobald genügend Anfragen in der Warteschlange sind. Dies wird die Aufzeichnungsanfrage nicht verlangsamen. Wenn deaktiviert, müssen Sie einen Cronjob einrichten, der den %1$s./console queuedtracking:process%2$s Konsolenbefehl z.B. jede Minute ausführt, um die Warteschlange zu verarbeiten.",
+        "QueueEnabledFieldHelp": "Wenn aktiviert, werden alle Aufzeichnungsanfragen in eine Warteschlange geschrieben, anstatt direkt in die Datenbank. Erfordert einen Redis-Server und die phpredis PHP-Erweiterung, wenn Redis als Backend verwendet wird.",
+        "QueueEnabledFieldTitle": "Warteschlange aktiviert",
+        "RedisDatabaseFieldTitle": "Redis Datenbank",
+        "RedisHostFieldHelp": "Remote-Host oder Unix-Socket des Redis-Servers. Maximal 500 Zeichen sind erlaubt.",
+        "RedisHostFieldHelpExtended": "Wenn Ihr Host eine TLS-Verbindung erfordert, können Sie das TLS-Protokoll Ihrem Host voranstellen, wie folgt: tls://beispiel-host.com. Wenn das nicht funktioniert, stellen Sie sicher, dass die Zertifikate auf Ihrem Matomo-Server korrekt konfiguriert sind.",
+        "RedisHostFieldHelpExtendedSentinel": "Da Sie Redis Sentinel verwenden, können Sie eine durch Kommas getrennte Liste verwenden. Stellen Sie sicher, dass Sie so viele Hosts angeben, wie Sie Ports angegeben haben. Um zum Beispiel zwei Server zu konfigurieren \"127.0.0.1:26379\" und \"127.0.0.2:26879\", geben Sie \"127.0.0.1,127.0.0.2\" als Host und \"26379,26879\" als Ports an.",
+        "RedisHostFieldTitle": "Redis Host oder Unix-Socket",
+        "RedisPasswordFieldHelp": "Passwort des Redis-Servers, falls vorhanden. Redis kann angewiesen werden, ein Passwort zu verlangen, bevor Clients Befehle ausführen dürfen.",
+        "RedisPasswordFieldTitle": "Redis Passwort",
+        "RedisPortFieldHelp": "Der Port, auf dem der Redis-Server läuft. Der Wert sollte zwischen 1 und 65535 liegen. Verwenden Sie 0, wenn Sie eine Unix-Socket-Verbindung zum Redis-Server verwenden.",
+        "RedisPortFieldTitle": "Redis-Port",
+        "RedisTimeoutFieldHelp": "Redis Verbindungs-Zeitlimit in Sekunden. \"0.0\" bedeutet unbegrenzt. Kann eine Fließkommazahl sein, z.B. \"2.5\" für ein Verbindungs-Zeitlimit von 2,5 Sekunden.",
+        "RedisTimeoutFieldTitle": "Redis Zeitlimit"
     }
 }
