@@ -17,11 +17,17 @@
         "QueueEnabledFieldTitle": "Radhë e aktivizuar",
         "RedisDatabaseFieldHelp": "Në rast se po përdorni Redis për ruajtje në fshehtinë, sigurohuni të përdorni një tjetër bazë të dhënash.",
         "RedisDatabaseFieldTitle": "Bazë të dhënash Redis",
+        "RedisHostFieldHelp": "Strehë e largët, ose socket Unix e shërbyesit Redis. Lejohen deri në 500 shenja e shumta.",
+        "RedisHostFieldHelpExtended": "Nëse streha juaj lyp një lidhje TLS, mund t’i vini përpara strehës tuaj protokollin TLS, kështu: tls://example-host.com. Nëse kjo s’bën punë, sigurohuni se dëshmitë janë formësuar saktë te shërbyesi juaj Matomo.",
+        "RedisHostFieldHelpExtendedSentinel": "Meqë po përdorni Redis Sentinel, mund të përdorni një listë zërash ndarë me presje. Garantoni të specifikoni aq strehë sa keni porta të specifikuara. Për shembull, për të formësuar dy shërbyes “127.0.0.1:26379” dhe “127.0.0.2:26879”, jepni “127.0.0.1,127.0.0.2” si strehë dhe “26379,26879” si porta.",
         "RedisHostFieldTitle": "Strehë Redis, ose socket Unix",
         "RedisPasswordFieldHelp": "Fjalëkalim i caktuar te shërbyesi Redis, në pastë. Redis mund të udhëzohet të kërkojë një fjalëkalim, para se të lejojë klientë të ekzekutojnë urdhra.",
         "RedisPasswordFieldTitle": "Fjalëkalim për Redis",
+        "RedisPortFieldHelp": "Porta në të cilën xhiron shërbyesi Redis. Vlera duhet të jetë mes 1 dhe 65535.Përdorni 0, nëse po përdorni një socket Unix për t’u lidhur me shërbyesin Redis.",
         "RedisPortFieldTitle": "Portë Redis",
+        "RedisTimeoutFieldHelp": "Mbarim kohe lidhjeje Redis, në sekonda. “0.0” do të thotë e pakufizuar. Mund të jetë numër dhjetorë, p.sh, “2.5” për një mbarim kohe prej 2.5 sekondash për lidhjen.",
         "RedisTimeoutFieldTitle": "Mbarim kohe për Redis",
+        "UseSentinelFieldHelp": "Në u aktivizoftë, do të përdoret veçoria Redis Sentinel. Sigurohuni të përditësoni strehë dhe portë, në u dashtë. Pasi të keni aktivizuar dhe ruajtur ndryshimin, do të jeni në gjendje të specifikoni shumë strehë njëherësh dhe porta, ndarë me presje.",
         "UseSentinelFieldTitle": "Aktivizo Redis Sentinel",
         "WhatRedisBackEndType": "Përzgjidhni cili lloj Redis të përdoret. Mos harroni të përditësoni strehën dhe portën, në u dashtë. Pasi të keni përzgjedhur dhe ruajtur ndryshimet, do të jeni në gjendje të tregoni strehë dhe porta të shumta, duke përdorur lista elementësh të ndarë me presje, vetëm për llojin “Sentinel” dhe “Cluster”."
     }
