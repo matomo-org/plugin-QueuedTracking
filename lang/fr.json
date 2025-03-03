@@ -4,6 +4,11 @@
         "MultipleServersOnlyConfigurableIfSentinelEnabled": "Plusieurs hôtes ou ports ne peuvent être configurés que lorsque Redis Sentinel est activé. Le plugin README vous dira comment faire.",
         "NumHostsNotMatchNumPorts": "Le nombre d'hôtes configurés est différent du nombre de ports configurés.",
         "RedisHostFieldHelp": "Hôte distant ou socket unix du serveur Redis. Un maximum de 500 caractères est autorisé.",
-        "RedisHostFieldTitle": "Hôte Redis ou socket unix"
+        "RedisHostFieldHelpExtended": "Si votre hébergeur nécessite une connexion TLS, vous pouvez ajouter le protocole TLS devant votre hôte, par exemple : tls://exemple-hote.com. Si cela ne fonctionne pas, assurez-vous que les certificats sont correctement configurés sur votre serveur Matomo.",
+        "RedisHostFieldHelpExtendedSentinel": "Puisque vous utilisez Redis Sentinel, vous pouvez utiliser une liste séparée par des virgules. Assurez-vous de spécifier autant d’hôtes que de ports. Par exemple, pour configurer deux serveurs \"127.0.0.1:26379\" et \"127.0.0.2:26879\", indiquez \"127.0.0.1,127.0.0.2\" comme hôtes et \"26379,26879\" comme ports.",
+        "RedisHostFieldTitle": "Hôte Redis ou socket unix",
+        "RedisPortFieldHelp": "Port sur lequel le serveur Redis est en cours d’exécution. La valeur doit être comprise entre 1 et 65535. Utilisez 0 si vous utilisez un socket Unix pour vous connecter au serveur Redis.",
+        "RedisPortFieldTitle": "Port Redis",
+        "RedisTimeoutFieldTitle": "Timeout Redis"
     }
 }
