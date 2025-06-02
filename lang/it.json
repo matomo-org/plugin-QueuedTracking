@@ -1,6 +1,10 @@
 {
     "QueuedTracking": {
+        "ExceptionValueIsNotInt": "Il valore non è un intero",
         "MultipleServersOnlyConfigurableIfSentinelEnabled": "Host o porte multipli possono essere configurati solamente quando è abilitato Redis Sentinel. Il file readme del plugin ti dirà come farlo.",
-        "NumHostsNotMatchNumPorts": "Il numero di host configurati con corrisponde al numero di porte configurate."
+        "NumHostsNotMatchNumPorts": "Il numero di host configurati con corrisponde al numero di porte configurate.",
+        "RedisHostFieldHelp": "Rimuovi host o socket unit del server Redis. Sono ammessi massimo 500 caratteri.",
+        "RedisHostFieldHelpExtended": "Se il tuo host richiede connessione TLS, puoi anteporre il protocollo TLS al tuo host, es: tls://example-host.com. Se non funziona, accertati che i certificati siano configurati correttamente nel tuo server Matomo.",
+        "RedisHostFieldTitle": "Host Redis o socket unix"
     }
 }
