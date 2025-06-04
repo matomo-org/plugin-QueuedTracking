@@ -15,6 +15,21 @@ use Piwik\Plugins\QueuedTracking\Queue\Backend;
 
 class Redis implements Backend
 {
+    private static $deleteScriptSha1 = null;
+    private static $expireScriptSha1 = null;
+
+    private const DELETE_SCRIPT_CONTENT = 'if redis.call("GET",KEYS[1]) == ARGV[1] then
+    return redis.call("DEL",KEYS[1])
+else
+    return 0
+end';
+
+    private const EXPIRE_SCRIPT_CONTENT = 'if redis.call("GET",KEYS[1]) == ARGV[1] then
+    return redis.call("EXPIRE",KEYS[1], ARGV[2])
+else
+    return 0
+end';
+
     /**
      * @var \Redis
      */
@@ -195,20 +210,18 @@ class Redis implements Backend
 
         $this->connectIfNeeded();
 
-        // see http://redis.io/topics/distlock
-        $script = 'if redis.call("GET",KEYS[1]) == ARGV[1] then
-    return redis.call("DEL",KEYS[1])
-else
-    return 0
-end';
+        if (self::$deleteScriptSha1 === null) {
+            self::$deleteScriptSha1 = sha1(self::DELETE_SCRIPT_CONTENT);
+        }
 
-        // ideally we would use evalSha to reduce bandwidth!
-        return (bool) $this->evalScript($script, array($key), array($value));
-    }
-
-    protected function evalScript($script, $keys, $args)
-    {
-        return $this->redis->eval($script, array_merge($keys, $args), count($keys));
+        try {
+            return (bool) $this->redis->evalSha(self::$deleteScriptSha1, array($key, $value), 1);
+        } catch (\RedisException $e) {
+            if (strpos($e->getMessage(), 'NOSCRIPT') !== false) {
+                return (bool) $this->redis->eval(self::DELETE_SCRIPT_CONTENT, array($key, $value), 1);
+            }
+            throw $e;
+        }
     }
 
     public function getKeysMatchingPattern($pattern)
@@ -226,13 +239,18 @@ end';
 
         $this->connectIfNeeded();
 
-        $script = 'if redis.call("GET",KEYS[1]) == ARGV[1] then
-    return redis.call("EXPIRE",KEYS[1], ARGV[2])
-else
-    return 0
-end';
-        // ideally we would use evalSha to reduce bandwidth!
-        return (bool) $this->evalScript($script, array($key), array($value, (int) $ttlInSeconds));
+        if (self::$expireScriptSha1 === null) {
+            self::$expireScriptSha1 = sha1(self::EXPIRE_SCRIPT_CONTENT);
+        }
+
+        try {
+            return (bool) $this->redis->evalSha(self::$expireScriptSha1, array($key, $value, (int) $ttlInSeconds), 1);
+        } catch (\RedisException $e) {
+            if (strpos($e->getMessage(), 'NOSCRIPT') !== false) {
+                return (bool) $this->redis->eval(self::EXPIRE_SCRIPT_CONTENT, array($key, $value, (int) $ttlInSeconds), 1);
+            }
+            throw $e;
+        }
     }
 
     public function get($key)

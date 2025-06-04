@@ -330,4 +330,65 @@ class RedisTest extends IntegrationTestCase
         $keys    = $backend->getKeysMatchingPattern('*fere*');
         $this->assertEquals(array(), $keys);
     }
+
+    public function test_deleteIfKeyHasValue_evalShaFallback()
+    {
+        if (!$this->hasDependencies()) {
+            $this->markTestSkipped('Requires redis');
+        }
+
+        $rawRedis = $this->redis->getConnection();
+        $rawRedis->script('flush');
+
+        $key1 = 'evalShaDelKey1';
+        $value1 = 'val1';
+
+        // Test EVAL fallback
+        $this->redis->setIfNotExists($key1, $value1, 60);
+        $this->assertNotEmpty($this->redis->get($key1), "Key $key1 should exist before deleteIfKeyHasValue (EVAL)");
+        $this->assertTrue($this->redis->deleteIfKeyHasValue($key1, $value1), "deleteIfKeyHasValue for $key1 should return true (EVAL)");
+        $this->assertFalse($this->redis->get($key1), "Key $key1 should be deleted after deleteIfKeyHasValue (EVAL)");
+
+        $key2 = 'evalShaDelKey2';
+        $value2 = 'val2';
+
+        // Test EVALSHA (script should be cached now)
+        $this->redis->setIfNotExists($key2, $value2, 60);
+        $this->assertNotEmpty($this->redis->get($key2), "Key $key2 should exist before deleteIfKeyHasValue (EVALSHA)");
+        $this->assertTrue($this->redis->deleteIfKeyHasValue($key2, $value2), "deleteIfKeyHasValue for $key2 should return true (EVALSHA)");
+        $this->assertFalse($this->redis->get($key2), "Key $key2 should be deleted after deleteIfKeyHasValue (EVALSHA)");
+    }
+
+    public function test_expireIfKeyHasValue_evalShaFallback()
+    {
+        if (!$this->hasDependencies()) {
+            $this->markTestSkipped('Requires redis');
+        }
+
+        $rawRedis = $this->redis->getConnection();
+        $rawRedis->script('flush');
+
+        $key1 = 'evalShaExpKey1';
+        $value1 = 'valExp1';
+        $ttlSeconds = 1;
+
+        // Test EVAL fallback
+        $this->redis->setIfNotExists($key1, $value1, 60); // Set with a longer initial TTL
+        $this->assertNotEmpty($this->redis->get($key1), "Key $key1 should exist before expireIfKeyHasValue (EVAL)");
+        $this->assertTrue($this->redis->expireIfKeyHasValue($key1, $value1, $ttlSeconds), "expireIfKeyHasValue for $key1 should return true (EVAL)");
+        $this->assertLessThanOrEqual($ttlSeconds * 1000, $this->redis->getTimeToLive($key1), "TTL for $key1 should be reduced (EVAL)");
+        sleep($ttlSeconds + 1); // Wait for key to expire
+        $this->assertFalse($this->redis->get($key1), "Key $key1 should be expired after wait (EVAL)");
+
+        $key2 = 'evalShaExpKey2';
+        $value2 = 'valExp2';
+
+        // Test EVALSHA (script should be cached now)
+        $this->redis->setIfNotExists($key2, $value2, 60); // Set with a longer initial TTL
+        $this->assertNotEmpty($this->redis->get($key2), "Key $key2 should exist before expireIfKeyHasValue (EVALSHA)");
+        $this->assertTrue($this->redis->expireIfKeyHasValue($key2, $value2, $ttlSeconds), "expireIfKeyHasValue for $key2 should return true (EVALSHA)");
+        $this->assertLessThanOrEqual($ttlSeconds * 1000, $this->redis->getTimeToLive($key2), "TTL for $key2 should be reduced (EVALSHA)");
+        sleep($ttlSeconds + 1); // Wait for key to expire
+        $this->assertFalse($this->redis->get($key2), "Key $key2 should be expired after wait (EVALSHA)");
+    }
 }
