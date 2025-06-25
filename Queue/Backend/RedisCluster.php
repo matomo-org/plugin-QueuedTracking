@@ -315,8 +315,13 @@ end';
         }
     }
 
-    public function setConfig($host, $port, $timeout, $password)
-    {
+    public function setConfig(
+        $host,
+        $port,
+        $timeout,
+        #[\SensitiveParameter]
+        $password
+    ) {
         $this->disconnect();
 
         $this->host = $host;
