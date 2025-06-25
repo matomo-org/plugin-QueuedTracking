@@ -12,24 +12,24 @@ for Matomo anyway.
 
 __Where can I configure and enable the queue?__
 
-In your Piwik instance go to "Administration => General Settings". There is a config section for this plugin.
+In your Matomo instance go to "Administration => General Settings". There is a config section for this plugin.
 
 __When will a queued tracking request be processed?__
 
 First you should know that multiple tracking requests will be inserted into the database at once using
-[bulk tracking](http://developer.piwik.org/api-reference/tracking-api#bulk-tracking) as soon as a configurable number
+[bulk tracking](http://developer.matomo.org/api-reference/tracking-api#bulk-tracking) as soon as a configurable number
 of requests is queued. By default we will check whether enough requests are queued during a regular tracking request
 and start processing them right after sending a response to the browser to make sure a user won't have to wait until
 the queue has finished to process all requests. Have a look at this graph to see how it works:
 
-![How it works](https://raw.githubusercontent.com/piwik/plugin-QueuedTracking/master/docs/How_it_works.png)
+![How it works](https://raw.githubusercontent.com/matomo-org/plugin-QueuedTracking/master/docs/How_it_works.png)
 
 __I do not want to process queued requests within a tracking request, what shall I do?__
 
 Don't worry, if this solution doesn't work out for you for some reason you can disable it and process all queued
-requests using the [Piwik console](http://developer.piwik.org/guides/piwik-on-the-command-line). Just follow these steps:
+requests using the [Matomo console](http://developer.matomo.org/guides/piwik-on-the-command-line). Just follow these steps:
 
-* Disable the setting "Process during tracking request" in the Piwik UI under "Settings => Plugin Settings"
+* Disable the setting "Process during tracking request" in the Matomo UI under "Settings => Plugin Settings"
 * Setup a cronjob that executes the command `./console queuedtracking:process` for instance every minute
 * That's it
 * Or, if you have __"non WINDOWS OS"__ you can use the [Supervisor](http://supervisord.org/) as a cron alternative.
@@ -42,7 +42,7 @@ queued requests at a time.
 
 Example crontab entry that starts the processor every minute:
 
-`* * * * * cd /piwik && ./console queuedtracking:process >/dev/null 2>&1`
+`* * * * * cd /matomo && ./console queuedtracking:process >/dev/null 2>&1`
 
 Example Supervisor entry that will start 16 processors/workers with 10 loop cycle times and auto restart:
 
@@ -72,7 +72,7 @@ Yes, you can. Just execute the command `./console queuedtracking:monitor`. This 
 
 __Can I improve the speed of inserting requests from the Redis queue to the database?__
 
-Yes, you can by adding more workers. By default only one worker is activated at a time and only one worker processes tracking requests from Redis to the database. When inserting tracking requests into the database, at time of writing this, about 80% of the time is spent in PHP and the database might be rather bored. If you have multiple CPUs available on your server you can add more workers. You can do this by going in the Piwik Admin interface to "Plugin Settings". There will be a setting "Number of queue workers". Increase this number to the number of CPUs you want to dedeciate for processing requests. Best practice is to add more workers step by step. So first increase this number to 2 and check if the tracking request insertions is fast enough for you. If not and you have more CPUs available, increase the number again.
+Yes, you can by adding more workers. By default only one worker is activated at a time and only one worker processes tracking requests from Redis to the database. When inserting tracking requests into the database, at time of writing this, about 80% of the time is spent in PHP and the database might be rather bored. If you have multiple CPUs available on your server you can add more workers. You can do this by going in the Matomo Admin interface to "Plugin Settings". There will be a setting "Number of queue workers". Increase this number to the number of CPUs you want to dedeciate for processing requests. Best practice is to add more workers step by step. So first increase this number to 2 and check if the tracking request insertions is fast enough for you. If not and you have more CPUs available, increase the number again.
 
 When using multiple workers it might be worth to lower the number of "Number of requests to process" to eg 15 in "Plugin Settings". By default 25 requests are inserted in one step by using transactions. This means different workers might have to wait for each other. By lowering that number each worker will block the DB for less time.
 
@@ -92,7 +92,7 @@ We currently write into the Redis default database by default but you can config
 
 You can also use a "Redis Cluster" to distribute all tracking requests data across multiple Redis masters/shards, complete with the HA feature.
 
-__Why do some tests fail on my local Piwik instance?__
+__Why do some tests fail on my local Matomo instance?__
 
 Make sure the requirements mentioned above are met and Redis needs to run on 127.0.0.1:6379 with no password for the
 integration tests to work. It will use the database "15" and the tests may flush all data it contains. Make sure
