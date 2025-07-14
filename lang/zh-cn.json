@@ -1,6 +1,6 @@
 {
     "QueuedTracking": {
-        "ExceptionValueIsNotInt": "这个值不是整数。",
+        "ExceptionValueIsNotInt": "这个值不是整数",
         "MultipleServersOnlyConfigurableIfSentinelEnabled": "仅在启用Redis Sentinel时才能配置多个主机或端口。 查看插件自述文件，以了解如何启用Sentinel。",
         "NumHostsNotMatchNumPorts": "配置的主机数量与配置的端口数量不匹配。"
     }
