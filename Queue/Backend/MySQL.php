@@ -99,7 +99,7 @@ class MySQL implements Backend
     {
         $table = $this->makePrefixedKeyListTableName($key);
 
-        $query = sprintf('INSERT INTO %s (`list_value`) VALUES (?)', $table);
+        $query = sprintf('INSERT INTO `%s` (`list_value`) VALUES (?)', $table);
         foreach ($values as $value) {
             if (empty($value)) {
                 continue;
@@ -143,7 +143,7 @@ class MySQL implements Backend
         }
 
         $table = $this->makePrefixedKeyListTableName($key);
-        $sql = sprintf('SELECT SQL_NO_CACHE list_value FROM %s ORDER BY idqueuelist ASC LIMIT %d OFFSET 0', $table, (int)$numValues);
+        $sql = sprintf('SELECT SQL_NO_CACHE list_value FROM `%s` ORDER BY idqueuelist ASC LIMIT %d OFFSET 0', $table, (int)$numValues);
 
         try {
             $values = Db::fetchAll($sql);
@@ -172,7 +172,7 @@ class MySQL implements Backend
         }
 
         $table = $this->makePrefixedKeyListTableName($key);
-        $sql = sprintf('SELECT SQL_NO_CACHE idqueuelist FROM %s LIMIT %d', $table, (int)$numValuesRequired);
+        $sql = sprintf('SELECT SQL_NO_CACHE idqueuelist FROM `%s` LIMIT %d', $table, (int)$numValuesRequired);
 
         try {
             $values = Db::fetchAll($sql);
@@ -194,7 +194,7 @@ class MySQL implements Backend
         }
 
         $table = $this->makePrefixedKeyListTableName($key);
-        $sql = sprintf('DELETE FROM %s ORDER BY idqueuelist ASC LIMIT %d', $table, (int)$numValues);
+        $sql = sprintf('DELETE FROM `%s` ORDER BY idqueuelist ASC LIMIT %d', $table, (int)$numValues);
 
         try {
             Db::query($sql);
@@ -210,7 +210,7 @@ class MySQL implements Backend
     public function getNumValuesInList($key)
     {
         $table = $this->makePrefixedKeyListTableName($key);
-        $sql = sprintf('SELECT SQL_NO_CACHE max(idqueuelist) - min(idqueuelist) as num_entries FROM %s', $table);
+        $sql = sprintf('SELECT SQL_NO_CACHE max(idqueuelist) - min(idqueuelist) as num_entries FROM `%s`', $table);
         try {
             $value = Db::fetchOne($sql);
             if ($value === null || $value === false) {
