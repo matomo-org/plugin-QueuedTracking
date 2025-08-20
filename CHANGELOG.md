@@ -1,7 +1,7 @@
 ## Changelog
 
 5.1.2 - 2025-07-07
-- Textual changes
+- Textual changesa
 
 5.1.1 - 2024-10-23
 - Fixed fatal error when running queuedtracking:monitor command on Windows
