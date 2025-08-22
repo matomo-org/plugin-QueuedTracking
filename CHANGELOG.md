@@ -1,5 +1,8 @@
 ## Changelog
 
+5.1.3 - 2025-08-22
+- Add support for Sentinel password
+
 5.1.2 - 2025-07-07
 - Textual changes
 

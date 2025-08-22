@@ -36,7 +36,7 @@ class Sentinel extends Redis
                 $configuredClient = new \Credis_Client($host, $ports[$index], $timeout = 0.5, $persistent = false);
                 $configuredClient->forceStandalone();
                 $configuredClient->connect();
-                $configuredSentinel = new \Credis_Sentinel($configuredClient);
+                $configuredSentinel = new \Credis_Sentinel($configuredClient, $this->password);
                 $master = $configuredSentinel->getMasterAddressByName($this->masterName);
 
                 if (!empty($master)) {
