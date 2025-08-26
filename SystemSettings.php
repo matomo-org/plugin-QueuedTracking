@@ -60,6 +60,9 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     /** @var Setting */
     public $sentinelMasterName;
 
+    /** @var Setting */
+    public $usePasswordForSentinelInstances;
+
     public function getAvailableRedisBackendTypes()
     {
         return array(
@@ -83,6 +86,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         $this->backend = $this->createBackendSetting();
         $this->useWhatRedisBackendType = $this->createUseWhatRedisBackendType();
         $this->sentinelMasterName = $this->createSetSentinelMasterName();
+        $this->usePasswordForSentinelInstances = $this->createUsePasswordForSentinelInstances();
         $this->redisHost = $this->createRedisHostSetting();
         $this->redisPort = $this->createRedisPortSetting();
         $this->redisTimeout = $this->createRedisTimeoutSetting();
@@ -112,6 +116,11 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     public function getSentinelMasterName()
     {
         return $this->sentinelMasterName->getValue();
+    }
+
+    public function getUsePasswordForSentinelInstances()
+    {
+        return $this->usePasswordForSentinelInstances->getValue();
     }
 
     public function isUsingUnixSocket()
@@ -370,6 +379,16 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
                 }
                 return trim($value);
             };
+        });
+    }
+
+    private function createUsePasswordForSentinelInstances()
+    {
+        return $this->makeSetting('usePasswordForSentinelInstances', $default = false, FieldConfig::TYPE_BOOL, function (FieldConfig $field) {
+            $field->title = Piwik::translate('QueuedTracking_UsePasswordForSentinelsTitle');
+            $field->condition = 'backend=="redis"';
+            $field->uiControl = FieldConfig::UI_CONTROL_CHECKBOX;
+            $field->inlineHelp = Piwik::translate('QueuedTracking_UsePasswordForSentinelsHelp', ['</br></br>']) . '</br>';
         });
     }
 

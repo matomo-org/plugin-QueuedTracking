@@ -72,6 +72,9 @@ class Factory
                 $redis = new Queue\Backend\Sentinel();
                 $redis->setSentinelMasterName($masterName);
                 $redis->setDatabase($database);
+                if (!empty($settings->getUsePasswordForSentinelInstances())) {
+                    $redis->setUsePasswordForSentinelInstances(true);
+                }
             }
         } elseif ($settings->isUsingClusterBackend()) {
             $redis = new Queue\Backend\RedisCluster();

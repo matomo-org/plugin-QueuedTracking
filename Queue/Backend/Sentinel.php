@@ -22,6 +22,11 @@ class Sentinel extends Redis
 {
     private $masterName = '';
 
+    /*
+     * @var bool
+     */
+    private $usePasswordForSentinelInstances = false;
+
     protected function connect()
     {
         $hosts = explode(',', $this->host);
@@ -36,6 +41,9 @@ class Sentinel extends Redis
                 $configuredClient = new \Credis_Client($host, $ports[$index], $timeout = 0.5, $persistent = false);
                 $configuredClient->forceStandalone();
                 $configuredClient->connect();
+                if ($this->usePasswordForSentinelInstances && !empty($this->password)) {
+                    $configuredClient->auth($this->password);
+                }
                 $configuredSentinel = new \Credis_Sentinel($configuredClient);
                 $master = $configuredSentinel->getMasterAddressByName($this->masterName);
 
@@ -62,6 +70,11 @@ class Sentinel extends Redis
     public function setSentinelMasterName($name)
     {
         $this->masterName = $name;
+    }
+
+    public function setUsePasswordForSentinelInstances(bool $usePasswordForSentinelInstances)
+    {
+        $this->usePasswordForSentinelInstances = $usePasswordForSentinelInstances;
     }
 
     protected function evalScript($script, $keys, $args)
