@@ -31,6 +31,8 @@
         "RedisPortFieldTitle": "Redis port",
         "RedisTimeoutFieldHelp": "Redis am istigh ceangail i soicindí. Ciallaíonn “0.0” gan teorainn. Is féidir leis a bheith ina snámhán m.sh. “2.5” le haghaidh teorainn ama ceangail 2.5 soicind.",
         "RedisTimeoutFieldTitle": "Teorainn ama Redis",
+        "UsePasswordForSentinelsHelp": "Ní bhaineann sé seo ach amháin má tá Sentinel cumasaithe.%1$sMá tá sé cumasaithe, úsáidfear an focal faire Redis freisin agus fíordheimhniú á dhéanamh le cásanna Sentinel chun an fhaisnéis nasc máistir a fháil. Seachas sin, ní úsáidtear an focal faire ach chun fíordheimhniú a dhéanamh leis an máistir Redis.",
+        "UsePasswordForSentinelsTitle": "Úsáid pasfhocal le Redis Sentinels",
         "UseSentinelFieldHelp": "Má tá sé cumasaithe, úsáidfear an ghné Redis Sentinel. Déan cinnte an t-óstach agus an port a nuashonrú más gá. Nuair a bheidh an t-athrú cumasaithe agus sábháilte agat, beidh tú in ann óstach iolrach agus port scartha le camóga a shonrú.",
         "UseSentinelFieldTitle": "Cumasaigh Redis Sentinel",
         "WhatRedisBackEndType": "Roghnaigh cén cineál redis a úsáidfear. Déan cinnte an t-óstach agus an port a nuashonrú más gá. Nuair a bheidh an t-athrú roghnaithe agus sábháilte agat, beidh tú in ann óstaigh agus poirt iolracha a shonrú ag baint úsáide as liostaí scartha le camóg don chineál “Sentinel” agus “Cnuasach” amháin."
