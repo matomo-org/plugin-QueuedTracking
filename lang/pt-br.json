@@ -1,6 +1,11 @@
 {
     "QueuedTracking": {
+        "ExceptionValueIsNotInt": "O valor não é um inteiro",
         "MultipleServersOnlyConfigurableIfSentinelEnabled": "Vários hosts ou portas só podem ser configurados quando o Redis Sentinel está ativado. O plugin README lhe dirá como fazer isso.",
-        "NumHostsNotMatchNumPorts": "O número de hosts configurados não coincide com o número de portas configuradas."
+        "NumHostsNotMatchNumPorts": "O número de hosts configurados não coincide com o número de portas configuradas.",
+        "RedisHostFieldHelp": "Host remoto ou socket unix do servidor Redis. São permitidos no máximo 500 caracteres.",
+        "RedisHostFieldHelpExtendedSentinel": "Como você está usando o Redis Sentinel, você pode usar uma lista separada por vírgulas. Certifique-se de especificar tantos hosts quanto portas especificadas. Por exemplo, para configurar dois servidores \"127.0.0.1:26379\" e \"127.0.0.2:26879\" especifique \"127.0.0.1,127.0.0.2\" como host e \"26379,26879\" como portas.",
+        "RedisHostFieldTitle": "Host Redis ou soquete unix",
+        "RedisPortFieldTitle": "Porto do Redis"
     }
 }
