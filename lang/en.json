@@ -33,6 +33,8 @@
         "MasterNameFieldTitle": "Redis Sentinel Master name",
         "MasterNameFieldHelp": "The sentinel master name only needs to be configured if Sentinel is enabled.",
         "NumHostsNotMatchNumPorts": "The number of configured hosts doesn't match the number of configured ports.",
-        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Multiple hosts or ports can be only configured when Redis Sentinel is on. The plugin README will tell you how to do so."
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Multiple hosts or ports can be only configured when Redis Sentinel is on. The plugin README will tell you how to do so.",
+        "UsePasswordForSentinelsTitle": "Use password with Redis Sentinels",
+        "UsePasswordForSentinelsHelp": "Only relevant if Sentinel is enabled.%1$sIf enabled, the Redis password will also be used when authenticating with Sentinel instances to obtain the master connection information. Otherwise, the password is only used to authenticate with the Redis master."
     }
 }
