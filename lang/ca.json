@@ -31,6 +31,8 @@
         "RedisPortFieldTitle": "Port de Redis",
         "RedisTimeoutFieldHelp": "Temps d'espera de connexió Redis en segons. \"0.0\" significa il·limitat. Pot ser un flotant, per exemple, \"2,5\" per a un temps d'espera de connexió de 2,5 segons.",
         "RedisTimeoutFieldTitle": "Temps d'espera de Redis",
+        "UsePasswordForSentinelsHelp": "Només és rellevant si Sentinel està habilitat.%1$sSi està habilitat, la contrasenya de Redis també s'utilitzarà en autenticar-se amb instàncies de Sentinel per obtenir la informació de connexió mestra. En cas contrari, la contrasenya només s'utilitza per autenticar-se amb el mestre de Redis.",
+        "UsePasswordForSentinelsTitle": "Utilitza la contrasenya amb Redis Sentinels",
         "UseSentinelFieldHelp": "Si està activada, s'utilitzarà la funció Redis Sentinel. Assegureu-vos d'actualitzar l'amfitrió i el port si cal. Un cop hàgiu habilitat i desat el canvi, podreu especificar diversos hosts i ports separats per comes.",
         "UseSentinelFieldTitle": "Activa Redis Sentinel",
         "WhatRedisBackEndType": "Seleccioneu quin tipus de redis voleu utilitzar. Assegureu-vos d'actualitzar l'amfitrió i el port si cal. Un cop hàgiu seleccionat i desat el canvi, podreu especificar diversos hosts i ports utilitzant llistes separades per comes només per al tipus \"Sentinel\" i \"Cluster\"."
