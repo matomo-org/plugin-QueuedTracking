@@ -31,6 +31,8 @@
         "RedisPortFieldTitle": "Redis bağlantı noktası",
         "RedisTimeoutFieldHelp": "Saniye olarak Redis bağlantı zaman aşımı. “0.0” sınırsız anlamına gelir. Bir ondalık sayı olabilir, örneğin 2.5 saniyelik bir bağlantı zaman aşımı için “2.5”.",
         "RedisTimeoutFieldTitle": "Redis zaman aşımı",
+        "UsePasswordForSentinelsHelp": "Yalnızca Sentinel etkinse geçerlidir.%1$sAçıldığında, ana bağlantı bilgilerini elde etmek için Sentinel kopyaları ile kimlik doğrulaması yaparken Redis parolası da kullanılır. Yoksa, parola yalnızca Redis master ile kimlik doğrulaması yapmak için kullanılır.",
+        "UsePasswordForSentinelsTitle": "Redis Sentinel ile parola kullanılsın",
         "UseSentinelFieldHelp": "Açıksa, Redis Sentinel özelliği kullanılır. Gerekirse sunucu ve bağlantı noktasını güncellediğinizden emin olun. Açtıktan ve değişikliği kaydettikten sonra, virgülle ayrılmış birden fazla sunucu ve bağlantı noktası belirtebilirsiniz.",
         "UseSentinelFieldTitle": "Redis Sentinel kullanılsın",
         "WhatRedisBackEndType": "Kullanılacak Redis türünü seçin. Gerekirse sunucuyı ve bağlantı noktasını güncellemeyi unutmayın. Seçimi yaptıktan ve değişikliği kaydettikten sonra, yalnızca \"Yedek\" ve \"Küme\" türü için virgül ile ayrılmış listeler kullanarak birden fazla sunucu ve bağlantı noktası belirleyebilirsiniz."
