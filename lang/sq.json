@@ -30,6 +30,8 @@
         "RedisPortFieldTitle": "Portë Redis",
         "RedisTimeoutFieldHelp": "Mbarim kohe lidhjeje Redis, në sekonda. “0.0” do të thotë e pakufizuar. Mund të jetë numër dhjetor, p.sh., “2.5” për një mbarim kohe prej 2.5 sekondash për lidhjen.",
         "RedisTimeoutFieldTitle": "Mbarim kohe për Redis",
+        "UsePasswordForSentinelsHelp": "Ka vlerë vetëm nëse Sentinel është i aktivizuar.%1$sNë qoftë i aktivizuar, do të përdoret edhe fjalëkalimi Redis, kur bëhet mirëfilltësimi me instanca Sentinel, për të marrë hollësi mbi lidhjen kryesore. Përdnryshe, fjalëkalimi përdoret vetëm për mirëfilltësim me Redis master.",
+        "UsePasswordForSentinelsTitle": "Përdorni fjalëkalim me Redis Sentinels",
         "UseSentinelFieldHelp": "Në u aktivizoftë, do të përdoret veçoria Redis Sentinel. Sigurohuni të përditësoni strehë dhe portë, në u dashtë. Pasi të keni aktivizuar dhe ruajtur ndryshimin, do të jeni në gjendje të specifikoni shumë strehë njëherësh dhe porta, ndarë me presje.",
         "UseSentinelFieldTitle": "Aktivizo Redis Sentinel",
         "WhatRedisBackEndType": "Përzgjidhni cili lloj Redis të përdoret. Mos harroni të përditësoni strehën dhe portën, në u dashtë. Pasi të keni përzgjedhur dhe ruajtur ndryshimet, do të jeni në gjendje të tregoni strehë dhe porta të shumta, duke përdorur lista elementësh të ndarë me presje, vetëm për llojin “Sentinel” dhe “Cluster”."
