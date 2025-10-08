@@ -1,19 +1,32 @@
 {
     "QueuedTracking": {
+        "AvailableRedisBackendTypeCluster": "Cluster",
+        "AvailableRedisBackendTypeSentinel": "Sentinel",
+        "BackendSettingFieldHelp": "Välj den backend du vill använda för denna funktion. Om du inte har någon erfarenhet av Redis eller om det inte är tillgängligt på din server rekommenderar vi att du använder MySQL.",
         "ExceptionValueIsNotInt": "Värdet är inte ett heltal",
         "MultipleServersOnlyConfigurableIfSentinelEnabled": "Flera värdar eller portar kan bara konfigureras när Redis Sentinel är på. Insticksprogrammets README kommer att förklara hur du gör det.",
         "NumHostsNotMatchNumPorts": "Antalet konfigurerade värdar matchar inte antalet konfigurerade portar.",
         "NumRequestsToProcessFieldHelp": "Definierar hur många förfrågningar som väljs ut ur kön för att bearbetas i klump. Ange ett nummer större än 1.",
         "NumRequestsToProcessFieldTitle": "Antal förfrågningar som bearbetas i en klump",
+        "ProcessDuringRequestFieldHelp": "Om aktiverad kommer alla förfrågningar i kön bearbetas under en normal spårningsförfrågan när det finns tillräckligt många förfrågningar i kön. Detta kommer inte att sakta ner spårningsförfrågan. Om inaktiverad måste du konfigurera ett cronjobb som kör konsolkommandot %1$s./console queuedtracking:process%2$s t.ex. varje minut för att bearbeta kön.",
+        "QueueEnabledFieldHelp": "Vid aktivering kommer alla spårningsförfrågningar att skrivas till en kö istället för direkt till databasen. Kräver en Redis-server och phpredis PHP-tillägg ifall Redis används som backend.",
         "QueueEnabledFieldTitle": "Kö aktiverad",
         "RedisDatabaseFieldHelp": "Om du använder Redis som cache behöver du använda en annan databas.",
         "RedisDatabaseFieldTitle": "Redis-databas",
         "RedisHostFieldHelp": "Värd eller unix-socket för Redis-server. Maximalt 500 tecken godtas.",
+        "RedisHostFieldHelpExtended": "Om din värd kräver en TLS-anslutning kan du lägga till TLS-protokollet före din värd så här: tls://exempel-värd.se. Om det inte fungerar, se till att certifikat är korrekt konfigurerade på din Matomo-server.",
+        "RedisHostFieldHelpExtendedSentinel": "Eftersom du använder Redis Sentinel kan du använda en kommaseparerad lista. Se till att ange lika många värdar som du har angivit portar. Till exempel, för att konfigurera två servrar \"127.0.0.1:26379\" och \"127.0.0.2:26879\", ange \"127.0.0.1,127.0.0.2\" som värd och \"26379,26879\" som portar.",
         "RedisHostFieldTitle": "Redis-värd eller unix-socket",
         "RedisPasswordFieldHelp": "Lösenordet sätts på Redis-servern, om något nu finns. Redis kan instrueras att kräva ett lösenord före den tillåter klienter att köra kommandon.",
         "RedisPasswordFieldTitle": "Redis-lösenord",
         "RedisPortFieldHelp": "Porten som Redis-servern körs på. Värdet ska vara mellan 1 och 65535. Använd 0 ifall du använder en unix-socket för att ansluta till Redis-servern.",
         "RedisPortFieldTitle": "Redis-port",
-        "UseSentinelFieldTitle": "Aktivera Redis Sentinel"
+        "RedisTimeoutFieldHelp": "Redis anslutningstimeout i sekunder. \"0.0\" betyder obegränsad. Kan vara ett decimaltal, t.ex. \"2.5\" för en anslutningstimeout på 2,5 sekunder.",
+        "RedisTimeoutFieldTitle": "Redis-timeout",
+        "UsePasswordForSentinelsHelp": "Endast relevant om Sentinel är aktiverad.%1$sOm aktiverad kommer Redis-lösenordet även att användas vid autentisering med Sentinel-instanser för att hämta master-anslutningsinformationen. Annars används lösenordet endast för att autentisera med Redis master.",
+        "UsePasswordForSentinelsTitle": "Använd lösenord med Redis Sentinels",
+        "UseSentinelFieldHelp": "Om aktiverad kommer Redis Sentinel-funktion att användas. Se till att uppdatera värd och port vid behov. När du har aktiverat och sparat ändringen kommer du att kunna ange flera värdar och portar separerade med kommatecken.",
+        "UseSentinelFieldTitle": "Aktivera Redis Sentinel",
+        "WhatRedisBackEndType": "Välj vilken typ av redis att använda. Se till att uppdatera värd och port vid behov. När du har valt och sparat ändringen kan du ange flera värdar och portar med kommaseparerade listor endast för typerna \"Sentinel\" och \"Cluster\"."
     }
 }
