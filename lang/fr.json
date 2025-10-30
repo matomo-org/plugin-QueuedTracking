@@ -31,6 +31,8 @@
         "RedisPortFieldTitle": "Port Redis",
         "RedisTimeoutFieldHelp": "Délai d’expiration de la connexion Redis en secondes. \"0.0\" signifie illimité. Peut être un nombre à virgule flottante, par exemple \"2.5\" pour un délai de connexion de 2,5 secondes.",
         "RedisTimeoutFieldTitle": "Timeout Redis",
+        "UsePasswordForSentinelsHelp": "Ne s’applique que si Sentinel est activé.%1$sSi cette option est activée, le mot de passe Redis sera également utilisé pour s’authentifier auprès des instances Sentinel afin d’obtenir les informations de connexion au maître. Dans le cas contraire, le mot de passe est uniquement utilisé pour l’authentification auprès du serveur maître Redis.",
+        "UsePasswordForSentinelsTitle": "Utiliser un mot de passe avec Redis Sentinels",
         "UseSentinelFieldHelp": "Si activé, la fonctionnalité Redis Sentinel sera utilisée. Assurez-vous de mettre à jour l’hôte et le port si nécessaire. Une fois l’option activée et la modification enregistrée, vous pourrez spécifier plusieurs hôtes et ports séparés par des virgules.",
         "UseSentinelFieldTitle": "Activer Redis Sentinel",
         "WhatRedisBackEndType": "Sélectionnez le type de Redis à utiliser. Assurez-vous de mettre à jour l’hôte et le port si nécessaire. Une fois la sélection effectuée et enregistrée, vous pourrez spécifier plusieurs hôtes et ports à l’aide de listes séparées par des virgules, uniquement pour les types \"Sentinel\" et \"Cluster\"."
