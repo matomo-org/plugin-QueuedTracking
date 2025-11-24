@@ -75,7 +75,6 @@ class Process extends ConsoleCommand
 
         Log::unsetInstance();
         $trackerEnvironment->getContainer()->get('Piwik\Access')->setSuperUserAccess(false);
-        $trackerEnvironment->getContainer()->get('Piwik\Plugin\Manager')->setTrackerPluginsNotToLoad(array('Provider'));
         Tracker::loadTrackerEnvironment();
 
         $backend      = Queue\Factory::makeBackend();
