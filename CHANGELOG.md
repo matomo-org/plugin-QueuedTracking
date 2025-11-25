@@ -1,6 +1,6 @@
 ## Changelog
 
-5.2.0 - 2025-11-24
+5.2.0 - 2025-11-25
 - No longer disable Provider plugin automatically. If performance issues occur, please disable it manually or install an ASN geolocation database (https://matomo.org/faq/how-to/setting-up-accurate-visitors-geolocation/).
 
 5.1.3 - 2025-09-01
