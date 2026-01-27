@@ -1,6 +1,7 @@
 {
     "QueuedTracking": {
-        "NumHostsNotMatchNumPorts": "Число настроенных хостов не совпадает с числом настроенных портов.",
-        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Несколько хостов или портов могут быть настроены только при включенном Redis Sentinel. Посмотрите файл readme плагина, чтобы узнать, как включить Sentinel."
+        "AvailableRedisBackendTypeSentinel": "Страж",
+        "MultipleServersOnlyConfigurableIfSentinelEnabled": "Несколько хостов или портов могут быть настроены только при включенном Redis Sentinel. Посмотрите файл readme плагина, чтобы узнать, как включить Sentinel.",
+        "NumHostsNotMatchNumPorts": "Число настроенных хостов не совпадает с числом настроенных портов."
     }
 }
