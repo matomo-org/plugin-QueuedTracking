@@ -1,5 +1,6 @@
 {
     "QueuedTracking": {
+        "AvailableRedisBackendTypeSentinel": "Centinela",
         "MultipleServersOnlyConfigurableIfSentinelEnabled": "Sólo se pueden configurar múltiples hosts o puertos cuando Redis Sentinel está activado. El README del plugin le dirá cómo hacerlo.",
         "NumHostsNotMatchNumPorts": "El número de hosts configurados no coincide con el número de puertos configurados."
     }
