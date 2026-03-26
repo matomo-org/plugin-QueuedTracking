@@ -313,45 +313,29 @@ class ProcessorTest extends IntegrationTestCase
                      ->setConstructorArgs(array($this->queue, $this->lock))
                      ->getMock();
 
-        $mock->expects($this->at(0))
+        $expectedRequestSetCalls = [
+            [1, 5],
+            [],
+            [1, 2],
+            [1],
+            [3, 1],
+            [],
+        ];
+        $mock->expects($this->exactly(count($expectedRequestSetCalls)))
              ->method('processRequestSets')
-             ->with($this->anything(), $this->callback(function ($arg) {
-                 return 2 === count($arg) && 1 === $arg[0]->getNumberOfRequests() &&  5 === $arg[1]->getNumberOfRequests();
-             }))
-            ->will($this->returnCallback($forwardCallToProcessor));
+             ->willReturnCallback(function ($tracker, $queuedRequestSets) use (&$expectedRequestSetCalls, $forwardCallToProcessor) {
+                 $expectedCounts = array_shift($expectedRequestSetCalls);
+                 $actualCounts = array_map(function ($requestSet) {
+                     return $requestSet->getNumberOfRequests();
+                 }, $queuedRequestSets);
 
-        $mock->expects($this->at(1))
-             ->method('processRequestSets')
-             ->with($this->anything(), $this->equalTo(array()))
-            ->will($this->returnCallback($forwardCallToProcessor));
+                 $this->assertSame($expectedCounts, $actualCounts);
 
-        $mock->expects($this->at(2)) // one of them fails
-             ->method('processRequestSets')
-             ->with($this->anything(), $this->callback(function ($arg) {
-                 return 2 === count($arg) && 1 === $arg[0]->getNumberOfRequests() &&  2 === $arg[1]->getNumberOfRequests();
-             }))
-             ->will($this->returnCallback($forwardCallToProcessor));
-
-        $mock->expects($this->at(3)) // retry, this time it should work
-             ->method('processRequestSets')
-             ->with($this->anything(), $this->callback(function ($arg) {
-                 return 1 === count($arg) && 1 === $arg[0]->getNumberOfRequests();
-             }))
-            ->will($this->returnCallback($forwardCallToProcessor));
-
-        $mock->expects($this->at(4)) // both of them fails
-             ->method('processRequestSets')
-             ->with($this->anything(), $this->callback(function ($arg) {
-                 return 2 === count($arg) && 3 === $arg[0]->getNumberOfRequests() &&  1 === $arg[1]->getNumberOfRequests();
-             }))
-             ->will($this->returnCallback($forwardCallToProcessor));
-
-        $mock->expects($this->at(5))  // as both fail none should be retried
-             ->method('processRequestSets')
-             ->with($this->anything(), $this->equalTo(array()))
-             ->will($this->returnCallback($forwardCallToProcessor));
+                 return $forwardCallToProcessor($tracker, $queuedRequestSets);
+             });
 
         $mock->process($this->createTracker());
+        $this->assertSame([], $expectedRequestSetCalls);
     }
 
     public function test_process_shouldRestoreEnvironmentAfterTrackingRequests()
