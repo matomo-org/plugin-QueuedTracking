@@ -42,8 +42,9 @@ describe("QueuedTrackingSettings", function () {
         await page.waitForNetworkIdle();
         // hide all cards, except of QueueTracking
         await page.evaluate(function(){
-            $('.card-content').hide();
-            $('.card-content:contains(\'QueuedTracking\')').show();
+            $('.card').hide();
+            $('.card:contains(\'QueuedTracking\')').show();
+            $('.card:contains(\'Queued Tracking\')').show();
         });
         await page.mouse.move(-10, -10);
         expect(await page.screenshotSelector(selector + ',#ajaxError,#notificationContainer')).to.matchImage('settings_save_error');
