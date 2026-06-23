@@ -34,6 +34,10 @@ describe("QueuedTrackingSettings", function () {
     });
 
     it("should show an error if queue is enabled and redis connection is wrong", async function () {
+        // Scroll the toggle to the viewport centre before clicking: under the modern headless Chrome
+        // it can otherwise be reported as "not clickable" when it sits behind a sticky header.
+        const queueEnabledToggle = await page.waitForSelector('#queueEnabled + span');
+        await queueEnabledToggle.evaluate(el => el.scrollIntoView({ block: 'center' }));
         await page.click('#queueEnabled + span');
         await page.type('input[name="redisPort"]', '1');
         await (await page.jQuery('.card-content:contains(\'QueuedTracking\') .pluginsSettingsSubmit')).click();
