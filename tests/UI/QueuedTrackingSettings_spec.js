@@ -38,7 +38,10 @@ describe("QueuedTrackingSettings", function () {
         // it can otherwise be reported as "not clickable" when it sits behind a sticky header.
         const queueEnabledToggle = await page.waitForSelector('#queueEnabled + span');
         await queueEnabledToggle.evaluate(el => el.scrollIntoView({ block: 'center' }));
-        await page.click('#queueEnabled + span');
+        // Use a JS click rather than page.click(): under the modern headless Chrome the toggle's
+        // lever can be reported as "not clickable" (covered by a sticky header / zero hit area)
+        // even after scrolling, while the click event itself fires the handler fine.
+        await queueEnabledToggle.evaluate(el => el.click());
         await page.type('input[name="redisPort"]', '1');
         await (await page.jQuery('.card-content:contains(\'QueuedTracking\') .pluginsSettingsSubmit')).click();
         await page.waitForSelector('.confirm-password-modal.open', { visible: true });
