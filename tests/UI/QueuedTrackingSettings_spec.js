@@ -44,9 +44,15 @@ describe("QueuedTrackingSettings", function () {
         await queueEnabledToggle.evaluate(el => el.click());
         await page.type('input[name="redisPort"]', '1');
         await (await page.jQuery('.card-content:contains(\'QueuedTracking\') .pluginsSettingsSubmit')).click();
-        await page.waitForSelector('.confirm-password-modal.open', { visible: true });
-        await page.type('.confirm-password-modal.open input[type=password]', superUserPassword);
-        await (await page.jQuery('.confirm-password-modal .confirm-password-btn:visible')).click();
+
+        // Wait for the password-confirmation modal to finish opening before interacting with it:
+        // under the modern headless Chrome the input is not yet focusable right after the submit
+        // click, and the confirm button can be reported as "not clickable" mid-animation.
+        const passwordInput = await page.waitForSelector('.confirm-password-modal input[type=password]', { visible: true });
+        await passwordInput.type(superUserPassword);
+        const confirmButton = await page.waitForSelector('.confirm-password-modal .modal-close.btn', { visible: true });
+        await confirmButton.evaluate(el => el.click());
+
         await page.waitForNetworkIdle();
         // hide all cards, except of QueueTracking
         await page.evaluate(function(){
