@@ -43,7 +43,12 @@ describe("QueuedTrackingSettings", function () {
         // even after scrolling, while the click event itself fires the handler fine.
         await queueEnabledToggle.evaluate(el => el.click());
         await page.type('input[name="redisPort"]', '1');
-        await (await page.jQuery('.card-content:contains(\'QueuedTracking\') .pluginsSettingsSubmit')).click();
+
+        // Use a JS click for the submit button: page/element click can be reported as "not
+        // clickable" under the modern headless Chrome, so the password-confirmation modal never
+        // opened.
+        const submitButton = await page.jQuery('.card-content:contains(\'QueuedTracking\') .pluginsSettingsSubmit');
+        await submitButton.evaluate(el => el.click());
 
         // Wait for the password-confirmation modal to finish opening before interacting with it:
         // under the modern headless Chrome the input is not yet focusable right after the submit
