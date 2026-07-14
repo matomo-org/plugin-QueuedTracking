@@ -16,6 +16,7 @@
         "NumberOfQueueWorkersFieldHelpNew": "Anzahl der maximal zulässigen Warteschlangenarbeiter. Akzeptiert eine Zahl zwischen 1 und 4096. Die beste Vorgehensweise besteht darin, die Anzahl der CPUs festzulegen, die Sie für die Warteschlangenverarbeitung zur Verfügung stellen möchten. Beachten Sie, dass Sie sicherstellen müssen, die Arbeiter manuell zu starten. Wir empfehlen, nicht 9-15 Arbeiter zu verwenden, sondern eher 8 oder 16, da die Warteschlange möglicherweise nicht gleichmäßig auf verschiedene Warteschlangen verteilt wird.",
         "NumberOfQueueWorkersFieldTitle": "Anzahl der Warteschlangenarbeiter",
         "ProcessDuringRequestFieldHelp": "Wenn aktiviert, werden wir alle Anfragen innerhalb einer Warteschlange während einer normalen Aufzeichnungsanfrage verarbeiten, sobald genügend Anfragen in der Warteschlange sind. Dies wird die Aufzeichnungsanfrage nicht verlangsamen. Wenn deaktiviert, müssen Sie einen Cronjob einrichten, der den %1$s./console queuedtracking:process%2$s Konsolenbefehl z.B. jede Minute ausführt, um die Warteschlange zu verarbeiten.",
+        "ProcessDuringRequestFieldTitle": "Verarbeitung während der Aufzeichnungsanfrage",
         "QueueEnabledFieldHelp": "Wenn aktiviert, werden alle Aufzeichnungsanfragen in eine Warteschlange geschrieben, anstatt direkt in die Datenbank. Erfordert einen Redis-Server und die phpredis PHP-Erweiterung, wenn Redis als Backend verwendet wird.",
         "QueueEnabledFieldTitle": "Warteschlange aktiviert",
         "RedisDatabaseFieldHelp": "Falls Sie Redis für das Caching verwenden, stellen Sie sicher, dass Sie eine andere Datenbank verwenden.",
@@ -30,6 +31,8 @@
         "RedisPortFieldTitle": "Redis-Port",
         "RedisTimeoutFieldHelp": "Redis Verbindungs-Zeitlimit in Sekunden. \"0.0\" bedeutet unbegrenzt. Kann eine Fließkommazahl sein, z.B. \"2.5\" für ein Verbindungs-Zeitlimit von 2,5 Sekunden.",
         "RedisTimeoutFieldTitle": "Redis Zeitlimit",
+        "UsePasswordForSentinelsHelp": "Nur relevant, wenn Sentinel aktiviert ist.%1$sWenn Sentinel aktiviert ist, wird das Redis-Passwort auch bei der Authentifizierung bei Sentinel-Instanzen verwendet, um die Master-Verbindungsdaten abzurufen. Andernfalls wird das Passwort nur zur Authentifizierung beim Redis-Master verwendet.",
+        "UsePasswordForSentinelsTitle": "Passwort bei Redis Sentinels verwenden",
         "UseSentinelFieldHelp": "Wenn aktiviert, wird das Redis Sentinel Feature verwendet. Stellen Sie sicher, dass Sie Host und Port bei Bedarf aktualisieren. Sobald Sie die Veränderung aktiviert und gespeichert haben, können Sie mehrere Hosts und Ports durch Kommas getrennt angeben.",
         "UseSentinelFieldTitle": "Redis Sentinel aktivieren",
         "WhatRedisBackEndType": "Wählen Sie aus, welchen Typ von Redis Sie verwenden möchten. Stellen Sie sicher, dass Sie Host und Port bei Bedarf aktualisieren. Sobald Sie die Veränderung ausgewählt und gespeichert haben, können Sie mehrere Hosts und Ports nur für den \"Sentinel\"- und \"Cluster\"-Typ mit kommagetrennten Listen angeben."
