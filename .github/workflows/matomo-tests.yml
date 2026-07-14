@@ -1,7 +1,7 @@
 # Action for running tests
 # This file has been automatically created.
 # To recreate it you can run this command
-# ./console generate:test-action --plugin="QueuedTracking" --php-versions="matomo5_min_php,matomo5_max_php" --enable-redis --schedule-cron="0 2 * * 6"
+# ./console generate:test-action --plugin="QueuedTracking" --php-versions="8.1,8.5" --enable-redis --schedule-cron="0 2 * * 6"
 
 name: Plugin QueuedTracking Tests
 
@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: [ 'matomo5_min_php', 'matomo5_max_php' ]
+        php: [ '8.1', '8.5' ]
         target: ['minimum_required_matomo', 'maximum_supported_matomo']
     steps:
       - uses: actions/checkout@v3
@@ -55,7 +55,7 @@ jobs:
           matomo-test-branch: ${{ matrix.target }}
           redis-service: true
           artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
-          upload-artifacts: ${{ matrix.php == 'matomo5_min_php' && matrix.target == 'maximum_supported_matomo' }}
+          upload-artifacts: ${{ matrix.php == '8.1' && matrix.target == 'maximum_supported_matomo' }}
   UI:
     runs-on: ubuntu-24.04
     steps:
@@ -69,7 +69,7 @@ jobs:
           plugin-name: 'QueuedTracking'
           matomo-test-branch: 'maximum_supported_matomo'
           test-type: 'UI'
-          php-version: 'matomo5_min_php'
+          php-version: '8.1'
           node-version: '16'
           redis-service: true
           artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
