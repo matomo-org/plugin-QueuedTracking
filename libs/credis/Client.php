@@ -272,6 +272,11 @@ class Credis_Client {
     /**
      * @var string
      */
+    protected $authUsername;
+
+    /**
+     * @var string
+     */
     protected $authPassword;
 
     /**
@@ -312,7 +317,7 @@ class Credis_Client {
      * @param int $db The selected datbase of the Redis server
      * @param string $password The authentication password of the Redis server
      */
-    public function __construct($host = '127.0.0.1', $port = 6379, $timeout = null, $persistent = '', $db = 0, $password = null)
+    public function __construct($host = '127.0.0.1', $port = 6379, $timeout = null, $persistent = '', $db = 0, $password = null, $username = null)
     {
         $this->host = (string) $host;
         $this->port = (int) $port;
@@ -320,6 +325,7 @@ class Credis_Client {
         $this->timeout = $timeout;
         $this->persistent = (string) $persistent;
         $this->standalone = ! extension_loaded('redis');
+        $this->authUsername = $username;
         $this->authPassword = $password;
         $this->selectedDb = (int)$db;
         $this->convertHost();
@@ -502,7 +508,7 @@ class Credis_Client {
         }
 
         if($this->authPassword) {
-            $this->auth($this->authPassword);
+            $this->auth($this->authPassword, $this->authUsername);
         }
         if($this->selectedDb !== 0) {
             $this->select($this->selectedDb);
@@ -637,12 +643,18 @@ class Credis_Client {
 
     /**
      * @param string $password
+     * @param string|null $username
      * @return bool
      */
-    public function auth($password)
+    public function auth($password, $username = null)
     {
-        $response = $this->__call('auth', array($password));
+        if ($username !== null) {
+            $response = $this->__call('auth', array($username, $password));
+        } else {
+            $response = $this->__call('auth', array($password));
+        }
         $this->authPassword = $password;
+        $this->authUsername = $username;
         return $response;
     }
 
@@ -1254,7 +1266,7 @@ class Credis_Client {
             $this->close(true);
             $this->connect();
             if($this->authPassword) {
-                $this->auth($this->authPassword);
+                $this->auth($this->authPassword, $this->authUsername);
             }
             if($this->selectedDb != 0) {
                 $this->select($this->selectedDb);

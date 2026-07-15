@@ -40,6 +40,9 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     public $redisDatabase;
 
     /** @var Setting */
+    public $redisUsername;
+
+    /** @var Setting */
     public $redisPassword;
 
     /** @var Setting */
@@ -90,6 +93,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         $this->redisHost = $this->createRedisHostSetting();
         $this->redisPort = $this->createRedisPortSetting();
         $this->redisTimeout = $this->createRedisTimeoutSetting();
+        $this->redisUsername = $this->createRedisUsernameSetting();
         $this->redisDatabase = $this->createRedisDatabaseSetting();
         $this->redisPassword = $this->createRedisPasswordSetting();
         $this->queueEnabled = $this->createQueueEnabledSetting();
@@ -233,6 +237,18 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         $this->addSetting($numQueueWorkers);
 
         return $numQueueWorkers;
+    }
+
+    private function createRedisUsernameSetting()
+    {
+        return $this->makeSetting('redisUsername', $default = '', FieldConfig::TYPE_STRING, function (FieldConfig $field) {
+            $field->title = 'Redis Username';
+            $field->condition = 'backend=="redis"';
+            $field->uiControl = FieldConfig::UI_CONTROL_TEXT;
+            $field->uiControlAttributes = array('size' => 128);
+            $field->inlineHelp = 'Username for Redis ACL authentication. Leave empty if not used.';
+            $field->validators[] = new CharacterLength(null, 128);
+        });
     }
 
     private function createRedisPasswordSetting()
