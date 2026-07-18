@@ -39,6 +39,9 @@ jobs:
       matrix:
         php: [ '8.1', '8.5' ]
         target: ['minimum_required_matomo', 'maximum_supported_matomo']
+        database:
+          - { engine: 'Mysql', version: '8.0' }
+          - { engine: 'Mariadb', version: '10.6' }
     steps:
       - uses: actions/checkout@v3
         with:
@@ -52,6 +55,8 @@ jobs:
           plugin-name: 'QueuedTracking'
           php-version: ${{ matrix.php }}
           test-type: 'PluginTests'
+          mysql-engine: ${{ matrix.database.engine }}
+          mysql-version: ${{ matrix.database.version }}
           matomo-test-branch: ${{ matrix.target }}
           redis-service: true
           artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
@@ -69,6 +74,8 @@ jobs:
           plugin-name: 'QueuedTracking'
           matomo-test-branch: 'maximum_supported_matomo'
           test-type: 'UI'
+          mysql-engine: 'Mysql'
+          mysql-version: '8.0'
           php-version: '8.1'
           node-version: '16'
           redis-service: true
