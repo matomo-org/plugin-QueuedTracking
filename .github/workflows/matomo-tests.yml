@@ -60,7 +60,7 @@ jobs:
           matomo-test-branch: ${{ matrix.target }}
           redis-service: true
           artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
-          upload-artifacts: ${{ matrix.php == '8.1' && matrix.target == 'maximum_supported_matomo' }}
+          upload-artifacts: ${{ matrix.php == '8.1' && matrix.target == 'maximum_supported_matomo' && matrix.database.engine == 'Mysql' }}
   UI:
     runs-on: ubuntu-24.04
     steps:
