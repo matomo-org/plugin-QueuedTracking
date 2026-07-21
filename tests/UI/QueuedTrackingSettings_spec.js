@@ -34,26 +34,18 @@ describe("QueuedTrackingSettings", function () {
     });
 
     it("should show an error if queue is enabled and redis connection is wrong", async function () {
-        // Toggle the checkbox input directly. page.click on the visible label/span is reported as
-        // "not clickable" under the modern headless Chrome, and a synthetic click on the label span
-        // does not reliably flip the underlying checkbox - so the setting never changed and saving
-        // did not prompt for the password. Clicking the input fires its change handler so the value
-        // actually changes.
+        // Click the checkbox input directly: clicking the label/span is flaky under the new headless
+        // Chrome and does not reliably flip the checkbox.
         const queueEnabledInput = await page.waitForSelector('#queueEnabled');
         await queueEnabledInput.evaluate(el => el.click());
         await page.type('input[name="redisPort"]', '1');
 
-        // Use a JS click for the submit button: page/element click can be reported as "not
-        // clickable" under the modern headless Chrome, so the password-confirmation modal never
-        // opened.
+        // JS click: a native click on the submit button is flaky under the new headless Chrome.
         const submitButton = await page.jQuery('.card-content:contains(\'QueuedTracking\') .pluginsSettingsSubmit');
         await submitButton.evaluate(el => el.click());
 
-        // Saving opens the password-confirmation modal. Scope every selector to the modal that is
-        // actually open: the settings page renders several .confirm-password-modal instances, and an
-        // unscoped selector matches a closed one whose password field never becomes visible. Wait for
-        // the field, enter the password and confirm (JS click - the button can be reported as "not
-        // clickable" mid-animation under the modern headless Chrome).
+        // Saving opens the password-confirmation modal. Scope to the open modal (the page renders
+        // several .confirm-password-modal instances) and JS-click confirm (native clicks are flaky).
         await page.waitForSelector('.confirm-password-modal.modal.open #currentUserPassword', { visible: true });
         await page.waitForTimeout(250);
         await page.type('.confirm-password-modal.modal.open #currentUserPassword', superUserPassword);
