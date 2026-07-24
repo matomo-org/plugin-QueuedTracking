@@ -34,12 +34,24 @@ describe("QueuedTrackingSettings", function () {
     });
 
     it("should show an error if queue is enabled and redis connection is wrong", async function () {
-        await page.click('#queueEnabled + span');
+        // Click the checkbox input directly: clicking the label/span is flaky under the new headless
+        // Chrome and does not reliably flip the checkbox.
+        const queueEnabledInput = await page.waitForSelector('#queueEnabled');
+        await queueEnabledInput.evaluate(el => el.click());
         await page.type('input[name="redisPort"]', '1');
-        await (await page.jQuery('.card-content:contains(\'QueuedTracking\') .pluginsSettingsSubmit')).click();
-        await page.waitForSelector('.confirm-password-modal.open', { visible: true });
-        await page.type('.confirm-password-modal.open input[type=password]', superUserPassword);
-        await (await page.jQuery('.confirm-password-modal .confirm-password-btn:visible')).click();
+
+        // JS click: a native click on the submit button is flaky under the new headless Chrome.
+        const submitButton = await page.jQuery('.card-content:contains(\'QueuedTracking\') .pluginsSettingsSubmit');
+        await submitButton.evaluate(el => el.click());
+
+        // Saving opens the password-confirmation modal. Scope to the open modal (the page renders
+        // several .confirm-password-modal instances) and JS-click confirm (native clicks are flaky).
+        await page.waitForSelector('.confirm-password-modal.modal.open #currentUserPassword', { visible: true });
+        await page.waitForTimeout(250);
+        await page.type('.confirm-password-modal.modal.open #currentUserPassword', superUserPassword);
+        const confirmButton = await page.waitForSelector('.confirm-password-modal.modal.open .confirm-password-btn', { visible: true });
+        await confirmButton.evaluate(el => el.click());
+
         await page.waitForNetworkIdle();
         // hide all cards, except of QueueTracking
         await page.evaluate(function(){
