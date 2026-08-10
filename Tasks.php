@@ -100,9 +100,9 @@ class Tasks extends \Piwik\Plugin\Tasks
             $prefix = Common::prefixTable(MySQL::QUEUED_TRACKING_TABLE_PREFIX);
             $tables = $db->fetchCol("SHOW TABLES LIKE '" . $prefix . "%'");
 
-            $force = Db::isOptimizeInnoDBSupported();
+            $force = Db\Schema::getInstance()->isOptimizeInnoDBSupported();
             // if supported, then we want to force it, as it is quite important to execute this
-            Db::optimizeTables($tables, $force);
+            Db\Schema::getInstance()->optimizeTables($tables, $force);
         }
     }
 }
