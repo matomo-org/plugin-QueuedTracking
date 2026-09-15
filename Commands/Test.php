@@ -104,7 +104,7 @@ class Test extends ConsoleCommand
         }
 
         $output->writeln('Backend version: ' . $backend->getServerVersion());
-        $output->writeln('Memory: ' . var_export($backend->getMemoryStats(), 1));
+        $output->writeln('Memory: ' . var_export($backend->getMemoryStats(), true));
 
         $redis = $backend->getConnection();
         if ($isUsingRedis && !$shouldSkipCheckingMemoryConfigValues) {
@@ -204,7 +204,7 @@ class Test extends ConsoleCommand
             if ($values == array('value3')) {
                 $output->writeln('List feature seems to work fine');
             } else {
-                $output->writeln('List feature seems to work only partially: ' . var_export($values, 1));
+                $output->writeln('List feature seems to work only partially: ' . var_export($values, true));
             }
         } else {
             $output->writeln('<error>List feature seems to not work fine: ' . $redis->getLastError() . '</error>');
@@ -217,7 +217,7 @@ class Test extends ConsoleCommand
     }
 
     /**
-     * @param \Redis $redis
+     * @param \Redis|\RedisCluster|\Credis_Client $redis
      * @param $configName
      * @return string
      */

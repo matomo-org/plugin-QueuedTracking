@@ -12,7 +12,6 @@ namespace Piwik\Plugins\QueuedTracking;
 
 use Piwik\Plugins\QueuedTracking\Queue\Backend;
 use Piwik\Tracker\RequestSet;
-use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
 
 class Queue
 {
@@ -22,7 +21,7 @@ class Queue
     ];
 
     /**
-     * @var Redis
+     * @var Backend
      */
     private $backend;
 
@@ -119,7 +118,7 @@ class Queue
      * The request array is passed by reference so that any changes are made to the original array. If any params are
      * found, this simply encodes them into a JSON string again.
      *
-     * @param array $requestArray
+     * @param mixed $requestArray
      * @return void
      */
     public function ensureJsonVarsAreStrings(&$requestArray)

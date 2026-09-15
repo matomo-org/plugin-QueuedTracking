@@ -24,7 +24,7 @@ use Exception;
 class Handler extends Tracker\Handler
 {
     /**
-     * @var Backend
+     * @var Backend|null
      */
     private $backend;
 

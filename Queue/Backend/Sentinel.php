@@ -38,7 +38,7 @@ class Sentinel extends Redis
 
         foreach ($hosts as $index => $host) { // Sort or randomize as appropriate
             try {
-                $configuredClient = new \Credis_Client($host, $ports[$index], $timeout = 0.5, $persistent = false);
+                $configuredClient = new \Credis_Client($host, (int) $ports[$index], $timeout = 0.5, $persistent = '');
                 $configuredClient->forceStandalone();
                 $configuredClient->connect();
                 if ($this->usePasswordForSentinelInstances && !empty($this->password)) {
@@ -52,7 +52,7 @@ class Sentinel extends Redis
                         $this->timeout = 0.05;
                     }
 
-                    $client = new \Credis_Client($master[0], $master[1], $this->timeout, $persistent = false, $this->database, $this->password);
+                    $client = new \Credis_Client($master[0], $master[1], $this->timeout, $persistent = '', $this->database, $this->password);
                     $client->connect();
 
                     $this->redis = $client;

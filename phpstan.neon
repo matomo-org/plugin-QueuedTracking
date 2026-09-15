@@ -1,0 +1,95 @@
+parameters:
+    level: 5
+    phpVersion: 80100
+    tmpDir: /tmp/phpstan/QueuedTracking/main
+    paths:
+        - .
+    excludePaths:
+        analyseAndScan:
+            - tests/*
+        analyse:
+            # Vendored Credis. Scanned but not analysed, so Queue\Backend\Redis and its siblings
+            # still resolve the client's methods while the library keeps its own conventions.
+            - libs/credis/*
+    ignoreErrors:
+        # The bundled ext-redis stubs disagree with the extension this plugin actually runs
+        # against. Reflected in the environment: RedisCluster::info() is
+        # (array|string $key_or_address, string $sections = '') returning RedisCluster|array|false,
+        # flushDB() takes array|string, and config() is (key_or_address, subcommand, ...extra_args)
+        # with two required arguments. Every call below matches the extension, not the stub.
+        -
+            identifier: arguments.count
+            message: '#RedisCluster::config\(\) invoked with 3 parameters#'
+            path: Commands/Test.php
+            count: 1
+        -
+            identifier: offsetAccess.notFound
+            message: "#Offset 'redis_version' does not exist on non-falsy-string#"
+            path: Queue/Backend/RedisCluster.php
+            count: 1
+        -
+            identifier: nullCoalesce.offset
+            message: "#Offset 'used_memory(_peak)?' on string on left side of \\?\\? does not exist#"
+            path: Queue/Backend/RedisCluster.php
+            count: 2
+        -
+            identifier: argument.type
+            message: '#RedisCluster::flushDB\(\) expects string, array#'
+            path: Queue/Backend/RedisCluster.php
+            count: 1
+        # Three backends share one $redis property and one getConnection(), holding \Redis,
+        # \RedisCluster or Credis_Client depending on how the queue is configured. Credis_Client
+        # mirrors the phpredis API deliberately, which is what makes the arrangement work at
+        # runtime; expressing it in the types means restructuring the hierarchy.
+        -
+            identifier: property.phpDocType
+            path: Queue/Backend/RedisCluster.php
+            count: 1
+        -
+            identifier: method.childReturnType
+            path: Queue/Backend/RedisCluster.php
+            count: 1
+        -
+            identifier: assign.propertyType
+            message: '#does not accept Credis_Client#'
+            path: Queue/Backend/Sentinel.php
+            count: 1
+        # Db::query() is declared to return a Zend_Db_Statement, but in tracker mode with the
+        # mysqli adapter it does not — which is exactly what the branches these findings sit on
+        # were written to handle, as their own comments say.
+        -
+            identifier: identical.alwaysFalse
+            message: '#Zend_Db_Statement and false#'
+            path: Queue/Backend/MySQL.php
+            count: 1
+        -
+            identifier: function.alreadyNarrowedType
+            message: '#with Zend_Db_Statement#'
+            path: Queue/Backend/MySQL.php
+            count: 2
+        # Db::get() is declared as a union whose interface never declares fetchCol(), though both
+        # implementations it can return do provide it.
+        -
+            identifier: method.notFound
+            message: '#::fetchCol\(\)#'
+            path: Queue/Backend/MySQL.php
+            count: 1
+        -
+            identifier: method.notFound
+            message: '#::fetchCol\(\)#'
+            path: Tasks.php
+            count: 1
+        # The updater builds every Updates class with the migration factory, as this plugin's two
+        # other update classes show; this one performs no migrations and so never uses it.
+        -
+            identifier: constructor.unusedParameter
+            path: Updates/5.1.0.php
+            count: 1
+    bootstrapFiles:
+        - ../../bootstrap-phpstan.php
+    universalObjectCratesClasses:
+        - Piwik\Config
+        - Piwik\View
+        - Piwik\ViewDataTable\Config
+    scanDirectories:
+        - ../../

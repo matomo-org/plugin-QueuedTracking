@@ -277,7 +277,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
 
                     $systemCheck = new SystemCheck();
 
-                    if ($self->isRedisBackend() && !$self->isUsingSentinelBackend()) {
+                    if (!$self->isUsingSentinelBackend()) {
                         $systemCheck->checkRedisIsInstalled();
                     }
                     $backend = Factory::makeBackendFromSettings($self);

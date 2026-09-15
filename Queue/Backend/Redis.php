@@ -16,7 +16,7 @@ use Piwik\Plugins\QueuedTracking\Queue\Backend;
 class Redis implements Backend
 {
     /**
-     * @var \Redis
+     * @var \Redis|null
      */
     protected $redis;
     protected $host;
@@ -25,7 +25,7 @@ class Redis implements Backend
     protected $password;
 
     /**
-     * @var int
+     * @var int|null
      */
     protected $database;
 
@@ -178,7 +178,6 @@ class Redis implements Backend
     }
 
     /**
-     * @internal for tests only
      */
     public function delete($key)
     {

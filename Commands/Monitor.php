@@ -112,12 +112,15 @@ class Monitor extends ConsoleCommand
                 }
 
                 $numInQueue = 0;
+                // $qPerPAge is never 0 by the time we get here, so the loop below always runs,
+                // but PHPStan cannot see that and reads the $idx used underneath as undefined
+                $idx = 0;
                 for ($idxPage = 0; $idxPage < $qPerPAge; $idxPage++) {
-                    $idx = ($qCurrentPage - 1) * $qPerPAge + $idxPage;
+                    $idx = (int) (($qCurrentPage - 1) * $qPerPAge + $idxPage);
                     if (isset($queues[$idx])) {
                         $q = $queues[$idx]->getNumberOfRequestSetsInQueue();
                         $numInQueue += (int)$q;
-                        $output->writeln(str_pad($idx, 10, " ", STR_PAD_LEFT) . " | " . str_pad(number_format($q), 16, " ", STR_PAD_LEFT));
+                        $output->writeln(str_pad((string) $idx, 10, " ", STR_PAD_LEFT) . " | " . str_pad(number_format($q), 16, " ", STR_PAD_LEFT));
                     } else {
                         $output->writeln(str_pad("", 10) . " | " . str_pad("", 16));
                     }
@@ -223,7 +226,7 @@ class Monitor extends ConsoleCommand
     /**
      * Loads the `rowperpage` argument from the commands arguments.
      *
-     * @return int|null
+     * @return int
      */
     private function getPerPageFromArg()
     {
@@ -242,7 +245,7 @@ class Monitor extends ConsoleCommand
     /**
      * Loads the `jumptopage` argument from the commands arguments.
      *
-     * @return int|null
+     * @return int
      */
     private function getJumpToPageFromArg()
     {

@@ -27,6 +27,8 @@ interface Backend extends LockBackend
 
     public function setIfNotExists($key, $value, $ttlInSeconds);
 
+    public function delete($key);
+
     public function deleteIfKeyHasValue($key, $value);
 
     public function hasAtLeastXRequestsQueued($key, $numValuesRequired);
