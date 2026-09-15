@@ -51,7 +51,7 @@ class PrintQueuedRequests extends ConsoleCommand
             $output->writeln(sprintf('<info>Showing requests of queue %s. Use <comment>--queue-id=%s</comment> to print only information for this queue.</info>', $thisQueueId, $thisQueueId));
 
             $requests = $queue->getRequestSetsToProcess();
-            $output->writeln(var_export($requests, 1));
+            $output->writeln(var_export($requests, true));
 
             $output->writeln(sprintf('<info>These were the requests of queue %s. Use <comment>--queue-id=%s</comment> to print only information for this queue.</info>', $thisQueueId, $thisQueueId));
         }

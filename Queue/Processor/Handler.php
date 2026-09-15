@@ -50,7 +50,7 @@ class Handler
 
                 $diffInMs = round(microtime(true) * 1000) - $startMs;
                 if ($diffInMs > 2000) {
-                    Common::printDebug(sprintf('The following request took more than 2 seconds (%d ms) to be tracked: %s', $diffInMs, var_export($request->getParams(), 1)));
+                    Common::printDebug(sprintf('The following request took more than 2 seconds (%d ms) to be tracked: %s', $diffInMs, var_export($request->getParams(), true)));
                 }
 
                 $this->count++;

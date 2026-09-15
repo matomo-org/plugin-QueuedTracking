@@ -18,6 +18,3 @@ jobs:
     uses: matomo-org/plugin-ci-workflows/.github/workflows/plugin-ci.yml@main
     with:
       plugin-name: QueuedTracking
-      # PHPStan has never run here and there is no phpstan.neon to run it with;
-      # adding one is a decision of its own.
-      skip-phpstan: true

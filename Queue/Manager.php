@@ -39,34 +39,6 @@ class Manager
 
     private $forceQueueId;
 
-    /**
-     * This mapping makes sure we move requests more evenly into different queues. Eg if we would do a
-     * ord($firstLetter) instead of this mapping, and have 4 workers, we would move the following characters:
-     * '0, 4, 8, d' into queue 0, '1, 5, 9, a, e' into queue 1, '2, 6, b, f' into queue 2 and '3, 7, c' into queue 3.
-     * This means queue 0 would get way more requests assigned compared to queue 3. It won't be perfect this way eg
-     * when having only 3 workers there will be always one queue with a few more results.
-     *
-     * @var array
-     */
-    private $mappingLettersToNumeric = array(
-        '0' => 0,
-        '1' => 1,
-        '2' => 2,
-        '3' => 3,
-        '4' => 4,
-        '5' => 5,
-        '6' => 6,
-        '7' => 7,
-        '8' => 8,
-        '9' => 9,
-        'a' => 10,
-        'b' => 11,
-        'c' => 12,
-        'd' => 13,
-        'e' => 14,
-        'f' => 15,
-    );
-
     public function __construct(Backend $backend, Lock $lock)
     {
         $this->backend = $backend;
@@ -250,7 +222,7 @@ class Manager
     }
 
     /**
-     * @return Queue
+     * @return Queue|null
      */
     public function lockNext()
     {
@@ -261,12 +233,12 @@ class Manager
 
             $shouldProcess = $queue->shouldProcess();
 
-            if ($shouldProcess && $this->lock->acquireLock($this->forceQueueId)) {
+            if ($shouldProcess && $this->lock->acquireLock((string) $this->forceQueueId)) {
                 return $queue;
             }
 
             // do not try to acquire a different lock
-            return;
+            return null;
         }
 
         if ($this->currentQueueId < 0) {
@@ -285,10 +257,12 @@ class Manager
 
             $shouldProcess = $queue->shouldProcess();
 
-            if ($shouldProcess && $this->lock->acquireLock($this->currentQueueId)) {
+            if ($shouldProcess && $this->lock->acquireLock((string) $this->currentQueueId)) {
                 return $queue;
             }
         }
+
+        return null;
     }
 
     public function unlock()

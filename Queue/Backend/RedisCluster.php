@@ -11,11 +11,13 @@
 namespace Piwik\Plugins\QueuedTracking\Queue\Backend;
 
 use Piwik\Log;
+use Piwik\Piwik;
+use Exception;
 
 class RedisCluster extends Redis
 {
     /**
-     * @var \RedisCluster
+     * @var \RedisCluster|null
      */
     protected $redis;
     protected $host;
@@ -210,7 +212,6 @@ class RedisCluster extends Redis
     }
 
     /**
-     * @internal for tests only
      */
     public function delete($key)
     {

@@ -326,7 +326,6 @@ class MySQL implements Backend
     }
 
     /**
-     * @internal for tests only
      */
     public function delete($key)
     {
