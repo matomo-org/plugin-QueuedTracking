@@ -61,6 +61,7 @@ class Factory
         $host     = $settings->redisHost->getValue();
         $port     = $settings->redisPort->getValue();
         $timeout  = $settings->redisTimeout->getValue();
+        $username = $settings->redisUsername->getValue();
         $password = $settings->redisPassword->getValue();
         $database = $settings->redisDatabase->getValue();
 
@@ -83,7 +84,7 @@ class Factory
             $redis->setDatabase($database);
         }
 
-        $redis->setConfig($host, $port, $timeout, $password);
+        $redis->setConfig($host, $port, $timeout, $password, $username);
         return $redis;
     }
 }

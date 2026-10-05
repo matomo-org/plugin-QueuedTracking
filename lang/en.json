@@ -16,6 +16,8 @@
         "AvailableRedisBackendTypeStandAlone": "Stand-alone",
         "AvailableRedisBackendTypeSentinel": "Sentinel",
         "AvailableRedisBackendTypeCluster": "Cluster",
+        "RedisUsernameFieldTitle": "Redis Username",
+        "RedisUsernameFieldHelp": "Username for Redis ACL authentication. Leave empty if not used.",
         "RedisPasswordFieldTitle": "Redis password",
         "RedisPasswordFieldHelp": "Password set on the Redis server, if any. Redis can be instructed to require a password before allowing clients to execute commands.",
         "RedisDatabaseFieldTitle": "Redis database",

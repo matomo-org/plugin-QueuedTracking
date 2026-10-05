@@ -23,6 +23,7 @@ class Redis implements Backend
     protected $port;
     protected $timeout;
     protected $password;
+    protected $username;
 
     /**
      * @var int|null
@@ -263,7 +264,7 @@ end';
         $success = $this->redis->connect($this->host, $this->port, $this->timeout, null, 100);
 
         if ($success && !empty($this->password)) {
-            $success = $this->redis->auth($this->password);
+            $success = $this->redis->auth([$this->username, $this->password]);
         }
 
         if (!empty($this->database) || 0 === $this->database) {
@@ -278,7 +279,8 @@ end';
         $port,
         $timeout,
         #[\SensitiveParameter]
-        $password
+        $password,
+        $username = null
     ) {
         $this->disconnect();
 
@@ -288,6 +290,9 @@ end';
 
         if (!empty($password)) {
             $this->password = $password;
+        }
+        if (!empty($username)) {
+            $this->username = $username;
         }
     }
 
