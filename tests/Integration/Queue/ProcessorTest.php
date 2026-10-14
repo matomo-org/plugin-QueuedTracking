@@ -373,10 +373,9 @@ class ProcessorTest extends IntegrationTestCase
         $this->assertSame(3, $tracker->getCountOfLoggedRequests());
     }
 
-    public function test_process_shouldLeaveTheBatchQueued_IfTheRetryHitsAnotherTransactionError_UntilTheAttemptsRunOut()
+    public function test_process_shouldRetryTheBatchThreeTimesThenDropIt_IfTheRetryKeepsHittingTransactionErrors()
     {
         $this->queue->setNumberOfRequestsToProcessAtSameTime(2);
-        $this->processor->setNumberOfMaxBatchesToProcess(1); // two attempts
 
         $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
 
@@ -386,12 +385,8 @@ class ProcessorTest extends IntegrationTestCase
 
         $tracker = $this->processor->process($this->createTracker());
 
-        $this->assertNumberOfRequestSetsLeftInQueue(2);
+        $this->assertSame(4, $tracker->numDeadlocks);
         $this->assertSame(0, $tracker->getCountOfLoggedRequests());
-
-        $this->processor->setNumberOfMaxBatchesToProcess(250);
-        $this->processor->process($this->createTracker());
-
         $this->assertNumberOfRequestSetsLeftInQueue(0);
     }
 

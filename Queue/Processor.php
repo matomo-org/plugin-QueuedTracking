@@ -65,10 +65,10 @@ class Processor
     private $numMinQueueIterations = 2;
 
     /**
-     * How often a run attempts a batch whose retry keeps hitting transaction errors before dropping it, so that it
+     * How often a batch is retried while its retry keeps hitting transaction errors, before it is dropped so that it
      * does not block its queue.
      */
-    private const MAX_ATTEMPTS_AFTER_TRANSACTION_ERRORS = 3;
+    private const MAX_RETRIES_AFTER_TRANSACTION_ERRORS = 3;
 
     public function __construct(Queue\Manager $queueManager)
     {
@@ -101,7 +101,6 @@ class Processor
 
         // Records the queue ID and the number of times we've seen this queue and it's been empty.
         $emptyQueueVisitCounts = array();
-        $transactionErrorCounts = [];
 
         try {
             while ($queue = $this->queueManager->lockNext()) {
@@ -155,27 +154,27 @@ class Processor
                         }
 
                         $failedRequestSets = $this->processRequestSets($tracker, $requestSetsToRetry);
+
+                        // the retry is rolled back as a whole after a transaction error, so repeat it while we still
+                        // hold the lock, rather than leave the batch queued for a run that would count afresh
+                        for ($retry = 1; !empty($requestSetsToRetry) && $this->handler->hasTransactionErrors(); $retry++) {
+                            if ($retry >= self::MAX_RETRIES_AFTER_TRANSACTION_ERRORS) {
+                                StaticContainer::get(LoggerInterface::class)->warning(sprintf(
+                                    'Dropping %d request sets from queue %s after repeated transaction errors.',
+                                    count($queuedRequestSets),
+                                    $queue->getId()
+                                ));
+                                break;
+                            }
+
+                            usleep(100000 * $retry); // give the conflicting transaction time to finish
+                            $failedRequestSets = $this->processRequestSets($tracker, $requestSetsToRetry);
+                        }
+
                         if (!empty($failedRequestSets)) {
                             Common::printDebug('Failed processing ' . count($failedRequestSets) . ' request sets.');
                         }
 
-                        if (!empty($requestSetsToRetry) && $this->handler->hasTransactionErrors()) {
-                            $transactionErrorCounts[$queue->getId()] = ($transactionErrorCounts[$queue->getId()] ?? 0) + 1;
-
-                            if ($transactionErrorCounts[$queue->getId()] < self::MAX_ATTEMPTS_AFTER_TRANSACTION_ERRORS) {
-                                // the retry was rolled back as a whole, so marking the batch as processed would drop it
-                                Common::printDebug('Leaving the request sets queued after another transaction error.');
-                                break;
-                            }
-
-                            StaticContainer::get(LoggerInterface::class)->warning(sprintf(
-                                'Dropping %d request sets from queue %s after repeated transaction errors.',
-                                count($queuedRequestSets),
-                                $queue->getId()
-                            ));
-                        }
-
-                        unset($transactionErrorCounts[$queue->getId()]);
                         $queue->markRequestSetsAsProcessed();
                         // TODO if markR..() fails, we would process them again later
                     }
