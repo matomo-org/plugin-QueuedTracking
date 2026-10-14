@@ -150,6 +150,12 @@ class Processor
                             Common::printDebug('Failed processing ' . count($failedRequestSets) . ' request sets.');
                         }
 
+                        if (!empty($requestSetsToRetry) && $this->handler->hasTransactionErrors()) {
+                            // the retry was rolled back as a whole, so marking the batch as processed would drop it
+                            Common::printDebug('Leaving the request sets queued after another transaction error.');
+                            break;
+                        }
+
                         $queue->markRequestSetsAsProcessed();
                         // TODO if markR..() fails, we would process them again later
                     }

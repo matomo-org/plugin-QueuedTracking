@@ -20,6 +20,10 @@ class Tracker extends \Piwik\Tests\Framework\Mock\Tracker
             throw new ForcedException("forced exception");
         }
 
+        if (!empty($allParams['forceDeadlock'])) {
+            throw new ForcedException('SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction');
+        }
+
         return parent::trackRequest($request);
     }
 }

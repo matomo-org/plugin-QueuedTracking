@@ -11,6 +11,8 @@ namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue;
 
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 use Piwik\Tests\Framework\Fixture;
+use Piwik\Tests\Framework\Mock\Tracker\RequestSet;
+use Piwik\Tracker\Request;
 use Piwik\Tracker\TrackerConfig;
 use Piwik\Tracker;
 use Piwik\Plugins\QueuedTracking\Queue;
@@ -352,6 +354,22 @@ class ProcessorTest extends IntegrationTestCase
              ->will($this->returnCallback($forwardCallToProcessor));
 
         $mock->process($this->createTracker());
+    }
+
+    public function test_process_shouldLeaveTheBatchQueued_IfTheRetryHitsAnotherTransactionError()
+    {
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(2);
+        $this->processor->setNumberOfMaxBatchesToProcess(3);
+
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+
+        $deadlockingRequestSet = new RequestSet();
+        $deadlockingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlock' => 1])]);
+        $this->queue->addRequestSetToQueues($deadlockingRequestSet);
+
+        $this->processor->process($this->createTracker());
+
+        $this->assertNumberOfRequestSetsLeftInQueue(2);
     }
 
     public function test_process_shouldRestoreEnvironmentAfterTrackingRequests()
