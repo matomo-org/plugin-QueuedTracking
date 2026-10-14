@@ -153,8 +153,7 @@ class Handler
         try {
             $this->getDb()->rollBack($this->transactionId);
         } catch (Exception $e) {
-            // PDO throws "There is no active transaction" once the server has rolled back. If the transaction is
-            // in fact still open, beginTransaction() below throws rather than nesting.
+            // PDO throws "There is no active transaction" once the server has rolled back.
             Common::printDebug('Rollback after a transaction error failed: ' . $e->getMessage());
         }
 

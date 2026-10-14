@@ -62,6 +62,12 @@ class Processor
      */
     private $numMinQueueIterations = 2;
 
+    /**
+     * How often a run attempts a batch whose retry keeps hitting transaction errors before dropping it, so that it
+     * does not block its queue.
+     */
+    private const MAX_ATTEMPTS_AFTER_TRANSACTION_ERRORS = 3;
+
     public function __construct(Queue\Manager $queueManager)
     {
         $this->queueManager = $queueManager;
@@ -93,6 +99,7 @@ class Processor
 
         // Records the queue ID and the number of times we've seen this queue and it's been empty.
         $emptyQueueVisitCounts = array();
+        $transactionErrorCounts = [];
 
         try {
             while ($queue = $this->queueManager->lockNext()) {
@@ -151,11 +158,18 @@ class Processor
                         }
 
                         if (!empty($requestSetsToRetry) && $this->handler->hasTransactionErrors()) {
-                            // the retry was rolled back as a whole, so marking the batch as processed would drop it
-                            Common::printDebug('Leaving the request sets queued after another transaction error.');
-                            break;
+                            $transactionErrorCounts[$queue->getId()] = ($transactionErrorCounts[$queue->getId()] ?? 0) + 1;
+
+                            if ($transactionErrorCounts[$queue->getId()] < self::MAX_ATTEMPTS_AFTER_TRANSACTION_ERRORS) {
+                                // the retry was rolled back as a whole, so marking the batch as processed would drop it
+                                Common::printDebug('Leaving the request sets queued after another transaction error.');
+                                break;
+                            }
+
+                            Common::printDebug('Dropping the request sets after repeated transaction errors.');
                         }
 
+                        unset($transactionErrorCounts[$queue->getId()]);
                         $queue->markRequestSetsAsProcessed();
                         // TODO if markR..() fails, we would process them again later
                     }

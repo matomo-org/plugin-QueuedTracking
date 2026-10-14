@@ -102,11 +102,14 @@ class HandlerTest extends IntegrationTestCase
     public function test_init_shouldResetAFaultyHandler()
     {
         $this->handler->onException(new RequestSet(), new \Exception());
+        $this->handler->onException(new RequestSet(), new \Exception('SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction'));
         $this->assertTrue($this->handler->hasErrors());
+        $this->assertTrue($this->handler->hasTransactionErrors());
 
         $this->handler->rollBack($this->tracker);
         $this->handler->init($this->tracker);
         $this->assertFalse($this->handler->hasErrors());
+        $this->assertFalse($this->handler->hasTransactionErrors());
     }
 
     public function test_process_ShouldForwardTheRequestToTheTracker()
@@ -302,7 +305,7 @@ class HandlerTest extends IntegrationTestCase
         $requestSet = $this->buildRequestSet(3);
         $this->handler->onException($requestSet, new \Exception($message));
 
-        // without a new transaction this would be stored in autocommit mode and the rollBack below would throw
+        // without a new transaction PDO would store this in autocommit mode and the rollBack below would throw
         $this->insertOption('QueuedTrackingTest_afterError');
 
         $this->handler->rollBack($this->tracker);

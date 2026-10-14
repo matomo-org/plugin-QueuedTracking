@@ -356,10 +356,10 @@ class ProcessorTest extends IntegrationTestCase
         $mock->process($this->createTracker());
     }
 
-    public function test_process_shouldLeaveTheBatchQueued_IfTheRetryHitsAnotherTransactionError()
+    public function test_process_shouldLeaveTheBatchQueued_IfTheRetryHitsAnotherTransactionError_UntilTheAttemptsRunOut()
     {
         $this->queue->setNumberOfRequestsToProcessAtSameTime(2);
-        $this->processor->setNumberOfMaxBatchesToProcess(3);
+        $this->processor->setNumberOfMaxBatchesToProcess(1); // two attempts
 
         $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
 
@@ -367,9 +367,15 @@ class ProcessorTest extends IntegrationTestCase
         $deadlockingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlock' => 1])]);
         $this->queue->addRequestSetToQueues($deadlockingRequestSet);
 
-        $this->processor->process($this->createTracker());
+        $tracker = $this->processor->process($this->createTracker());
 
         $this->assertNumberOfRequestSetsLeftInQueue(2);
+        $this->assertSame(0, $tracker->getCountOfLoggedRequests());
+
+        $this->processor->setNumberOfMaxBatchesToProcess(250);
+        $this->processor->process($this->createTracker());
+
+        $this->assertNumberOfRequestSetsLeftInQueue(0);
     }
 
     public function test_process_shouldRestoreEnvironmentAfterTrackingRequests()
