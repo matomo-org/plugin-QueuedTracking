@@ -11,6 +11,8 @@
 namespace Piwik\Plugins\QueuedTracking\Queue;
 
 use Piwik\Common;
+use Piwik\Container\StaticContainer;
+use Piwik\Log\LoggerInterface;
 use Piwik\Tracker;
 use Piwik\Tracker\RequestSet;
 use Piwik\Plugins\QueuedTracking\Queue;
@@ -166,7 +168,11 @@ class Processor
                                 break;
                             }
 
-                            Common::printDebug('Dropping the request sets after repeated transaction errors.');
+                            StaticContainer::get(LoggerInterface::class)->warning(sprintf(
+                                'Dropping %d request sets from queue %s after repeated transaction errors.',
+                                count($queuedRequestSets),
+                                $queue->getId()
+                            ));
                         }
 
                         unset($transactionErrorCounts[$queue->getId()]);

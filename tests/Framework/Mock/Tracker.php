@@ -13,6 +13,8 @@ use Piwik\Tracker\Request;
 
 class Tracker extends \Piwik\Tests\Framework\Mock\Tracker
 {
+    private $hasDeadlocked = false;
+
     public function trackRequest(Request $request)
     {
         $allParams = $request->getRawParams();
@@ -20,7 +22,8 @@ class Tracker extends \Piwik\Tests\Framework\Mock\Tracker
             throw new ForcedException("forced exception");
         }
 
-        if (!empty($allParams['forceDeadlock'])) {
+        if (!empty($allParams['forceDeadlock']) || (!empty($allParams['forceDeadlockOnce']) && !$this->hasDeadlocked)) {
+            $this->hasDeadlocked = true;
             throw new ForcedException('SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction');
         }
 

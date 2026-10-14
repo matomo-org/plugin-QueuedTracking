@@ -356,6 +356,23 @@ class ProcessorTest extends IntegrationTestCase
         $mock->process($this->createTracker());
     }
 
+    public function test_process_shouldTrackEveryRequestOnce_IfTheRetrySucceedsAfterATransactionError()
+    {
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(3);
+
+        $deadlockingRequestSet = new RequestSet();
+        $deadlockingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlockOnce' => 1])]);
+
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+        $this->queue->addRequestSetToQueues($deadlockingRequestSet);
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+
+        $tracker = $this->processor->process($this->createTracker());
+
+        $this->assertNumberOfRequestSetsLeftInQueue(0);
+        $this->assertSame(3, $tracker->getCountOfLoggedRequests());
+    }
+
     public function test_process_shouldLeaveTheBatchQueued_IfTheRetryHitsAnotherTransactionError_UntilTheAttemptsRunOut()
     {
         $this->queue->setNumberOfRequestsToProcessAtSameTime(2);
