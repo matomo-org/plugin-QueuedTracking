@@ -10,6 +10,7 @@
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue\Backend;
 
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
+use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 
 /**
@@ -277,6 +278,104 @@ class RedisTest extends IntegrationTestCase
         $this->redis->setConfig('127.0.0.1', 6370, 0.2, null);
         $success = $this->redis->testConnection();
         $this->assertFalse($success);
+    }
+
+    public function test_checkConnectionWithPasswordShouldFailIfPasswordIsWrong(): void
+    {
+        $password = 'correctPassword';
+
+        try {
+            $this->createRedisPassword($password);
+
+            $settings = Factory::getSettings();
+            $this->redis->setConfig($settings->redisHost->getValue(), (int) $settings->redisPort->getValue(), 0.2, 'wrongPassword');
+            $success = $this->redis->testConnection();
+
+            $this->assertFalse($success);
+        } finally {
+            $this->removeRedisPassword(null, $password);
+        }
+    }
+
+    public function test_checkConnectionWithCorrectPasswordShouldConnect(): void
+    {
+        $password = 'correctPassword';
+
+        try {
+            $this->createRedisPassword($password);
+
+            $settings = Factory::getSettings();
+            $this->redis->setConfig($settings->redisHost->getValue(), (int)  $settings->redisPort->getValue(), 0.2, $password);
+            $success = $this->redis->testConnection();
+
+            $this->assertTrue($success);
+        } finally {
+            $this->removeRedisPassword(null, $password);
+        }
+    }
+
+    public function test_checkConnectionWithUsernameShouldFailIfNotCorrect(): void
+    {
+        try {
+            $this->createRedisPassword($password = 'correctPassword', $username = 'correctUsername');
+
+            $settings = Factory::getSettings();
+            $this->redis->setConfig($settings->redisHost->getValue(), (int) $settings->redisPort->getValue(), 0.2, $password, 'wrongUsername');
+            $success = $this->redis->testConnection();
+
+            $this->assertFalse($success);
+        } finally {
+            $this->removeRedisPassword($username);
+        }
+    }
+
+    public function test_checkConnectionWithUsernameShouldConnectIfCorrect(): void
+    {
+        try {
+            $this->createRedisPassword($password = 'correctPassword', $username = 'correctUsername');
+
+            $settings = Factory::getSettings();
+            $this->redis->setConfig($settings->redisHost->getValue(), (int) $settings->redisPort->getValue(), 0.2, $password, $username);
+            $success = $this->redis->testConnection();
+
+            $this->assertTrue($success);
+        } finally {
+            $this->removeRedisPassword($username);
+        }
+    }
+
+    private function createRedisPassword($password, $username = null)
+    {
+        if (!empty($username)) {
+            $this->createAdminConnection()->rawcommand('ACL', 'SETUSER', $username, 'on', '>' . $password, '~*', '&*', '+@all');
+        } else {
+            $this->createAdminConnection()->rawcommand('CONFIG', 'SET', 'requirepass', $password);
+        }
+    }
+
+    private function removeRedisPassword($username = null, $requirepass = null): void
+    {
+        if (empty($username)) {
+            $this->createAdminConnection($requirepass)->rawcommand('CONFIG', 'SET', 'requirepass', '');
+        } else {
+            $this->createAdminConnection()->rawCommand('ACL', 'DELUSER', $username);
+        }
+    }
+
+    /**
+     * Admin connection used only to set up/tear down auth state for these tests. This must
+     * always target the real Redis master directly (127.0.0.1:6379) and not sentinel.
+     */
+    private function createAdminConnection($requirepass = null)
+    {
+        $connection = new \Redis();
+        $connection->connect('127.0.0.1', 6379, 0.2);
+
+        if (!empty($requirepass)) {
+            $connection->auth($requirepass);
+        }
+
+        return $connection;
     }
 
     public function test_checkConnectionDetails_shouldNotFailIfConnectionDataIsCorrect()
