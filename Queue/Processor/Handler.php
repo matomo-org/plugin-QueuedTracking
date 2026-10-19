@@ -39,9 +39,9 @@ class Handler
 
     public function process(Tracker $tracker, RequestSet $requestSet)
     {
-        $requestSet->restoreEnvironment();
-
         $this->count = 0;
+
+        $requestSet->restoreEnvironment();
 
         foreach ($requestSet->getRequests() as $request) {
             try {

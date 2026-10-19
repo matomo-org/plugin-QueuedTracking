@@ -155,21 +155,21 @@ class Processor
 
                         $failedRequestSets = $this->processRequestSets($tracker, $requestSetsToRetry);
 
-                        // the retry is rolled back as a whole after a transaction error, so repeat it while we still
-                        // hold the lock, rather than leave the batch queued for a run that would count afresh
+                        // the retry is rolled back as a whole after any error, so repeat it while we still hold the
+                        // lock, rather than leave the batch queued for a run that would count afresh
 
                         // keyed by spl_object_id(), as the sets stay referenced until the batch is done
                         $numTransactionErrors = [];
                         $numDroppedRequestSets = 0;
-                        for ($retry = 1; !empty($failedRequestSets) && $this->handler->hasTransactionErrors(); $retry++) {
+                        for ($retry = 1; !empty($failedRequestSets); $retry++) {
                             foreach ($this->handler->getRequestSetsWithTransactionErrors() as $requestSet) {
                                 $id = spl_object_id($requestSet);
                                 $numTransactionErrors[$id] = ($numTransactionErrors[$id] ?? 0) + 1;
                             }
 
                             // the previous pass already left out, or truncated, the sets that failed for other reasons.
-                            // Each pass counts an error against at least one set, and a set is dropped once it reaches
-                            // the limit, so this ends
+                            // Each failed pass either counts an error against a set, which is dropped once it reaches
+                            // the limit, or shortens or leaves out a set, so this ends
                             $requestSetsToRetry = [];
                             foreach ($failedRequestSets as $requestSet) {
                                 if (($numTransactionErrors[spl_object_id($requestSet)] ?? 0) >= self::MAX_TRANSACTION_ERRORS_PER_REQUEST_SET) {
@@ -179,7 +179,7 @@ class Processor
                                 }
                             }
 
-                            if (!empty($requestSetsToRetry)) {
+                            if (!empty($requestSetsToRetry) && $this->handler->hasTransactionErrors()) {
                                 // give the conflicting transaction time to finish
                                 usleep(100000 * min($retry, self::MAX_TRANSACTION_ERRORS_PER_REQUEST_SET));
                             }
@@ -188,22 +188,11 @@ class Processor
                         }
 
                         if ($numDroppedRequestSets > 0) {
-                            $message = sprintf(
+                            StaticContainer::get(LoggerInterface::class)->warning(sprintf(
                                 'Dropping %d request sets from queue %s after repeated transaction errors.',
                                 $numDroppedRequestSets,
                                 $queue->getId()
-                            );
-                            if (!empty($failedRequestSets)) {
-                                $message .= sprintf(
-                                    ' %d more are dropped because their last retry was rolled back after another request set failed.',
-                                    count($failedRequestSets)
-                                );
-                            }
-                            StaticContainer::get(LoggerInterface::class)->warning($message);
-                        }
-
-                        if (!empty($failedRequestSets)) {
-                            Common::printDebug('Failed processing ' . count($failedRequestSets) . ' request sets.');
+                            ));
                         }
 
                         $queue->markRequestSetsAsProcessed();
