@@ -11,6 +11,8 @@
 namespace Piwik\Plugins\QueuedTracking\Queue;
 
 use Piwik\Common;
+use Piwik\Container\StaticContainer;
+use Piwik\Log\LoggerInterface;
 use Piwik\Tracker;
 use Piwik\Tracker\RequestSet;
 use Piwik\Plugins\QueuedTracking\Queue;
@@ -61,6 +63,12 @@ class Processor
      * @var int
      */
     private $numMinQueueIterations = 2;
+
+    /**
+     * How often a batch is retried while its retry keeps hitting transaction errors. After that, the request sets that
+     * hit one are dropped until the rest of the batch goes through, so that it does not block its queue.
+     */
+    private const MAX_RETRIES_AFTER_TRANSACTION_ERRORS = 3;
 
     public function __construct(Queue\Manager $queueManager)
     {
@@ -146,6 +154,40 @@ class Processor
                         }
 
                         $failedRequestSets = $this->processRequestSets($tracker, $requestSetsToRetry);
+
+                        // the retry is rolled back as a whole after a transaction error, so repeat it while we still
+                        // hold the lock, rather than leave the batch queued for a run that would count afresh
+                        $numDroppedRequestSets = 0;
+                        for ($retry = 1; !empty($failedRequestSets) && $this->handler->hasTransactionErrors(); $retry++) {
+                            // the previous pass already left out the sets that failed for other reasons
+                            $requestSetsToRetry = $failedRequestSets;
+
+                            if ($retry < self::MAX_RETRIES_AFTER_TRANSACTION_ERRORS) {
+                                usleep(100000 * $retry); // give the conflicting transaction time to finish
+                            } else {
+                                // keep to one transaction, so a failure here cannot leave some sets stored while the
+                                // batch stays queued; each pass drops at least one set, so this ends
+                                $conflictingRequestSets = $this->handler->getRequestSetsWithTransactionErrors();
+                                $numDroppedRequestSets += count($conflictingRequestSets);
+                                $requestSetsToRetry = array_values(array_filter(
+                                    $requestSetsToRetry,
+                                    function ($requestSet) use ($conflictingRequestSets) {
+                                        return !in_array($requestSet, $conflictingRequestSets, true);
+                                    }
+                                ));
+                            }
+
+                            $failedRequestSets = $this->processRequestSets($tracker, $requestSetsToRetry);
+                        }
+
+                        if ($numDroppedRequestSets > 0) {
+                            StaticContainer::get(LoggerInterface::class)->warning(sprintf(
+                                'Dropping %d request sets from queue %s after repeated transaction errors.',
+                                $numDroppedRequestSets,
+                                $queue->getId()
+                            ));
+                        }
+
                         if (!empty($failedRequestSets)) {
                             Common::printDebug('Failed processing ' . count($failedRequestSets) . ' request sets.');
                         }
