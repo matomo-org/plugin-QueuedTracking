@@ -1,5 +1,8 @@
 ## Changelog
 
+5.2.1
+- Fixed queue processing failing with a fatal error, and some hits being counted twice, after a database deadlock or a MariaDB snapshot isolation conflict; requests hit by a snapshot isolation conflict are now retried
+
 5.2.0 - 2025-11-25
 - No longer disable Provider plugin automatically. If performance issues occur, please disable it manually or install an ASN geolocation database (https://matomo.org/faq/how-to/setting-up-accurate-visitors-geolocation/).
 
