@@ -437,6 +437,24 @@ class ProcessorTest extends IntegrationTestCase
         $this->assertNumberOfRequestSetsLeftInQueue(0);
     }
 
+    public function testProcessShouldRetryAgainIfTheRetryFailsForAnotherReasonAfterATransactionError()
+    {
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(2);
+
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+
+        // deadlocks in the first pass, then fails for another reason in the second
+        $failingRequestSet = new RequestSet();
+        $failingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlockOnce' => 1, 'forceThrowAfterDeadlock' => 1])]);
+        $this->queue->addRequestSetToQueues($failingRequestSet);
+
+        $tracker = $this->processor->process($this->createTracker());
+
+        $this->assertSame(1, $tracker->numDeadlocks);
+        $this->assertSame(1, $tracker->getCountOfLoggedRequests());
+        $this->assertNumberOfRequestSetsLeftInQueue(0);
+    }
+
     public function test_process_shouldRestoreEnvironmentAfterTrackingRequests()
     {
         $serverBackup = $_SERVER;
