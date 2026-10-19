@@ -15,19 +15,31 @@ class Tracker extends \Piwik\Tests\Framework\Mock\Tracker
 {
     public $numDeadlocks = 0;
 
+    /**
+     * Keyed by the request's params, as a request is restored from the queue as a new object.
+     * @var int[]
+     */
+    private $numDeadlocksPerRequest = [];
+
     public function trackRequest(Request $request)
     {
         $allParams = $request->getRawParams();
-        if (!empty($allParams['forceThrow']) || (!empty($allParams['forceThrowAfterDeadlock']) && $this->numDeadlocks)) {
+        $key = json_encode($allParams);
+        $numOwnDeadlocks = $this->numDeadlocksPerRequest[$key] ?? 0;
+
+        if (!empty($allParams['forceThrow']) || (!empty($allParams['forceThrowAfterDeadlock']) && $numOwnDeadlocks)) {
             throw new ForcedException("forced exception");
         }
 
         if (
             !empty($allParams['forceDeadlock'])
-            || (!empty($allParams['forceDeadlockOnce']) && !$this->numDeadlocks)
-            || (!empty($allParams['forceDeadlockUntil']) && $this->numDeadlocks < $allParams['forceDeadlockUntil'])
+            || (!empty($allParams['forceDeadlockOnce']) && !$numOwnDeadlocks)
+            || (!empty($allParams['forceDeadlockUntil']) && $numOwnDeadlocks < $allParams['forceDeadlockUntil'])
+            || (!empty($allParams['forceDeadlockOnceAfterDeadlocks']) && !$numOwnDeadlocks
+                && $this->numDeadlocks >= $allParams['forceDeadlockOnceAfterDeadlocks'])
         ) {
             $this->numDeadlocks++;
+            $this->numDeadlocksPerRequest[$key] = $numOwnDeadlocks + 1;
             throw new ForcedException('SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction');
         }
 

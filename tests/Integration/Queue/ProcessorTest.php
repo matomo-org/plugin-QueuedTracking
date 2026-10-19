@@ -405,12 +405,34 @@ class ProcessorTest extends IntegrationTestCase
 
         // deadlocks in the first two passes
         $deadlockingRequestSet = new RequestSet();
-        $deadlockingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlockUntil' => 3])]);
+        $deadlockingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlockUntil' => 2])]);
         $this->queue->addRequestSetToQueues($deadlockingRequestSet);
 
         $tracker = $this->processor->process($this->createTracker());
 
         $this->assertSame(3, $tracker->numDeadlocks);
+        $this->assertSame(2, $tracker->getCountOfLoggedRequests());
+        $this->assertNumberOfRequestSetsLeftInQueue(0);
+    }
+
+    public function testProcessShouldNotDropARequestSetThatHitsItsFirstTransactionErrorAfterAnotherSetWasDropped()
+    {
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(3);
+
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+
+        $deadlockingRequestSet = new RequestSet();
+        $deadlockingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlock' => 1])]);
+        $this->queue->addRequestSetToQueues($deadlockingRequestSet);
+
+        // deadlocks once, in the pass after which the set above reaches the limit and is dropped
+        $lateDeadlockingRequestSet = new RequestSet();
+        $lateDeadlockingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlockOnceAfterDeadlocks' => 4])]);
+        $this->queue->addRequestSetToQueues($lateDeadlockingRequestSet);
+
+        $tracker = $this->processor->process($this->createTracker());
+
+        $this->assertSame(5, $tracker->numDeadlocks);
         $this->assertSame(2, $tracker->getCountOfLoggedRequests());
         $this->assertNumberOfRequestSetsLeftInQueue(0);
     }
