@@ -294,7 +294,7 @@ class HandlerTest extends IntegrationTestCase
     /**
      * @dataProvider getRetryableTransactionErrors
      */
-    public function test_onException_shouldRetryTheRequestSetAndDiscardWorkDoneInTheTransaction(string $message, bool $serverEndsTransaction)
+    public function testOnExceptionShouldRetryTheRequestSetAndDiscardWorkDoneInTheTransaction(string $message, bool $serverEndsTransaction)
     {
         $this->insertOption('QueuedTrackingTest_beforeError');
 

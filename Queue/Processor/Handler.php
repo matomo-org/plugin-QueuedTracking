@@ -23,7 +23,7 @@ class Handler
     protected $transactionId;
 
     private $hasError = false;
-    private $hasTransactionError = false;
+    private $requestSetsWithTransactionErrors = [];
     private $requestSetsToRetry = array();
     private $count = 0;
     private $numTrackedRequestsBeginning = 0;
@@ -32,7 +32,7 @@ class Handler
     {
         $this->requestSetsToRetry = array();
         $this->hasError = false;
-        $this->hasTransactionError = false;
+        $this->requestSetsWithTransactionErrors = [];
         $this->numTrackedRequestsBeginning = $tracker->getCountOfLoggedRequests();
         $this->transactionId = $this->getDb()->beginTransaction();
     }
@@ -85,7 +85,7 @@ class Handler
         Common::printDebug('Got exception: ' . $e->getMessage());
 
         if ($this->isRetryableTransactionError($e)) {
-            $this->hasTransactionError = true;
+            $this->requestSetsWithTransactionErrors[] = $requestSet;
             $this->requestSetsToRetry[] = $requestSet;
             Common::printDebug('Added requestSet that hit a transaction error to requestSetsToRetry');
             $this->restartTransaction();
@@ -110,7 +110,16 @@ class Handler
      */
     public function hasTransactionErrors(): bool
     {
-        return $this->hasTransactionError;
+        return !empty($this->requestSetsWithTransactionErrors);
+    }
+
+    /**
+     * @return RequestSet[] the request sets that hit a deadlock, lock wait timeout or snapshot isolation conflict
+     *                      since init()
+     */
+    public function getRequestSetsWithTransactionErrors(): array
+    {
+        return $this->requestSetsWithTransactionErrors;
     }
 
     public function rollBack(Tracker $tracker)

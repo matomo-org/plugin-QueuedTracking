@@ -18,11 +18,15 @@ class Tracker extends \Piwik\Tests\Framework\Mock\Tracker
     public function trackRequest(Request $request)
     {
         $allParams = $request->getRawParams();
-        if (!empty($allParams['forceThrow'])) {
+        if (!empty($allParams['forceThrow']) || (!empty($allParams['forceThrowAfterDeadlock']) && $this->numDeadlocks)) {
             throw new ForcedException("forced exception");
         }
 
-        if (!empty($allParams['forceDeadlock']) || (!empty($allParams['forceDeadlockOnce']) && !$this->numDeadlocks)) {
+        if (
+            !empty($allParams['forceDeadlock'])
+            || (!empty($allParams['forceDeadlockOnce']) && !$this->numDeadlocks)
+            || (!empty($allParams['forceDeadlockUntil']) && $this->numDeadlocks < $allParams['forceDeadlockUntil'])
+        ) {
             $this->numDeadlocks++;
             throw new ForcedException('SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction');
         }
