@@ -10,6 +10,7 @@
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue;
 
 use Piwik\Config;
+use Piwik\Piwik;
 use Piwik\Plugins\QueuedTracking\Queue;
 use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Plugins\QueuedTracking\SystemSettings;
@@ -81,6 +82,16 @@ class FactoryTest extends IntegrationTestCase
         $backend = Factory::makeBackend();
         Config::getInstance()->QueuedTracking = [];
         $this->assertTrue($backend instanceof Queue\Backend\RedisCluster);
+    }
+
+    public function testRedisClusterShouldExplainAHostAndPortMismatch()
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage(Piwik::translate('QueuedTracking_NumHostsNotMatchNumPorts'));
+
+        $backend = new Queue\Backend\RedisCluster();
+        $backend->setConfig('127.0.0.1,127.0.0.2', '6379', 0.0, null);
+        $backend->getServerVersion();
     }
 
     public function test_makeBackend_shouldConfigureRedis()
