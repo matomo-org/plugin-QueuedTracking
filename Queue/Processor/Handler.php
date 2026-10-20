@@ -12,9 +12,12 @@ namespace Piwik\Plugins\QueuedTracking\Queue\Processor;
 
 use Piwik\Common;
 use Piwik\Container\StaticContainer;
+use Piwik\Db\TransactionErrors;
 use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Plugins\QueuedTracking\Configuration;
 use Piwik\Tracker;
+use Piwik\Tracker\Db as TrackerDb;
+use Piwik\Tracker\Db\DbException;
 use Piwik\Tracker\RequestSet;
 use Exception;
 
@@ -48,6 +51,7 @@ class Handler
                 $startMs = round(microtime(true) * 1000);
 
                 $tracker->trackRequest($request);
+                $this->failIfTransactionAborted();
 
                 $diffInMs = round(microtime(true) * 1000) - $startMs;
                 if ($diffInMs > 2000) {
@@ -143,13 +147,31 @@ class Handler
     }
 
     /**
-     * Deadlock (1213), lock wait timeout (1205) and MariaDB's snapshot isolation conflict (1020).
+     * Deadlock (1213), lock wait timeout (1205), MariaDB's snapshot isolation conflict (1020) and, on Matomo versions
+     * that list them, the other errors that end the transaction.
      */
     private function isRetryableTransactionError(Exception $e): bool
     {
         $db = $this->getDb();
 
+        if (class_exists(TransactionErrors::class)) {
+            return TransactionErrors::endsTransaction($db, $e) || TransactionErrors::isStatementOnly($db, $e);
+        }
+
         return $db->isErrNo($e, 1213) || $db->isErrNo($e, 1205) || $db->isErrNo($e, 1020);
+    }
+
+    /**
+     * A tracking step may catch an error that made the server roll back the transaction. Matomo then refuses every
+     * later query, but when that was the request set's last query nothing notices until the lock or commit queries.
+     */
+    private function failIfTransactionAborted(): void
+    {
+        $db = $this->getDb();
+
+        if (method_exists($db, 'isTransactionAborted') && $db->isTransactionAborted()) {
+            throw new DbException(TrackerDb::TRANSACTION_ABORTED_MESSAGE, TransactionErrors::ERROR_CODE_DEADLOCK);
+        }
     }
 
     /**

@@ -15,8 +15,11 @@ use Piwik\Plugins\QueuedTracking\Queue\Processor\Handler;
 use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\ForcedException;
 use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\Tracker;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
+use Piwik\Tests\Framework\DbErrorRaiser;
 use Piwik\Tests\Framework\Fixture;
 use Piwik\Tests\Framework\Mock\Tracker\RequestSet;
+use Piwik\Tracker\Db\DbException;
+use Piwik\Tracker\Request;
 
 class TestHandler extends Handler
 {
@@ -348,6 +351,53 @@ class HandlerTest extends IntegrationTestCase
             'snapshot isolation' => ["SQLSTATE[HY000]: General error: 1020 Record has changed since last read in table 'log_visit'; try restarting transaction", true],
             'lock wait timeout' => ['SQLSTATE[HY000]: General error: 1205 Lock wait timeout exceeded; try restarting transaction', false],
         ];
+    }
+
+    public function testProcessShouldFailTheRequestSetIfATrackingStepSwallowedAnErrorThatEndedTheTransaction()
+    {
+        if (!method_exists(Tracker::getDatabase(), 'isTransactionAborted')) {
+            $this->markTestSkipped('Needs a Matomo version that refuses queries once the transaction was rolled back');
+        }
+
+        // creating the procedure would commit the open transaction
+        $this->handler->rollBack($this->tracker);
+        DbErrorRaiser::install();
+        $this->handler->init($this->tracker);
+
+        $tracker = new class extends Tracker {
+            public function trackRequest(Request $request)
+            {
+                parent::trackRequest($request);
+
+                try {
+                    DbErrorRaiser::raise(self::getDatabase(), 1213, 'Deadlock found when trying to get lock; try restarting transaction');
+                } catch (\Exception $e) {
+                    // like a tracking step that logs a failed write and carries on
+                }
+            }
+        };
+
+        $requestSet = $this->buildRequestSet(1);
+        $this->insertOption('QueuedTrackingTest_beforeError');
+
+        try {
+            $this->handler->process($tracker, $requestSet);
+            $this->fail('The request set must not count as processed');
+        } catch (DbException $e) {
+            $this->handler->onException($requestSet, $e);
+        }
+
+        // the handler started a new transaction
+        $this->insertOption('QueuedTrackingTest_afterError');
+        $this->handler->rollBack($this->tracker);
+        DbErrorRaiser::uninstall();
+
+        $this->assertEquals([$requestSet], $this->handler->getRequestSetsToRetry());
+        $this->assertEquals([$requestSet], $this->handler->getRequestSetsWithTransactionErrors());
+        $this->assertSame(0, (int) Db::fetchOne(
+            'SELECT COUNT(*) FROM `' . Common::prefixTable('option') . '` WHERE option_name LIKE ?',
+            ['QueuedTrackingTest_%']
+        ));
     }
 
     private function insertOption(string $name): void
