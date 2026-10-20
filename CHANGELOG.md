@@ -1,6 +1,6 @@
 ## Changelog
 
-6.0.2
+6.0.2 - 2026-10-20
 - Fixed queue processing failing with a fatal error, and some hits being counted twice, after a database deadlock or a MariaDB snapshot isolation conflict; requests hit by a snapshot isolation conflict are now retried
 - Fixed requests being lost when the retry after a database deadlock or snapshot isolation conflict failed because of a different request
 
