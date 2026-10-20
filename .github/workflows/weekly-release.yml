@@ -1,0 +1,16 @@
+name: Weekly release
+on:
+  # Run by hand: GitHub only runs schedules from the default branch, 6.x-dev.
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  release:
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    uses: matomo-org/plugin-ci-workflows/.github/workflows/plugin-dev-release.yml@main
+    secrets:
+      approver-token: ${{ secrets.TESTS_ACCESS_TOKEN }}
