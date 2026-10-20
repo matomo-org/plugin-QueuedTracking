@@ -217,6 +217,14 @@ class Processor
         } catch (Exception $e) {
             Common::printDebug('Failed to process a request set: ' . $e->getMessage());
 
+            try {
+                // the MySQL backend shares the tracker's connection, which refuses to unlock while an aborted
+                // transaction is still open
+                $this->handler->rollBack($tracker);
+            } catch (Exception $rollBackException) {
+                Common::printDebug('Failed to roll back: ' . $rollBackException->getMessage());
+            }
+
             $this->queueManager->unlock();
             $request->restoreEnvironment();
             throw $e;
