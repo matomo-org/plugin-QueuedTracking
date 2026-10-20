@@ -12,3 +12,6 @@ jobs:
       contents: write
       pull-requests: write
     uses: matomo-org/plugin-ci-workflows/.github/workflows/plugin-dev-release.yml@main
+    secrets:
+      # A user other than github-actions, so the bot's date PR can be approved and merged.
+      approver-token: ${{ secrets.TESTS_ACCESS_TOKEN }}
