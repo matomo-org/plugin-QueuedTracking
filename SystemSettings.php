@@ -68,7 +68,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         return array(
             1 => Piwik::translate('QueuedTracking_AvailableRedisBackendTypeStandAlone'),
             2 => Piwik::translate('QueuedTracking_AvailableRedisBackendTypeSentinel'),
-            3 => Piwik::translate('QueuedTracking_AvailableRedisBackendTypeCluster')
+            3 => Piwik::translate('QueuedTracking_AvailableRedisBackendTypeCluster'),
         );
     }
 
@@ -277,7 +277,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
 
                     $systemCheck = new SystemCheck();
 
-                    if ($self->isRedisBackend() && !$self->isUsingSentinelBackend()) {
+                    if (!$self->isUsingSentinelBackend()) {
                         $systemCheck->checkRedisIsInstalled();
                     }
                     $backend = Factory::makeBackendFromSettings($self);

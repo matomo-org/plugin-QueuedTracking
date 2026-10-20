@@ -11,11 +11,13 @@
 namespace Piwik\Plugins\QueuedTracking\Queue\Backend;
 
 use Piwik\Log;
+use Piwik\Piwik;
+use Exception;
 
 class RedisCluster extends Redis
 {
     /**
-     * @var \RedisCluster
+     * @var \RedisCluster|null
      */
     protected $redis;
     protected $host;
@@ -89,7 +91,7 @@ class RedisCluster extends Redis
 
         $memory = array (
             'used_memory_human' => 0,
-            'used_memory_peak_human' => 0
+            'used_memory_peak_human' => 0,
         );
 
         foreach ($hosts as $idx => $host) {
@@ -209,9 +211,6 @@ class RedisCluster extends Redis
         return $this->redis;
     }
 
-    /**
-     * @internal for tests only
-     */
     public function delete($key)
     {
         $this->connectIfNeeded();

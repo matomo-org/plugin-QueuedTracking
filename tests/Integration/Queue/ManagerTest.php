@@ -144,7 +144,7 @@ class ManagerTest extends IntegrationTestCase
     {
         $numQueues = $this->manager->getNumberOfAvailableQueues();
 
-        $a = 10 % $numQueues; // 10, 11, 12 is a internal mapping see {Manager::$mappingLettersToNumeric}
+        $a = 10 % $numQueues; // 10, 11, 12 are hexdec() of a, b, c, see Manager::getQueueIdForVisitor()
         $b = 11 % $numQueues;
         $c = 12 % $numQueues;
         $d = 0;
