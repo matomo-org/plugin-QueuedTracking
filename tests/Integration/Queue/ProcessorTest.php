@@ -22,6 +22,10 @@ class TestProcessor extends Processor
 {
     public function processRequestSets(Tracker $tracker, $queuedRequestSets)
     {
+        if (!empty($queuedRequestSets) && $tracker instanceof \Piwik\Plugins\QueuedTracking\tests\Framework\Mock\Tracker) {
+            $tracker->numPasses++;
+        }
+
         return parent::processRequestSets($tracker, $queuedRequestSets);
     }
 }
@@ -405,13 +409,73 @@ class ProcessorTest extends IntegrationTestCase
 
         // deadlocks in the first two passes
         $deadlockingRequestSet = new RequestSet();
-        $deadlockingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlockUntil' => 3])]);
+        $deadlockingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlockUntil' => 2])]);
         $this->queue->addRequestSetToQueues($deadlockingRequestSet);
 
         $tracker = $this->processor->process($this->createTracker());
 
         $this->assertSame(3, $tracker->numDeadlocks);
         $this->assertSame(2, $tracker->getCountOfLoggedRequests());
+        $this->assertNumberOfRequestSetsLeftInQueue(0);
+    }
+
+    public function testProcessShouldNotDropARequestSetThatHitsItsFirstTransactionErrorAfterAnotherSetWasDropped()
+    {
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(3);
+
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+
+        $deadlockingRequestSet = new RequestSet();
+        $deadlockingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlock' => 1])]);
+        $this->queue->addRequestSetToQueues($deadlockingRequestSet);
+
+        // deadlocks once, in the pass after which the set above reaches the limit and is dropped
+        $lateDeadlockingRequestSet = new RequestSet();
+        $lateDeadlockingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlockOnceAfterDeadlocks' => 4])]);
+        $this->queue->addRequestSetToQueues($lateDeadlockingRequestSet);
+
+        $tracker = $this->processor->process($this->createTracker());
+
+        $this->assertSame(5, $tracker->numDeadlocks);
+        $this->assertSame(2, $tracker->getCountOfLoggedRequests());
+        $this->assertNumberOfRequestSetsLeftInQueue(0);
+    }
+
+    public function testProcessShouldRetryAgainIfTheRetryFailsForAnotherReasonAfterATransactionError()
+    {
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(2);
+
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+
+        // deadlocks in the first pass, then fails for another reason in the second
+        $failingRequestSet = new RequestSet();
+        $failingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlockOnce' => 1, 'forceThrowAfterDeadlock' => 1])]);
+        $this->queue->addRequestSetToQueues($failingRequestSet);
+
+        $tracker = $this->processor->process($this->createTracker());
+
+        $this->assertSame(1, $tracker->numDeadlocks);
+        $this->assertSame(1, $tracker->getCountOfLoggedRequests());
+        $this->assertNumberOfRequestSetsLeftInQueue(0);
+    }
+
+    public function testProcessShouldDropAConflictingRequestSetBelowItsLimitOnceTheBatchHasBeenRetriedTooOften()
+    {
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(4);
+
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+
+        // the sets conflict in turn, so none reaches three errors by the sixth retry, which the first one fails again
+        foreach (['0,3,6', '1,4', '2,5'] as $passes) {
+            $deadlockingRequestSet = new RequestSet();
+            $deadlockingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlockInPasses' => $passes])]);
+            $this->queue->addRequestSetToQueues($deadlockingRequestSet);
+        }
+
+        $tracker = $this->processor->process($this->createTracker());
+
+        $this->assertSame(7, $tracker->numDeadlocks);
+        $this->assertSame(3, $tracker->getCountOfLoggedRequests());
         $this->assertNumberOfRequestSetsLeftInQueue(0);
     }
 

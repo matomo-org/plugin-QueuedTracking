@@ -168,6 +168,29 @@ class HandlerTest extends IntegrationTestCase
         $this->assertEquals(array('idsite' => '1', 'index' => '3'), $requests[3]->getParams());
     }
 
+    public function testOnExceptionShouldNotKeepRequestsOfASetWhoseEnvironmentCouldNotBeRestored()
+    {
+        $requestSet = $this->buildRequestSet(5);
+        $this->handler->process($this->tracker, $requestSet);
+
+        $failingRequestSet = new class extends RequestSet {
+            public function restoreEnvironment()
+            {
+                throw new ForcedException('forced exception');
+            }
+        };
+        $failingRequestSet->setRequests($this->buildRequestSet(3)->getRequests());
+
+        try {
+            $this->handler->process($this->tracker, $failingRequestSet);
+            $this->fail('An expected exception was not triggered');
+        } catch (ForcedException $e) {
+            $this->handler->onException($failingRequestSet, $e);
+        }
+
+        $this->assertEquals([$requestSet], $this->handler->getRequestSetsToRetry());
+    }
+
     public function test_rollBack_shouldAddTheSuccessfullyProcessedRequestSetToAllValidRequestSets()
     {
         $requestSet1 = $this->buildRequestSet(5);
