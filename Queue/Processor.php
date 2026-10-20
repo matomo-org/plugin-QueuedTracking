@@ -70,6 +70,12 @@ class Processor
      */
     private const MAX_TRANSACTION_ERRORS_PER_REQUEST_SET = 3;
 
+    /**
+     * After this many retries of a batch, a request set that hits a transaction error is dropped straight away, so that
+     * sets which conflict in turn cannot keep the queue locked for long.
+     */
+    private const MAX_RETRIES_PER_BATCH = 2 * self::MAX_TRANSACTION_ERRORS_PER_REQUEST_SET;
+
     public function __construct(Queue\Manager $queueManager)
     {
         $this->queueManager = $queueManager;
@@ -162,9 +168,11 @@ class Processor
                         $numTransactionErrors = [];
                         $numDroppedRequestSets = 0;
                         for ($retry = 1; !empty($failedRequestSets); $retry++) {
+                            $hasTransactionErrorInLatestPass = [];
                             foreach ($this->handler->getRequestSetsWithTransactionErrors() as $requestSet) {
                                 $id = spl_object_id($requestSet);
                                 $numTransactionErrors[$id] = ($numTransactionErrors[$id] ?? 0) + 1;
+                                $hasTransactionErrorInLatestPass[$id] = true;
                             }
 
                             // the previous pass already left out, or truncated, the sets that failed for other reasons.
@@ -172,7 +180,11 @@ class Processor
                             // the limit, or shortens or leaves out a set, so this ends
                             $requestSetsToRetry = [];
                             foreach ($failedRequestSets as $requestSet) {
-                                if (($numTransactionErrors[spl_object_id($requestSet)] ?? 0) >= self::MAX_TRANSACTION_ERRORS_PER_REQUEST_SET) {
+                                $id = spl_object_id($requestSet);
+                                if (
+                                    ($numTransactionErrors[$id] ?? 0) >= self::MAX_TRANSACTION_ERRORS_PER_REQUEST_SET
+                                    || ($retry >= self::MAX_RETRIES_PER_BATCH && isset($hasTransactionErrorInLatestPass[$id]))
+                                ) {
                                     $numDroppedRequestSets++;
                                 } else {
                                     $requestSetsToRetry[] = $requestSet;
