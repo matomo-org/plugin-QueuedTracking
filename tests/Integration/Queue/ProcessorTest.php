@@ -22,6 +22,10 @@ class TestProcessor extends Processor
 {
     public function processRequestSets(Tracker $tracker, $queuedRequestSets)
     {
+        if (!empty($queuedRequestSets) && $tracker instanceof \Piwik\Plugins\QueuedTracking\tests\Framework\Mock\Tracker) {
+            $tracker->numPasses++;
+        }
+
         return parent::processRequestSets($tracker, $queuedRequestSets);
     }
 }
@@ -452,6 +456,26 @@ class ProcessorTest extends IntegrationTestCase
 
         $this->assertSame(1, $tracker->numDeadlocks);
         $this->assertSame(1, $tracker->getCountOfLoggedRequests());
+        $this->assertNumberOfRequestSetsLeftInQueue(0);
+    }
+
+    public function testProcessShouldDropAConflictingRequestSetBelowItsLimitOnceTheBatchHasBeenRetriedTooOften()
+    {
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(4);
+
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+
+        // the sets conflict in turn, so none reaches three errors by the sixth retry, which the first one fails again
+        foreach (['0,3,6', '1,4', '2,5'] as $passes) {
+            $deadlockingRequestSet = new RequestSet();
+            $deadlockingRequestSet->setRequests([new Request(['idsite' => '1', 'forceDeadlockInPasses' => $passes])]);
+            $this->queue->addRequestSetToQueues($deadlockingRequestSet);
+        }
+
+        $tracker = $this->processor->process($this->createTracker());
+
+        $this->assertSame(7, $tracker->numDeadlocks);
+        $this->assertSame(3, $tracker->getCountOfLoggedRequests());
         $this->assertNumberOfRequestSetsLeftInQueue(0);
     }
 
