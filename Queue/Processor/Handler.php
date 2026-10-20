@@ -12,7 +12,6 @@ namespace Piwik\Plugins\QueuedTracking\Queue\Processor;
 
 use Piwik\Common;
 use Piwik\Container\StaticContainer;
-use Piwik\Db;
 use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Plugins\QueuedTracking\Configuration;
 use Piwik\Tracker;
@@ -24,6 +23,7 @@ class Handler
     protected $transactionId;
 
     private $hasError = false;
+    private $requestSetsWithTransactionErrors = [];
     private $requestSetsToRetry = array();
     private $count = 0;
     private $numTrackedRequestsBeginning = 0;
@@ -32,15 +32,16 @@ class Handler
     {
         $this->requestSetsToRetry = array();
         $this->hasError = false;
+        $this->requestSetsWithTransactionErrors = [];
         $this->numTrackedRequestsBeginning = $tracker->getCountOfLoggedRequests();
         $this->transactionId = $this->getDb()->beginTransaction();
     }
 
     public function process(Tracker $tracker, RequestSet $requestSet)
     {
-        $requestSet->restoreEnvironment();
-
         $this->count = 0;
+
+        $requestSet->restoreEnvironment();
 
         foreach ($requestSet->getRequests() as $request) {
             try {
@@ -83,10 +84,11 @@ class Handler
 
         Common::printDebug('Got exception: ' . $e->getMessage());
 
-        // retry if a deadlock or a lock wait timeout happened
-        if (Db::get()->isErrNo($e, 1213) || Db::get()->isErrNo($e, 1205)) {
+        if ($this->isRetryableTransactionError($e)) {
+            $this->requestSetsWithTransactionErrors[] = $requestSet;
             $this->requestSetsToRetry[] = $requestSet;
-            Common::printDebug('Added deadlocked requestSet to requestSetsToRetry');
+            Common::printDebug('Added requestSet that hit a transaction error to requestSetsToRetry');
+            $this->restartTransaction();
             return;
         }
 
@@ -101,6 +103,23 @@ class Handler
     public function hasErrors()
     {
         return $this->hasError;
+    }
+
+    /**
+     * Whether a deadlock, lock wait timeout or snapshot isolation conflict happened since init().
+     */
+    public function hasTransactionErrors(): bool
+    {
+        return !empty($this->requestSetsWithTransactionErrors);
+    }
+
+    /**
+     * @return RequestSet[] the request sets that hit a deadlock, lock wait timeout or snapshot isolation conflict
+     *                      since init()
+     */
+    public function getRequestSetsWithTransactionErrors(): array
+    {
+        return $this->requestSetsWithTransactionErrors;
     }
 
     public function rollBack(Tracker $tracker)
@@ -121,6 +140,33 @@ class Handler
     {
         $this->getDb()->commit($this->transactionId);
         $this->requestSetsToRetry = array();
+    }
+
+    /**
+     * Deadlock (1213), lock wait timeout (1205) and MariaDB's snapshot isolation conflict (1020).
+     */
+    private function isRetryableTransactionError(Exception $e): bool
+    {
+        $db = $this->getDb();
+
+        return $db->isErrNo($e, 1213) || $db->isErrNo($e, 1205) || $db->isErrNo($e, 1020);
+    }
+
+    /**
+     * These errors can end the transaction on the server, after which PDO runs every later query in autocommit
+     * mode, so the remaining request sets would be stored even though the batch is rolled back and retried.
+     * Every request set processed so far is already queued for retry, so discard their work and start over.
+     */
+    private function restartTransaction(): void
+    {
+        try {
+            $this->getDb()->rollBack($this->transactionId);
+        } catch (Exception $e) {
+            // PDO throws "There is no active transaction" once the server has rolled back.
+            Common::printDebug('Rollback after a transaction error failed: ' . $e->getMessage());
+        }
+
+        $this->transactionId = $this->getDb()->beginTransaction();
     }
 
     protected function getDb()

@@ -9,6 +9,8 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue\Processor;
 
+use Piwik\Common;
+use Piwik\Db;
 use Piwik\Plugins\QueuedTracking\Queue\Processor\Handler;
 use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\ForcedException;
 use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\Tracker;
@@ -100,10 +102,14 @@ class HandlerTest extends IntegrationTestCase
     public function test_init_shouldResetAFaultyHandler()
     {
         $this->handler->onException(new RequestSet(), new \Exception());
+        $this->handler->onException(new RequestSet(), new \Exception('SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction'));
         $this->assertTrue($this->handler->hasErrors());
+        $this->assertTrue($this->handler->hasTransactionErrors());
 
+        $this->handler->rollBack($this->tracker);
         $this->handler->init($this->tracker);
         $this->assertFalse($this->handler->hasErrors());
+        $this->assertFalse($this->handler->hasTransactionErrors());
     }
 
     public function test_process_ShouldForwardTheRequestToTheTracker()
@@ -160,6 +166,29 @@ class HandlerTest extends IntegrationTestCase
         $this->assertEquals(array('idsite' => '1', 'index' => '1'), $requests[1]->getParams());
         $this->assertEquals(array('idsite' => '1', 'index' => '2'), $requests[2]->getParams());
         $this->assertEquals(array('idsite' => '1', 'index' => '3'), $requests[3]->getParams());
+    }
+
+    public function testOnExceptionShouldNotKeepRequestsOfASetWhoseEnvironmentCouldNotBeRestored()
+    {
+        $requestSet = $this->buildRequestSet(5);
+        $this->handler->process($this->tracker, $requestSet);
+
+        $failingRequestSet = new class extends RequestSet {
+            public function restoreEnvironment()
+            {
+                throw new ForcedException('forced exception');
+            }
+        };
+        $failingRequestSet->setRequests($this->buildRequestSet(3)->getRequests());
+
+        try {
+            $this->handler->process($this->tracker, $failingRequestSet);
+            $this->fail('An expected exception was not triggered');
+        } catch (ForcedException $e) {
+            $this->handler->onException($failingRequestSet, $e);
+        }
+
+        $this->assertEquals([$requestSet], $this->handler->getRequestSetsToRetry());
     }
 
     public function test_rollBack_shouldAddTheSuccessfullyProcessedRequestSetToAllValidRequestSets()
@@ -283,6 +312,50 @@ class HandlerTest extends IntegrationTestCase
 
         $_SERVER = $serverBackup;
         $_COOKIE = $cookieBackup;
+    }
+
+    /**
+     * @dataProvider getRetryableTransactionErrors
+     */
+    public function testOnExceptionShouldRetryTheRequestSetAndDiscardWorkDoneInTheTransaction(string $message, bool $serverEndsTransaction)
+    {
+        $this->insertOption('QueuedTrackingTest_beforeError');
+
+        if ($serverEndsTransaction) {
+            Tracker::getDatabase()->query('ROLLBACK');
+        }
+
+        $requestSet = $this->buildRequestSet(3);
+        $this->handler->onException($requestSet, new \Exception($message));
+
+        // without a new transaction PDO would store this in autocommit mode and the rollBack below would throw
+        $this->insertOption('QueuedTrackingTest_afterError');
+
+        $this->handler->rollBack($this->tracker);
+
+        $this->assertEquals([$requestSet], $this->handler->getRequestSetsToRetry());
+        $this->assertSame(3, $requestSet->getNumberOfRequests());
+        $this->assertSame(0, (int) Db::fetchOne(
+            'SELECT COUNT(*) FROM `' . Common::prefixTable('option') . '` WHERE option_name LIKE ?',
+            ['QueuedTrackingTest_%']
+        ));
+    }
+
+    public function getRetryableTransactionErrors(): array
+    {
+        return [
+            'deadlock' => ['SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction', true],
+            'snapshot isolation' => ["SQLSTATE[HY000]: General error: 1020 Record has changed since last read in table 'log_visit'; try restarting transaction", true],
+            'lock wait timeout' => ['SQLSTATE[HY000]: General error: 1205 Lock wait timeout exceeded; try restarting transaction', false],
+        ];
+    }
+
+    private function insertOption(string $name): void
+    {
+        Tracker::getDatabase()->query(
+            'INSERT INTO `' . Common::prefixTable('option') . '` (option_name, option_value, autoload) VALUES (?, ?, 0)',
+            [$name, '1']
+        );
     }
 
     private function createHandler()
