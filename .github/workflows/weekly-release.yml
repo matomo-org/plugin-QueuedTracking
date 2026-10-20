@@ -1,0 +1,14 @@
+name: Weekly release
+on:
+  # Run by hand for now; the Monday schedule and the other-branches sweep come later.
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  release:
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    uses: matomo-org/plugin-ci-workflows/.github/workflows/plugin-dev-release.yml@main
