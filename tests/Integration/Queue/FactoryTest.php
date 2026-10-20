@@ -75,6 +75,14 @@ class FactoryTest extends IntegrationTestCase
         $this->assertTrue($backend instanceof Queue\Backend\Sentinel);
     }
 
+    public function testMakeBackendShouldReturnARedisClusterInstanceIfConfigured()
+    {
+        Config::getInstance()->QueuedTracking = ['useWhatRedisBackendType' => '3'];
+        $backend = Factory::makeBackend();
+        Config::getInstance()->QueuedTracking = [];
+        $this->assertTrue($backend instanceof Queue\Backend\RedisCluster);
+    }
+
     public function test_makeBackend_shouldConfigureRedis()
     {
         $success = Factory::makeBackend()->testConnection();

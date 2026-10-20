@@ -305,7 +305,9 @@ end';
             throw new Exception(Piwik::translate('QueuedTracking_NumHostsNotMatchNumPorts'));
         }
 
-        $hostsPorts = array_map(fn($host, $port): string => "$host:$port", $hosts, $ports);
+        $hostsPorts = array_map(function ($host, $port): string {
+            return "$host:$port";
+        }, $hosts, $ports);
 
         try {
             $this->redis = new \RedisCluster(null, $hostsPorts, $this->timeout, $this->timeout, true, $this->password);
