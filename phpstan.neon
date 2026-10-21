@@ -12,31 +12,6 @@ parameters:
             # still resolve the client's methods while the library keeps its own conventions.
             - libs/credis/*
     ignoreErrors:
-        # The bundled ext-redis stubs disagree with the extension this plugin actually runs
-        # against. Reflected in the environment: RedisCluster::info() is
-        # (array|string $key_or_address, string $sections = '') returning RedisCluster|array|false,
-        # flushDB() takes array|string, and config() is (key_or_address, subcommand, ...extra_args)
-        # with two required arguments. Every call below matches the extension, not the stub.
-        -
-            identifier: arguments.count
-            message: '#RedisCluster::config\(\) invoked with 3 parameters#'
-            path: Commands/Test.php
-            count: 1
-        -
-            identifier: offsetAccess.notFound
-            message: "#Offset 'redis_version' does not exist on non-falsy-string#"
-            path: Queue/Backend/RedisCluster.php
-            count: 1
-        -
-            identifier: nullCoalesce.offset
-            message: "#Offset 'used_memory(_peak)?' on string on left side of \\?\\? does not exist#"
-            path: Queue/Backend/RedisCluster.php
-            count: 2
-        -
-            identifier: argument.type
-            message: '#RedisCluster::flushDB\(\) expects string, array#'
-            path: Queue/Backend/RedisCluster.php
-            count: 1
         # Three backends share one $redis property and one getConnection(), holding \Redis,
         # \RedisCluster or Credis_Client depending on how the queue is configured. Credis_Client
         # mirrors the phpredis API deliberately, which is what makes the arrangement work at

@@ -1,0 +1,32 @@
+includes:
+    - phpstan.neon
+
+parameters:
+    tmpDir: /tmp/phpstan/QueuedTracking/min
+    ignoreErrors:
+        # The ext-redis stubs bundled with the PHPStan of the minimum-supported Matomo disagree with
+        # the extension this plugin actually runs against: RedisCluster::info() is
+        # (array|string $key_or_address, string $sections = '') returning RedisCluster|array|false,
+        # flushDB() takes array|string, and config() is (key_or_address, subcommand, ...extra_args)
+        # with two required arguments. Every call below matches the extension, not the stub. The
+        # newer PHPStan on the maximum leg has corrected stubs, so there these would be unmatched.
+        -
+            identifier: arguments.count
+            message: '#RedisCluster::config\(\) invoked with 3 parameters#'
+            path: Commands/Test.php
+            count: 1
+        -
+            identifier: offsetAccess.notFound
+            message: "#Offset 'redis_version' does not exist on non-falsy-string#"
+            path: Queue/Backend/RedisCluster.php
+            count: 1
+        -
+            identifier: nullCoalesce.offset
+            message: "#Offset 'used_memory(_peak)?' on string on left side of \\?\\? does not exist#"
+            path: Queue/Backend/RedisCluster.php
+            count: 2
+        -
+            identifier: argument.type
+            message: '#RedisCluster::flushDB\(\) expects string, array#'
+            path: Queue/Backend/RedisCluster.php
+            count: 1
