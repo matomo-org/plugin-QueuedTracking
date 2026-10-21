@@ -312,7 +312,7 @@ end';
             $this->redis = new \RedisCluster(null, $hostsPorts, $this->timeout, $this->timeout, true, $this->password);
             return true;
         } catch (Exception $e) {
-            throw new Exception('Could not connect to redis cluster: ' . $e->getMessage());
+            throw new Exception('Could not connect to redis cluster: ' . $e->getMessage(), 0, $e);
         }
     }
 
