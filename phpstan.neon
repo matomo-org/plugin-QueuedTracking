@@ -1,0 +1,141 @@
+parameters:
+    level: 5
+    phpVersion: 70200
+    tmpDir: /tmp/phpstan/QueuedTracking/main
+    paths:
+        - .
+    excludePaths:
+        analyseAndScan:
+            - tests/*
+        analyse:
+            # Vendored Credis. Scanned but not analysed, so Queue\Backend\Redis and its siblings
+            # still resolve the client's methods while the library keeps its own conventions.
+            - libs/credis/*
+    ignoreErrors:
+        # The bundled ext-redis stubs disagree with the extension this plugin actually runs
+        # against. Reflected in the environment: RedisCluster::info() is
+        # (array|string $key_or_address, string $sections = '') returning RedisCluster|array|false,
+        # flushDB() takes array|string, and config() is (key_or_address, subcommand, ...extra_args)
+        # with two required arguments. Every call below matches the extension, not the stub.
+        -
+            identifier: arguments.count
+            message: '#RedisCluster::info\(\) invoked with 2 parameters#'
+            path: Queue/Backend/RedisCluster.php
+            count: 1
+        -
+            identifier: argument.type
+            message: '#RedisCluster::info\(\) expects string, array#'
+            path: Queue/Backend/RedisCluster.php
+            count: 1
+        # The stub's \Redis return types include \Redis itself, which phpredis only returns in
+        # pipeline or MULTI mode; this backend never enters either.
+        -
+            identifier: equal.invalid
+            path: Queue/Backend/Redis.php
+            count: 2
+        -
+            identifier: greater.invalid
+            path: Queue/Backend/Redis.php
+            count: 1
+        -
+            identifier: arguments.count
+            message: '#RedisCluster::config\(\) invoked with 3 parameters#'
+            path: Commands/Test.php
+            count: 1
+        -
+            identifier: offsetAccess.notFound
+            message: "#Offset 'redis_version' does not exist on non-falsy-string#"
+            path: Queue/Backend/RedisCluster.php
+            count: 1
+        -
+            identifier: nullCoalesce.offset
+            message: "#Offset 'used_memory(_peak)?' on string on left side of \\?\\? does not exist#"
+            path: Queue/Backend/RedisCluster.php
+            count: 2
+        -
+            identifier: argument.type
+            message: '#RedisCluster::flushDB\(\) expects string, array#'
+            path: Queue/Backend/RedisCluster.php
+            count: 1
+        # Three backends share one $redis property and one getConnection(), holding \Redis,
+        # \RedisCluster or Credis_Client depending on how the queue is configured. Credis_Client
+        # mirrors the phpredis API deliberately, which is what makes the arrangement work at
+        # runtime; expressing it in the types means restructuring the hierarchy.
+        -
+            identifier: property.phpDocType
+            path: Queue/Backend/RedisCluster.php
+            count: 1
+        -
+            identifier: method.childReturnType
+            path: Queue/Backend/RedisCluster.php
+            count: 1
+        -
+            identifier: assign.propertyType
+            message: '#does not accept Credis_Client#'
+            path: Queue/Backend/Sentinel.php
+            count: 1
+        # Db::query() is declared to return a Zend_Db_Statement, but in tracker mode with the
+        # mysqli adapter it does not — which is exactly what the branches these findings sit on
+        # were written to handle, as their own comments say.
+        -
+            identifier: identical.alwaysFalse
+            message: '#Zend_Db_Statement and false#'
+            path: Queue/Backend/MySQL.php
+            count: 1
+        # Db::fetchOne() is documented as returning a string, but it returns null when the column is
+        # NULL, as max() - min() is over an empty list table, and false when there is no row.
+        -
+            identifier: identical.alwaysFalse
+            message: '#between string and (false|null)#'
+            path: Queue/Backend/MySQL.php
+            count: 2
+        -
+            identifier: booleanOr.alwaysFalse
+            path: Queue/Backend/MySQL.php
+            count: 1
+        # Error has had getMessage() and getCode() and implemented Throwable since PHP 7.0, but the
+        # PHP 7.2 analysis reports the caught Throwable, once narrowed to Error, as having neither.
+        -
+            identifier: method.notFound
+            message: '#Error::get(Code|Message)\(\)#'
+            path: Queue/Processor/Handler.php
+            count: 2
+        -
+            identifier: argument.type
+            message: '#\$previous of class Exception constructor expects Throwable\|null, Error given#'
+            path: Queue/Processor/Handler.php
+            count: 1
+        # Matomo 5.0 documents getRequestVar()'s default as string|null although it casts the value
+        # to the requested type; later releases widen it, so only the minimum leg reports this.
+        -
+            identifier: argument.type
+            message: '#\$varDefault of static method Piwik\\Common::getRequestVar\(\) expects string\|null, int given#'
+            path: QueuedTracking.php
+            count: 1
+            reportUnmatched: false
+        # Db::get() is declared as a union whose interface never declares fetchCol(), though both
+        # implementations it can return do provide it.
+        -
+            identifier: method.notFound
+            message: '#::fetchCol\(\)#'
+            path: Queue/Backend/MySQL.php
+            count: 1
+        -
+            identifier: method.notFound
+            message: '#::fetchCol\(\)#'
+            path: Tasks.php
+            count: 1
+        # The updater builds every Updates class with the migration factory, as this plugin's two
+        # other update classes show; this one performs no migrations and so never uses it.
+        -
+            identifier: constructor.unusedParameter
+            path: Updates/5.1.0.php
+            count: 1
+    bootstrapFiles:
+        - ../../bootstrap-phpstan.php
+    universalObjectCratesClasses:
+        - Piwik\Config
+        - Piwik\View
+        - Piwik\ViewDataTable\Config
+    scanDirectories:
+        - ../../
