@@ -51,9 +51,9 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
             'processDuringTrackingRequest' => 0,
             Configuration::KEY_NOTIFY_THRESHOLD => 150,
         );
-        
+
         $this->configuration->install();
-        
+
         $this->assertEquals(array(
             'backend' => 'mysql',
             'queueEnabled' => 1,
@@ -62,7 +62,7 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
             Configuration::KEY_NOTIFY_EMAILS => Configuration::$DEFAULT_NOTIFY_EMAILS,
         ), Config::getInstance()->QueuedTracking);
     }
-    
+
     public function test_getNotifyThreshold_shouldReturnDefaultThreshold()
     {
         $this->assertEquals(250000, $this->configuration->getNotifyThreshold());
