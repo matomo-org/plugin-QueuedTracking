@@ -1,8 +1,20 @@
+# Releases this plugin from its dev branch once a week when plugin.json carries an untagged version
+# whose CHANGELOG.md entry is undated. The logic lives in matomo-org/plugin-ci-workflows; see the
+# "Weekly release" section of its README.md.
+
 name: Weekly release
+
 on:
-  # Run by hand for now; the Monday schedule and the other-branches sweep come later.
+  schedule:
+    # Monday, so the release is dated that Monday. Keeps the minute and hour of matomo-tests.yml's
+    # cron, so the fleet stays staggered across the window.
+    - cron: '0 2 * * 1'
   workflow_dispatch:
     inputs:
+      all-branches:
+        description: "Also release the other maintained branches, as the schedule does"
+        type: boolean
+        default: false
       skip-ci-check:
         description: "Release this branch even though its CI failed or is still running"
         type: boolean
@@ -12,6 +24,7 @@ permissions: {}
 
 jobs:
   release:
+    # Granted here because permissions can only be reduced down a call chain, never elevated.
     permissions:
       actions: write
       contents: write
@@ -20,5 +33,14 @@ jobs:
     with:
       skip-ci-check: ${{ inputs.skip-ci-check || false }}
     secrets:
-      # A user other than github-actions, so the bot's date PR can be approved and merged.
       approver-token: ${{ secrets.TESTS_ACCESS_TOKEN }}
+
+  # A dispatched run must not dispatch again, or the branches would keep dispatching each other.
+  other-branches:
+    if: github.event_name == 'schedule' || inputs.all-branches
+    permissions:
+      actions: write
+      contents: read
+    uses: matomo-org/plugin-ci-workflows/.github/workflows/plugin-branch-sweep.yml@main
+    with:
+      workflow-file: weekly-release.yml
