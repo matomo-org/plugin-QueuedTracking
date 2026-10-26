@@ -28,6 +28,7 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
     {
         parent::setUp();
 
+        Config::getInstance()->QueuedTracking = array();
         $this->configuration = new Configuration();
     }
 
@@ -40,6 +41,26 @@ class ConfigurationTest extends \PHPUnit\Framework\TestCase
             'notify_queue_threshold_single_queue' => Configuration::DEFAULT_NOTIFY_THRESHOLD,
             'notify_queue_threshold_emails' => Configuration::$DEFAULT_NOTIFY_EMAILS
         ), $QueuedTracking);
+    }
+
+    public function test_install_shouldKeepExistingSettings()
+    {
+        Config::getInstance()->QueuedTracking = array(
+            'backend' => 'mysql',
+            'queueEnabled' => 1,
+            'processDuringTrackingRequest' => 0,
+            Configuration::KEY_NOTIFY_THRESHOLD => 150,
+        );
+
+        $this->configuration->install();
+
+        $this->assertEquals(array(
+            'backend' => 'mysql',
+            'queueEnabled' => 1,
+            'processDuringTrackingRequest' => 0,
+            Configuration::KEY_NOTIFY_THRESHOLD => 150,
+            Configuration::KEY_NOTIFY_EMAILS => Configuration::$DEFAULT_NOTIFY_EMAILS,
+        ), Config::getInstance()->QueuedTracking);
     }
 
     public function test_getNotifyThreshold_shouldReturnDefaultThreshold()
