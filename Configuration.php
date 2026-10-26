@@ -25,10 +25,10 @@ class Configuration
     {
         $config = $this->getConfig();
 
-        if (empty($config->QueuedTracking)) {
-            $config->QueuedTracking = array();
-        }
         $reports = $config->QueuedTracking;
+        if (empty($reports)) {
+           $reports = array();
+        }
 
         // we make sure to set a value only if none has been configured yet, eg in common config.
         if (empty($reports[self::KEY_NOTIFY_THRESHOLD])) {
