@@ -27,7 +27,7 @@ class Configuration
 
         $reports = $config->QueuedTracking;
         if (empty($reports)) {
-           $reports = array();
+            $reports = array();
         }
 
         // we make sure to set a value only if none has been configured yet, eg in common config.
