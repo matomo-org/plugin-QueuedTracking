@@ -17,6 +17,8 @@ use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\Tracker;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 use Piwik\Tests\Framework\Fixture;
 use Piwik\Tests\Framework\Mock\Tracker\RequestSet;
+use Piwik\Tracker\Db as TrackerDb;
+use Piwik\Tracker\Db\DbException;
 
 class TestHandler extends Handler
 {
@@ -102,7 +104,7 @@ class HandlerTest extends IntegrationTestCase
     public function test_init_shouldResetAFaultyHandler()
     {
         $this->handler->onException(new RequestSet(), new \Exception());
-        $this->handler->onException(new RequestSet(), new \Exception('SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction'));
+        $this->handler->onException(new RequestSet(), new DbException('SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction', 1213));
         $this->assertTrue($this->handler->hasErrors());
         $this->assertTrue($this->handler->hasTransactionErrors());
 
@@ -317,7 +319,7 @@ class HandlerTest extends IntegrationTestCase
     /**
      * @dataProvider getRetryableTransactionErrors
      */
-    public function testOnExceptionShouldRetryTheRequestSetAndDiscardWorkDoneInTheTransaction(string $message, bool $serverEndsTransaction)
+    public function testOnExceptionShouldRetryTheRequestSetAndDiscardWorkDoneInTheTransaction(string $message, int $errno, bool $serverEndsTransaction)
     {
         $this->insertOption('QueuedTrackingTest_beforeError');
 
@@ -326,7 +328,7 @@ class HandlerTest extends IntegrationTestCase
         }
 
         $requestSet = $this->buildRequestSet(3);
-        $this->handler->onException($requestSet, new \Exception($message));
+        $this->handler->onException($requestSet, new DbException($message, $errno));
 
         // without a new transaction PDO would store this in autocommit mode and the rollBack below would throw
         $this->insertOption('QueuedTrackingTest_afterError');
@@ -344,15 +346,43 @@ class HandlerTest extends IntegrationTestCase
     public function getRetryableTransactionErrors(): array
     {
         return [
-            'deadlock' => ['SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction', true],
-            'snapshot isolation' => ["SQLSTATE[HY000]: General error: 1020 Record has changed since last read in table 'log_visit'; try restarting transaction", true],
-            'lock wait timeout' => ['SQLSTATE[HY000]: General error: 1205 Lock wait timeout exceeded; try restarting transaction', false],
+            'deadlock' => ['SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction', 1213, true],
+            'snapshot isolation' => ["SQLSTATE[HY000]: General error: 1020 Record has changed since last read in table 'log_visit'; try restarting transaction", 1020, true],
+            'lock wait timeout' => ['SQLSTATE[HY000]: General error: 1205 Lock wait timeout exceeded; try restarting transaction', 1205, false],
         ];
     }
 
-    private function insertOption(string $name): void
+    public function testOnExceptionShouldRetryARequestSetThatHitARealLockWaitTimeout()
     {
-        Tracker::getDatabase()->query(
+        $db = Tracker::getDatabase();
+        $lockWaitTimeout = (int) $db->fetchOne('SELECT @@SESSION.innodb_lock_wait_timeout');
+        $db->query('SET SESSION innodb_lock_wait_timeout = 1');
+
+        // another connection holds the row's lock, so the handler's transaction times out waiting for it
+        $otherDb = TrackerDb::connectPiwikTrackerDb();
+        $otherTransactionId = $otherDb->beginTransaction();
+        $this->insertOption('QueuedTrackingTest_locked', $otherDb);
+
+        $requestSet = $this->buildRequestSet(3);
+
+        try {
+            $this->insertOption('QueuedTrackingTest_locked');
+            $this->fail('An expected exception was not triggered');
+        } catch (DbException $e) {
+            $this->handler->onException($requestSet, $e);
+        } finally {
+            $otherDb->rollBack($otherTransactionId);
+            $otherDb->disconnect();
+            $db->query('SET SESSION innodb_lock_wait_timeout = ' . $lockWaitTimeout);
+        }
+
+        $this->assertTrue($this->handler->hasTransactionErrors());
+        $this->assertEquals([$requestSet], $this->handler->getRequestSetsToRetry());
+    }
+
+    private function insertOption(string $name, ?TrackerDb $db = null): void
+    {
+        ($db ?? Tracker::getDatabase())->query(
             'INSERT INTO `' . Common::prefixTable('option') . '` (option_name, option_value, autoload) VALUES (?, ?, 0)',
             [$name, '1']
         );

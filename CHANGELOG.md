@@ -1,6 +1,7 @@
 ## Changelog
 6.0.3
 - Fixed existing QueuedTracking settings being cleared when the plugin is installed.
+- Fixed database deadlocks, lock wait timeouts and snapshot isolation conflicts not being retried when Matomo uses the MYSQLI database adapter
 
 6.0.2 - 2026-10-20
 - Fixed queue processing failing with a fatal error, and some hits being counted twice, after a database deadlock or a MariaDB snapshot isolation conflict; requests hit by a snapshot isolation conflict are now retried

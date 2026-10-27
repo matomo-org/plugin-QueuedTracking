@@ -13,6 +13,8 @@ use Piwik\Plugins\QueuedTracking\Queue\Processor\Handler;
 use Piwik\Tests\Framework\Mock\Tracker;
 use Piwik\Tests\Framework\Mock\Tracker\Db;
 use Piwik\Tests\Framework\TestCase\UnitTestCase;
+use Piwik\Tracker\Db\DbException;
+use Piwik\Tracker\RequestSet;
 
 class TestHandler extends Handler
 {
@@ -94,5 +96,17 @@ class HandlerTest extends UnitTestCase
 
         $this->assertEquals($this->transactionId, $this->db->rollbackTransactionId);
         $this->assertFalse($this->db->commitTransactionId);
+    }
+
+    public function testOnExceptionShouldRetryATransactionErrorWhoseNumberIsOnlyInTheCode()
+    {
+        $this->handler->init($this->tracker);
+
+        // as thrown by the mysqli adapter, whose message does not include the number
+        $requestSet = new RequestSet();
+        $this->handler->onException($requestSet, new DbException('Error query: Mysqli statement execute error : Deadlock found when trying to get lock; try restarting transaction', 1213));
+
+        $this->assertTrue($this->handler->hasTransactionErrors());
+        $this->assertSame([$requestSet], $this->handler->getRequestSetsToRetry());
     }
 }
