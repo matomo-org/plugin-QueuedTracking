@@ -9,6 +9,7 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Framework\Mock;
 
+use Piwik\Tracker\Db\DbException;
 use Piwik\Tracker\Request;
 
 class Tracker extends \Piwik\Tests\Framework\Mock\Tracker
@@ -49,7 +50,7 @@ class Tracker extends \Piwik\Tests\Framework\Mock\Tracker
         ) {
             $this->numDeadlocks++;
             $this->numDeadlocksPerRequest[$key] = $numOwnDeadlocks + 1;
-            throw new ForcedException('SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction');
+            throw new DbException('SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction', 1213);
         }
 
         return parent::trackRequest($request);

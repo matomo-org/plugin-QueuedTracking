@@ -15,6 +15,7 @@ use Piwik\Container\StaticContainer;
 use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Plugins\QueuedTracking\Configuration;
 use Piwik\Tracker;
+use Piwik\Tracker\Db\DbException;
 use Piwik\Tracker\RequestSet;
 use Exception;
 
@@ -147,9 +148,16 @@ class Handler
      */
     private function isRetryableTransactionError(Exception $e): bool
     {
-        $db = $this->getDb();
+        return $this->isErrNo($e, 1213) || $this->isErrNo($e, 1205) || $this->isErrNo($e, 1020);
+    }
 
-        return $db->isErrNo($e, 1213) || $db->isErrNo($e, 1205) || $db->isErrNo($e, 1020);
+    /**
+     * The mysqli adapter reads the number from the connection, which no longer has it once the failed statement was
+     * freed, but the tracker's DbException carries it as its code.
+     */
+    private function isErrNo(Exception $e, int $errno): bool
+    {
+        return $this->getDb()->isErrNo($e, $errno) || ($e instanceof DbException && $e->getCode() === $errno);
     }
 
     /**
