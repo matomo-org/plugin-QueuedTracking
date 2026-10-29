@@ -479,6 +479,66 @@ class ProcessorTest extends IntegrationTestCase
         $this->assertNumberOfRequestSetsLeftInQueue(0);
     }
 
+    public function testProcessShouldTrackTheRequestsFollowingInvalidRequestsInAQueuedBulkRequest()
+    {
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(2);
+
+        $this->queue->addRequestSetToQueues($this->buildRequestSetFromParams([
+            [], ['forceInvalidRequest' => 1], [], ['forceNoAccess' => 1], ['idsite' => '0'], [],
+        ]));
+        $this->queue->addRequestSetToQueues($this->buildRequestSet(1));
+
+        $tracker = $this->processor->process($this->createTracker());
+
+        $this->assertSame(3 + 1, $tracker->getCountOfLoggedRequests());
+        $this->assertSame(2, $tracker->numInvalidRequests);
+        $this->assertNumberOfRequestSetsLeftInQueue(0);
+    }
+
+    public function testProcessShouldNotEvaluateSkippedRequestsAgainWhenTheBatchIsRetriedAfterAnError()
+    {
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(3);
+
+        $this->queue->addRequestSetToQueues($this->buildRequestSetFromParams([[], ['forceInvalidRequest' => 1], []]));
+        // fails, so the batch is rolled back and retried with its first request only
+        $this->queue->addRequestSetToQueues($this->buildRequestSetFromParams([[], ['forceThrow' => 1], []]));
+        $this->queue->addRequestSetToQueues($this->buildRequestSetFromParams([['idsite' => '0'], ['forceTypeError' => 1]]));
+
+        $tracker = $this->processor->process($this->createTracker());
+
+        $this->assertSame(2 + 1, $tracker->getCountOfLoggedRequests());
+        $this->assertSame(1, $tracker->numInvalidRequests);
+        $this->assertNumberOfRequestSetsLeftInQueue(0);
+    }
+
+    public function testProcessShouldNotEvaluateSkippedRequestsAgainWhenTheBatchIsRetriedAfterATransactionError()
+    {
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(2);
+
+        $this->queue->addRequestSetToQueues($this->buildRequestSetFromParams([[], ['forceInvalidRequest' => 1], []]));
+        $this->queue->addRequestSetToQueues($this->buildRequestSetFromParams([['forceDeadlockOnce' => 1]]));
+
+        $tracker = $this->processor->process($this->createTracker());
+
+        $this->assertSame(1, $tracker->numDeadlocks);
+        $this->assertSame(1, $tracker->numInvalidRequests);
+        $this->assertSame(2 + 1, $tracker->getCountOfLoggedRequests());
+        $this->assertNumberOfRequestSetsLeftInQueue(0);
+    }
+
+    public function testProcessShouldSkipARequestTheTrackerRejectsAsInvalid()
+    {
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(1);
+
+        // a visitor ID has to be 16 characters long
+        $this->queue->addRequestSetToQueues($this->buildRequestSetFromParams([['rec' => 1], ['rec' => 1, 'cid' => 'abc'], ['rec' => 1]]));
+
+        $tracker = $this->processor->process($this->createTracker());
+
+        $this->assertSame(2, $tracker->getCountOfLoggedRequests());
+        $this->assertNumberOfRequestSetsLeftInQueue(0);
+    }
+
     public function test_process_shouldRestoreEnvironmentAfterTrackingRequests()
     {
         $serverBackup = $_SERVER;
@@ -495,6 +555,22 @@ class ProcessorTest extends IntegrationTestCase
 
         $this->assertEquals($serverBackup, $_SERVER);
         $this->assertEquals($cookieBackup, $_COOKIE);
+    }
+
+    /**
+     * @param array[] $paramsPerRequest params to add to (or override in) each request, which is otherwise valid
+     */
+    private function buildRequestSetFromParams(array $paramsPerRequest): RequestSet
+    {
+        $requests = [];
+        foreach ($paramsPerRequest as $index => $params) {
+            $requests[] = new Request($params + ['idsite' => '1', 'index' => $index]);
+        }
+
+        $requestSet = new RequestSet();
+        $requestSet->setRequests($requests);
+
+        return $requestSet;
     }
 
     private function acquireAllQueueLocks()
