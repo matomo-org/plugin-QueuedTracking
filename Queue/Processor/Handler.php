@@ -12,6 +12,7 @@ namespace Piwik\Plugins\QueuedTracking\Queue\Processor;
 
 use Piwik\Common;
 use Piwik\Container\StaticContainer;
+use Piwik\Exception\InvalidRequestParameterException;
 use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Plugins\QueuedTracking\Configuration;
 use Piwik\Tracker;
@@ -26,7 +27,10 @@ class Handler
     private $hasError = false;
     private $requestSetsWithTransactionErrors = [];
     private $requestSetsToRetry = array();
-    private $count = 0;
+    /**
+     * @var Tracker\Request[] the requests of the current request set that were tracked
+     */
+    private $trackedRequests = [];
     private $numTrackedRequestsBeginning = 0;
 
     public function init(Tracker $tracker)
@@ -40,7 +44,7 @@ class Handler
 
     public function process(Tracker $tracker, RequestSet $requestSet)
     {
-        $this->count = 0;
+        $this->trackedRequests = [];
 
         $requestSet->restoreEnvironment();
 
@@ -55,9 +59,15 @@ class Handler
                     Common::printDebug(sprintf('The following request took more than 2 seconds (%d ms) to be tracked: %s', $diffInMs, var_export($request->getParams(), true)));
                 }
 
-                $this->count++;
+                $this->trackedRequests[] = $request;
             } catch (UnexpectedWebsiteFoundException $ex) {
                 // empty
+            } catch (InvalidRequestParameterException $ex) {
+                // rejected like in a bulk request, so only this request is left out
+                StaticContainer::get(\Piwik\Log\LoggerInterface::class)->debug(
+                    'Skipped an invalid queued tracking request: {message}',
+                    ['message' => $ex->getMessage()]
+                );
             } catch (\Throwable $th) {
                 // Log the error to help with debugging and visibility
                 $message = "There was an error while trying to process a queued tracking request.";
@@ -75,6 +85,8 @@ class Handler
             }
         }
 
+        // so a retry of the batch does not process the requests left out again
+        $requestSet->setRequests($this->trackedRequests);
         $this->requestSetsToRetry[] = $requestSet;
     }
 
@@ -93,10 +105,9 @@ class Handler
             return;
         }
 
-        if ($this->count > 0) {
-            // remove the first one that failed and all following (standard bulk tracking behavior)
-            $insertedRequests = array_slice($requestSet->getRequests(), 0, $this->count);
-            $requestSet->setRequests($insertedRequests);
+        if (!empty($this->trackedRequests)) {
+            // keep the requests tracked before the one that failed, without the ones left out as invalid
+            $requestSet->setRequests($this->trackedRequests);
             $this->requestSetsToRetry[] = $requestSet;
         }
     }

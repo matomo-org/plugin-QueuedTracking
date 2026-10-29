@@ -9,12 +9,19 @@
 
 namespace Piwik\Plugins\QueuedTracking\tests\Framework\Mock;
 
+use Piwik\Exception\InvalidRequestParameterException;
+use Piwik\NoAccessException;
 use Piwik\Tracker\Db\DbException;
 use Piwik\Tracker\Request;
 
 class Tracker extends \Piwik\Tests\Framework\Mock\Tracker
 {
     public $numDeadlocks = 0;
+
+    /**
+     * How often a request was rejected as invalid, to tell whether a retry evaluates a skipped request again.
+     */
+    public $numInvalidRequests = 0;
 
     /**
      * Counted by TestProcessor over the tracker's lifetime, so in a test that processes a single batch a pass's index is
@@ -34,6 +41,20 @@ class Tracker extends \Piwik\Tests\Framework\Mock\Tracker
         $allParams = $request->getRawParams();
         $key = json_encode($allParams);
         $numOwnDeadlocks = $this->numDeadlocksPerRequest[$key] ?? 0;
+
+        if (!empty($allParams['forceInvalidRequest'])) {
+            $this->numInvalidRequests++;
+            throw new InvalidRequestParameterException('forced invalid request');
+        }
+
+        if (!empty($allParams['forceNoAccess'])) {
+            $this->numInvalidRequests++;
+            throw new NoAccessException('forced missing access', 403);
+        }
+
+        if (!empty($allParams['forceTypeError'])) {
+            throw new \TypeError('forced type error');
+        }
 
         if (!empty($allParams['forceThrow']) || (!empty($allParams['forceThrowAfterDeadlock']) && $numOwnDeadlocks)) {
             throw new ForcedException("forced exception");

@@ -19,6 +19,7 @@ use Piwik\Tests\Framework\Fixture;
 use Piwik\Tests\Framework\Mock\Tracker\RequestSet;
 use Piwik\Tracker\Db as TrackerDb;
 use Piwik\Tracker\Db\DbException;
+use Piwik\Tracker\Request;
 
 class TestHandler extends Handler
 {
@@ -378,6 +379,140 @@ class HandlerTest extends IntegrationTestCase
 
         $this->assertTrue($this->handler->hasTransactionErrors());
         $this->assertEquals([$requestSet], $this->handler->getRequestSetsToRetry());
+    }
+
+    public function testProcessShouldSkipAnInvalidRequestAndTrackTheFollowingOnes()
+    {
+        $requestSet = $this->buildRequestSetFromParams([[], ['forceInvalidRequest' => 1], [], []]);
+
+        $this->handler->process($this->tracker, $requestSet);
+
+        $this->assertSame(3, $this->tracker->getCountOfLoggedRequests());
+        $this->assertSame(1, $this->tracker->numInvalidRequests);
+        $this->assertFalse($this->handler->hasErrors());
+        $this->assertSame([0, 2, 3], $this->getIndexes($requestSet));
+    }
+
+    public function testProcessShouldSkipARequestRejectedForMissingAccess()
+    {
+        $requestSet = $this->buildRequestSetFromParams([[], ['forceNoAccess' => 1], []]);
+
+        $this->handler->process($this->tracker, $requestSet);
+
+        $this->assertSame(2, $this->tracker->getCountOfLoggedRequests());
+        $this->assertFalse($this->handler->hasErrors());
+        $this->assertSame([0, 2], $this->getIndexes($requestSet));
+    }
+
+    public function testProcessShouldLeaveOutRequestsForUnknownSitesAndInvalidRequestsOfTheSameSet()
+    {
+        $requestSet = $this->buildRequestSetFromParams([['idsite' => '0'], [], ['forceInvalidRequest' => 1], [], ['idsite' => '99']]);
+
+        $this->handler->process($this->tracker, $requestSet);
+
+        $this->assertSame(2, $this->tracker->getCountOfLoggedRequests());
+        $this->assertFalse($this->handler->hasErrors());
+        $this->assertSame([1, 3], $this->getIndexes($requestSet));
+        $this->assertSame([$requestSet], $this->handler->getRequestSetsToRetry());
+    }
+
+    public function testProcessShouldKeepAllRequestsOfASetWithoutSkippedOrFailedRequests()
+    {
+        $requestSet = $this->buildRequestSet(4);
+
+        $this->handler->process($this->tracker, $requestSet);
+
+        $this->assertSame([0, 1, 2, 3], $this->getIndexes($requestSet));
+    }
+
+    public function testOnExceptionShouldKeepOnlyTheTrackedRequestsIfRequestsWereSkippedBeforeTheError()
+    {
+        $requestSet = $this->buildRequestSetFromParams([
+            [], ['forceInvalidRequest' => 1], [], ['idsite' => '0'], [], ['forceThrow' => 1], [],
+        ]);
+
+        $this->processExpectingAnError($requestSet);
+
+        $this->assertTrue($this->handler->hasErrors());
+        $this->assertSame([0, 2, 4], $this->getIndexes($requestSet));
+        $this->assertSame([$requestSet], $this->handler->getRequestSetsToRetry());
+    }
+
+    public function testOnExceptionShouldNotRetryASetWhoseRequestsBeforeTheErrorWereAllSkipped()
+    {
+        $requestSet = $this->buildRequestSetFromParams([['forceInvalidRequest' => 1], ['idsite' => '0'], ['forceThrow' => 1], []]);
+
+        $this->processExpectingAnError($requestSet);
+
+        $this->assertSame([], $this->handler->getRequestSetsToRetry());
+    }
+
+    public function testOnExceptionShouldKeepTheTrackedRequestsIfATypeErrorFollowsASkippedRequest()
+    {
+        $requestSet = $this->buildRequestSetFromParams([[], ['forceInvalidRequest' => 1], ['forceTypeError' => 1], []]);
+
+        $this->processExpectingAnError($requestSet);
+
+        $this->assertSame([0], $this->getIndexes($requestSet));
+        $this->assertSame([$requestSet], $this->handler->getRequestSetsToRetry());
+    }
+
+    public function testRollBackShouldRetryTheTrackedRequestsOfEverySetWithoutTheSkippedAndFailedOnes()
+    {
+        $requestSet1 = $this->buildRequestSetFromParams([[], ['forceInvalidRequest' => 1], []]);
+        $requestSet2 = $this->buildRequestSetFromParams([[], ['forceNoAccess' => 1], [], ['forceThrow' => 1], []]);
+        $requestSet3 = $this->buildRequestSetFromParams([['idsite' => '0'], []]);
+
+        $this->handler->process($this->tracker, $requestSet1);
+        $this->processExpectingAnError($requestSet2);
+        $this->handler->process($this->tracker, $requestSet3);
+
+        $this->handler->rollBack($this->tracker);
+
+        $this->assertSame([$requestSet1, $requestSet2, $requestSet3], $this->handler->getRequestSetsToRetry());
+        $this->assertSame([0, 2], $this->getIndexes($requestSet1));
+        $this->assertSame([0, 2], $this->getIndexes($requestSet2));
+        $this->assertSame([1], $this->getIndexes($requestSet3));
+        $this->assertSame(0, $this->tracker->getCountOfLoggedRequests());
+    }
+
+    private function processExpectingAnError(RequestSet $requestSet): void
+    {
+        $exception = null;
+        try {
+            $this->handler->process($this->tracker, $requestSet);
+        } catch (\Exception $e) {
+            $exception = $e;
+        }
+
+        $this->assertNotNull($exception, 'An expected exception was not triggered');
+        $this->handler->onException($requestSet, $exception);
+    }
+
+    /**
+     * @param array[] $paramsPerRequest params to add to (or override in) each request, which is otherwise valid
+     */
+    private function buildRequestSetFromParams(array $paramsPerRequest): RequestSet
+    {
+        $requests = [];
+        foreach ($paramsPerRequest as $index => $params) {
+            $requests[] = new Request($params + ['idsite' => '1', 'index' => $index]);
+        }
+
+        $requestSet = new RequestSet();
+        $requestSet->setRequests($requests);
+
+        return $requestSet;
+    }
+
+    /**
+     * @return int[]
+     */
+    private function getIndexes(RequestSet $requestSet): array
+    {
+        return array_map(function (Request $request) {
+            return (int) $request->getParams()['index'];
+        }, $requestSet->getRequests());
     }
 
     private function insertOption(string $name, ?TrackerDb $db = null): void
