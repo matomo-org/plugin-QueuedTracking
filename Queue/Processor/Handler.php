@@ -17,7 +17,6 @@ use Piwik\Exception\InvalidRequestParameterException;
 use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Plugins\QueuedTracking\Configuration;
 use Piwik\Tracker;
-use Piwik\Tracker\Db as TrackerDb;
 use Piwik\Tracker\Db\DbException;
 use Piwik\Tracker\RequestSet;
 use Exception;
@@ -191,7 +190,8 @@ class Handler
         $db = $this->getDb();
 
         if (method_exists($db, 'isTransactionAborted') && $db->isTransactionAborted()) {
-            throw new DbException(TrackerDb::TRANSACTION_ABORTED_MESSAGE, TransactionErrors::ERROR_CODE_DEADLOCK);
+            // the code sends the set down the retry path; core's constants for both are missing on older Matomo
+            throw new DbException('The database already rolled this transaction back (MySQL error 1213)', 1213);
         }
     }
 
