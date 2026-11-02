@@ -120,7 +120,7 @@ class Handler
     }
 
     /**
-     * Whether a deadlock, lock wait timeout or snapshot isolation conflict happened since init().
+     * Whether an error that ends the transaction, or a lock wait timeout, happened since init().
      */
     public function hasTransactionErrors(): bool
     {
@@ -128,7 +128,7 @@ class Handler
     }
 
     /**
-     * @return RequestSet[] the request sets that hit a deadlock, lock wait timeout or snapshot isolation conflict
+     * @return RequestSet[] the request sets that hit an error that ends the transaction, or a lock wait timeout,
      *                      since init()
      */
     public function getRequestSetsWithTransactionErrors(): array
@@ -190,8 +190,8 @@ class Handler
         $db = $this->getDb();
 
         if (method_exists($db, 'isTransactionAborted') && $db->isTransactionAborted()) {
-            // the code sends the set down the retry path; core's constants for both are missing on older Matomo
-            throw new DbException('The database already rolled this transaction back (MySQL error 1213)', 1213);
+            // the code sends the set down the retry path. Core does not expose which error it was
+            throw new DbException('A caught database error already rolled back this transaction', 1213);
         }
     }
 
