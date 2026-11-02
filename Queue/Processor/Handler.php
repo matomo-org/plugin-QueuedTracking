@@ -12,6 +12,7 @@ namespace Piwik\Plugins\QueuedTracking\Queue\Processor;
 
 use Piwik\Common;
 use Piwik\Container\StaticContainer;
+use Piwik\Db\TransactionErrors;
 use Piwik\Exception\InvalidRequestParameterException;
 use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Plugins\QueuedTracking\Configuration;
@@ -53,6 +54,7 @@ class Handler
                 $startMs = round(microtime(true) * 1000);
 
                 $tracker->trackRequest($request);
+                $this->failIfTransactionAborted();
 
                 $diffInMs = round(microtime(true) * 1000) - $startMs;
                 if ($diffInMs > 2000) {
@@ -61,8 +63,10 @@ class Handler
 
                 $this->trackedRequests[] = $request;
             } catch (UnexpectedWebsiteFoundException $ex) {
-                // empty
+                // a tracking step may have caught an error that ended the transaction before this was thrown
+                $this->failIfTransactionAborted();
             } catch (InvalidRequestParameterException $ex) {
+                $this->failIfTransactionAborted();
                 // rejected like in a bulk request, so only this request is left out
                 StaticContainer::get(\Piwik\Log\LoggerInterface::class)->debug(
                     'Skipped an invalid queued tracking request: {message}',
@@ -79,6 +83,7 @@ class Handler
                 }
 
                 StaticContainer::get(\Piwik\Log\LoggerInterface::class)->warning($message);
+                $this->failIfTransactionAborted();
 
                 // Wrap any throwables so that they are caught by the try/catch in Processor, which is expecting Exceptions
                 throw ($th instanceof \Exception ? $th : new \Exception($th->getMessage(), $th->getCode(), $th));
@@ -118,7 +123,7 @@ class Handler
     }
 
     /**
-     * Whether a deadlock, lock wait timeout or snapshot isolation conflict happened since init().
+     * Whether an error that ends the transaction, or a lock wait timeout, happened since init().
      */
     public function hasTransactionErrors(): bool
     {
@@ -126,7 +131,7 @@ class Handler
     }
 
     /**
-     * @return RequestSet[] the request sets that hit a deadlock, lock wait timeout or snapshot isolation conflict
+     * @return RequestSet[] the request sets that hit an error that ends the transaction, or a lock wait timeout,
      *                      since init()
      */
     public function getRequestSetsWithTransactionErrors(): array
@@ -155,11 +160,19 @@ class Handler
     }
 
     /**
-     * Deadlock (1213), lock wait timeout (1205) and MariaDB's snapshot isolation conflict (1020).
+     * Deadlock (1213), lock wait timeout (1205), MariaDB's snapshot isolation conflict (1020) and, on Matomo versions
+     * that list them, the other errors that end the transaction.
      */
     private function isRetryableTransactionError(Exception $e): bool
     {
-        return $this->isErrNo($e, 1213) || $this->isErrNo($e, 1205) || $this->isErrNo($e, 1020);
+        if ($this->isErrNo($e, 1213) || $this->isErrNo($e, 1205) || $this->isErrNo($e, 1020)) {
+            return true;
+        }
+
+        $db = $this->getDb();
+
+        return class_exists(TransactionErrors::class)
+            && (TransactionErrors::endsTransaction($db, $e) || TransactionErrors::isStatementOnly($db, $e));
     }
 
     /**
@@ -169,6 +182,20 @@ class Handler
     private function isErrNo(Exception $e, int $errno): bool
     {
         return $this->getDb()->isErrNo($e, $errno) || ($e instanceof DbException && $e->getCode() === $errno);
+    }
+
+    /**
+     * A tracking step may catch an error that made the server roll back the transaction. Matomo then refuses every
+     * later query, but when that was the request set's last query nothing notices until the lock or commit queries.
+     */
+    private function failIfTransactionAborted(): void
+    {
+        $db = $this->getDb();
+
+        if (method_exists($db, 'isTransactionAborted') && $db->isTransactionAborted()) {
+            // 1213 sends the set down the retry path. Core does not expose which error it was
+            throw new DbException('A caught database error already rolled back this transaction', 1213);
+        }
     }
 
     /**

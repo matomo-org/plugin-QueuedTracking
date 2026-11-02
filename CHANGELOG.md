@@ -1,4 +1,7 @@
 ## Changelog
+6.0.4
+- Fixed a queue worker crashing and keeping its queue locked when a database deadlock was caught while tracking a request; the request set is now retried
+
 6.0.3 - 2026-11-02
 - Fixed existing QueuedTracking settings being cleared when the plugin is installed.
 - Fixed database deadlocks, lock wait timeouts and snapshot isolation conflicts not being retried when Matomo uses the MYSQLI database adapter

@@ -10,8 +10,10 @@
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue;
 
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
+use Piwik\Tests\Framework\DbErrorRaiser;
 use Piwik\Tests\Framework\Fixture;
 use Piwik\Tests\Framework\Mock\Tracker\RequestSet;
+use Piwik\Tracker\Db\DbException;
 use Piwik\Tracker\Request;
 use Piwik\Tracker\TrackerConfig;
 use Piwik\Tracker;
@@ -537,6 +539,58 @@ class ProcessorTest extends IntegrationTestCase
 
         $this->assertSame(2, $tracker->getCountOfLoggedRequests());
         $this->assertNumberOfRequestSetsLeftInQueue(0);
+    }
+
+    public function testProcessShouldReleaseTheLockIfALockQueryEndsTheTransaction()
+    {
+        if (!method_exists(Tracker::getDatabase(), 'isTransactionAborted')) {
+            $this->markTestSkipped('Needs a Matomo version that refuses queries once the transaction was rolled back');
+        }
+
+        // extending the lock runs inside the batch's transaction, so a deadlock there leaves it aborted
+        $this->backend = new class extends Queue\Backend\MySQL {
+            public function expireIfKeyHasValue($key, $value, $ttlInSeconds)
+            {
+                if (Tracker::getDatabase()->isInTransaction()) {
+                    DbErrorRaiser::raise(Tracker::getDatabase(), 1213, 'Deadlock found when trying to get lock; try restarting transaction');
+                }
+
+                return parent::expireIfKeyHasValue($key, $value, $ttlInSeconds);
+            }
+        };
+        $this->queue = new Queue\Manager($this->backend, new Queue\Lock($this->backend));
+        $this->queue->setNumberOfAvailableQueues(1);
+        $this->queue->setNumberOfRequestsToProcessAtSameTime(1);
+        $this->processor = $this->createProcessor();
+
+        $this->queue->addRequestSetToQueues($this->buildRequestSetFromParams([[]]));
+
+        // creating the procedure would commit the open transaction
+        DbErrorRaiser::install();
+        // so the MySQL backend shares the tracker's connection, as when processing in tracker mode
+        $GLOBALS['PIWIK_TRACKER_MODE'] = true;
+
+        try {
+            $this->processor->process($this->createTracker());
+            $this->fail('An expected exception was not triggered');
+        } catch (DbException $e) {
+            // the deadlock itself, not a refused unlock
+            $this->assertTrue(Tracker::getDatabase()->isErrNo($e, 1213), $e->getMessage());
+            $this->assertStringNotContainsString('already rolled', $e->getMessage());
+        } finally {
+            $GLOBALS['PIWIK_TRACKER_MODE'] = false;
+            $isTransactionAborted = Tracker::getDatabase()->isTransactionAborted();
+            if ($isTransactionAborted) {
+                // the server did not really roll back the raised deadlock, and the open transaction would block
+                // dropping the procedure
+                Tracker::getDatabase()->disconnect();
+            }
+            DbErrorRaiser::uninstall();
+        }
+
+        $this->assertFalse($isTransactionAborted, 'The aborted transaction was not rolled back');
+        $this->assertTrue((new Queue\Lock($this->backend))->acquireLock(0), 'The queue is still locked');
+        $this->assertNumberOfRequestSetsLeftInQueue(1);
     }
 
     public function test_process_shouldRestoreEnvironmentAfterTrackingRequests()
