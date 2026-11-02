@@ -1,5 +1,5 @@
 ## Changelog
-6.0.3
+6.0.3 - 2026-11-02
 - Fixed existing QueuedTracking settings being cleared when the plugin is installed.
 - Fixed database deadlocks, lock wait timeouts and snapshot isolation conflicts not being retried when Matomo uses the MYSQLI database adapter
 - Fixed the requests following an invalid request in a queued bulk request being lost: a request rejected as invalid is now skipped on its own, as without the queue

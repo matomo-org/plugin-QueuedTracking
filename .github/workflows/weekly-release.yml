@@ -6,9 +6,9 @@ name: Weekly release
 
 on:
   schedule:
-    # Monday, so the release is dated that Monday. Keeps the minute and hour of matomo-tests.yml's
-    # cron, so the fleet stays staggered across the window.
-    - cron: '0 2 * * 1'
+    # Monday, so the release is dated that Monday. Every plugin shares this slot, so the week's
+    # releases finish together.
+    - cron: '17 2 * * 1'
   workflow_dispatch:
     inputs:
       all-branches:
