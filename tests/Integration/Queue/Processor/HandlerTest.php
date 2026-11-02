@@ -11,6 +11,8 @@ namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue\Processor;
 
 use Piwik\Common;
 use Piwik\Db;
+use Piwik\Exception\InvalidRequestParameterException;
+use Piwik\Exception\UnexpectedWebsiteFoundException;
 use Piwik\Plugins\QueuedTracking\Queue\Processor\Handler;
 use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\ForcedException;
 use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\Tracker;
@@ -354,8 +356,12 @@ class HandlerTest extends IntegrationTestCase
         ];
     }
 
-    public function testProcessShouldFailTheRequestSetIfATrackingStepSwallowedAnErrorThatEndedTheTransaction()
-    {
+    /**
+     * @dataProvider getExceptionsThrownAfterASwallowedError
+     */
+    public function testProcessShouldFailTheRequestSetIfATrackingStepSwallowedAnErrorThatEndedTheTransaction(
+        ?\Exception $thrownAfterwards
+    ) {
         if (!method_exists(Tracker::getDatabase(), 'isTransactionAborted')) {
             $this->markTestSkipped('Needs a Matomo version that refuses queries once the transaction was rolled back');
         }
@@ -366,6 +372,8 @@ class HandlerTest extends IntegrationTestCase
         $this->handler->init($this->tracker);
 
         $tracker = new class extends Tracker {
+            public $thrownAfterwards;
+
             public function trackRequest(Request $request)
             {
                 parent::trackRequest($request);
@@ -375,8 +383,13 @@ class HandlerTest extends IntegrationTestCase
                 } catch (\Exception $e) {
                     // like a tracking step that logs a failed write and carries on
                 }
+
+                if ($this->thrownAfterwards) {
+                    throw $this->thrownAfterwards;
+                }
             }
         };
+        $tracker->thrownAfterwards = $thrownAfterwards;
 
         $requestSet = $this->buildRequestSet(1);
         $this->insertOption('QueuedTrackingTest_beforeError');
@@ -399,6 +412,16 @@ class HandlerTest extends IntegrationTestCase
             'SELECT COUNT(*) FROM `' . Common::prefixTable('option') . '` WHERE option_name LIKE ?',
             ['QueuedTrackingTest_%']
         ));
+    }
+
+    public function getExceptionsThrownAfterASwallowedError(): array
+    {
+        return [
+            'none' => [null],
+            // the handler skips these requests, but must still notice the ended transaction
+            'invalid request' => [new InvalidRequestParameterException('forced invalid request')],
+            'unknown site' => [new UnexpectedWebsiteFoundException('forced unknown site')],
+        ];
     }
 
     public function testOnExceptionShouldRetryARequestSetThatHitARealLockWaitTimeout()

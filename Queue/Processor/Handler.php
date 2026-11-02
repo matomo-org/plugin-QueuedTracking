@@ -63,8 +63,10 @@ class Handler
 
                 $this->trackedRequests[] = $request;
             } catch (UnexpectedWebsiteFoundException $ex) {
-                // empty
+                // a tracking step may have caught an error that ended the transaction before this was thrown
+                $this->failIfTransactionAborted();
             } catch (InvalidRequestParameterException $ex) {
+                $this->failIfTransactionAborted();
                 // rejected like in a bulk request, so only this request is left out
                 StaticContainer::get(\Piwik\Log\LoggerInterface::class)->debug(
                     'Skipped an invalid queued tracking request: {message}',
