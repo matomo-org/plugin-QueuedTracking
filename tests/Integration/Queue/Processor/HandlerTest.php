@@ -421,6 +421,7 @@ class HandlerTest extends IntegrationTestCase
             // the handler skips these requests, but must still notice the ended transaction
             'invalid request' => [new InvalidRequestParameterException('forced invalid request')],
             'unknown site' => [new UnexpectedWebsiteFoundException('forced unknown site')],
+            'other error' => [new ForcedException('forced exception')],
         ];
     }
 

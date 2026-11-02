@@ -83,6 +83,7 @@ class Handler
                 }
 
                 StaticContainer::get(\Piwik\Log\LoggerInterface::class)->warning($message);
+                $this->failIfTransactionAborted();
 
                 // Wrap any throwables so that they are caught by the try/catch in Processor, which is expecting Exceptions
                 throw ($th instanceof \Exception ? $th : new \Exception($th->getMessage(), $th->getCode(), $th));
@@ -192,7 +193,7 @@ class Handler
         $db = $this->getDb();
 
         if (method_exists($db, 'isTransactionAborted') && $db->isTransactionAborted()) {
-            // the code sends the set down the retry path. Core does not expose which error it was
+            // 1213 sends the set down the retry path. Core does not expose which error it was
             throw new DbException('A caught database error already rolled back this transaction', 1213);
         }
     }

@@ -11,7 +11,6 @@ namespace Piwik\Plugins\QueuedTracking\tests\Framework\Mock;
 
 use Piwik\Exception\InvalidRequestParameterException;
 use Piwik\NoAccessException;
-use Piwik\Tests\Framework\DbErrorRaiser;
 use Piwik\Tracker\Db\DbException;
 use Piwik\Tracker\Request;
 
@@ -55,16 +54,6 @@ class Tracker extends \Piwik\Tests\Framework\Mock\Tracker
 
         if (!empty($allParams['forceTypeError'])) {
             throw new \TypeError('forced type error');
-        }
-
-        if (!empty($allParams['forceSwallowedDeadlockThenThrow'])) {
-            try {
-                DbErrorRaiser::raise(self::getDatabase(), 1213, 'Deadlock found when trying to get lock; try restarting transaction');
-            } catch (\Exception $e) {
-                // like a tracking step that logs a failed write and carries on, needs DbErrorRaiser::install()
-            }
-
-            throw new ForcedException('forced exception after a swallowed deadlock');
         }
 
         if (!empty($allParams['forceThrow']) || (!empty($allParams['forceThrowAfterDeadlock']) && $numOwnDeadlocks)) {
