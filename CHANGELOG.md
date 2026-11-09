@@ -1,5 +1,5 @@
 ## Changelog
-6.0.4
+6.0.4 - 2026-11-09
 - Fixed a queue worker crashing and keeping its queue locked when a database deadlock was caught while tracking a request; the request set is now retried
 
 6.0.3 - 2026-11-02
