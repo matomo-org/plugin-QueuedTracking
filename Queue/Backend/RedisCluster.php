@@ -321,7 +321,8 @@ end';
         $port,
         $timeout,
         #[\SensitiveParameter]
-        $password
+        $password,
+        $username = null,
     ) {
         $this->disconnect();
 
@@ -331,6 +332,10 @@ end';
 
         if (!empty($password)) {
             $this->password = $password;
+        }
+
+        if (!empty($username)) {
+            $this->username = $username;
         }
     }
 
