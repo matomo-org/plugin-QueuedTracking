@@ -55,7 +55,7 @@ jobs:
       - name: Install package ripgrep
         run: sudo apt-get install ripgrep
       - name: Run tests
-        uses: matomo-org/github-action-tests@main
+        uses: matomo-org/github-action-tests@id-309-redis-version-tag
         with:
           plugin-name: 'QueuedTracking'
           php-version: ${{ matrix.php }}
@@ -75,7 +75,7 @@ jobs:
           lfs: true
           persist-credentials: false
       - name: running tests
-        uses: matomo-org/github-action-tests@main
+        uses: matomo-org/github-action-tests@id-309-redis-version-tag
         with:
           plugin-name: 'QueuedTracking'
           matomo-test-branch: 'maximum_supported_matomo'
