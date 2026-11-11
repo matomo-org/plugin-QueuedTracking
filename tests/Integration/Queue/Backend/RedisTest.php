@@ -10,6 +10,7 @@
 namespace Piwik\Plugins\QueuedTracking\tests\Integration\Queue\Backend;
 
 use Piwik\Plugins\QueuedTracking\Queue\Backend\Redis;
+use Piwik\Plugins\QueuedTracking\Queue\Factory;
 use Piwik\Plugins\QueuedTracking\tests\Framework\TestCase\IntegrationTestCase;
 
 /**
@@ -329,5 +330,40 @@ class RedisTest extends IntegrationTestCase
         $backend = $this->createRedisBackend();
         $keys    = $backend->getKeysMatchingPattern('*fere*');
         $this->assertEquals(array(), $keys);
+    }
+
+    public function test_persistentConnection_shouldKeepEachDatabaseSeparate()
+    {
+        $settings = Factory::getSettings();
+        $database = (int) $settings->redisDatabase->getValue();
+        $otherDatabase = $database === 14 ? 13 : 14;
+
+        $backend = $this->createPersistentRedisBackend($database);
+        $other = $this->createPersistentRedisBackend($otherDatabase);
+
+        $other->delete($this->key);
+        $backend->setIfNotExists($this->key, 'inThisDatabase', 100);
+        $other->setIfNotExists($this->key, 'inTheOtherDatabase', 100);
+
+        $this->assertSame('inThisDatabase', $backend->get($this->key));
+        $this->assertSame('inTheOtherDatabase', $other->get($this->key));
+
+        $other->delete($this->key);
+    }
+
+    private function createPersistentRedisBackend($database)
+    {
+        $settings = Factory::getSettings();
+        $backend = new Redis();
+        $backend->setConfig(
+            $settings->redisHost->getValue(),
+            $settings->redisPort->getValue(),
+            $settings->redisTimeout->getValue(),
+            $settings->redisPassword->getValue()
+        );
+        $backend->setDatabase($database);
+        $backend->setUsePersistentConnection(true);
+
+        return $backend;
     }
 }

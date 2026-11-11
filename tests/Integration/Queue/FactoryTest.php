@@ -81,6 +81,14 @@ class FactoryTest extends IntegrationTestCase
         $this->assertTrue($success);
     }
 
+    public function test_makeBackend_shouldConnectWithAPersistentConnection_IfConfigured()
+    {
+        Config::getInstance()->QueuedTracking = array('redisPersistentConnection' => '1');
+        $success = Factory::makeBackend()->testConnection();
+        Config::getInstance()->QueuedTracking = array();
+        $this->assertTrue($success);
+    }
+
     public function test_getSettings_shouldReturnARedisInstance()
     {
         $settings = Factory::getSettings();
