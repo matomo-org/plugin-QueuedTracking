@@ -54,6 +54,8 @@ jobs:
           persist-credentials: false
       - name: Install package ripgrep
         run: sudo apt-get install ripgrep
+      - name: Block mirror.gcr.io (throwaway cache fallback test)
+        run: echo "0.0.0.0 mirror.gcr.io" | sudo tee -a /etc/hosts
       - name: Run tests
         uses: matomo-org/github-action-tests@id-309-redis-version-tag
         with:
@@ -74,6 +76,8 @@ jobs:
         with:
           lfs: true
           persist-credentials: false
+      - name: Block mirror.gcr.io (throwaway cache fallback test)
+        run: echo "0.0.0.0 mirror.gcr.io" | sudo tee -a /etc/hosts
       - name: running tests
         uses: matomo-org/github-action-tests@id-309-redis-version-tag
         with:
