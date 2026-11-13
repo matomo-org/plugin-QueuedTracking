@@ -40,6 +40,9 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
     public $redisDatabase;
 
     /** @var Setting */
+    public $redisPersistentConnection;
+
+    /** @var Setting */
     public $redisPassword;
 
     /** @var Setting */
@@ -91,6 +94,7 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
         $this->redisPort = $this->createRedisPortSetting();
         $this->redisTimeout = $this->createRedisTimeoutSetting();
         $this->redisDatabase = $this->createRedisDatabaseSetting();
+        $this->redisPersistentConnection = $this->createRedisPersistentConnectionSetting();
         $this->redisPassword = $this->createRedisPasswordSetting();
         $this->queueEnabled = $this->createQueueEnabledSetting();
         $this->numQueueWorkers = $this->createNumberOfQueueWorkerSetting();
@@ -245,6 +249,21 @@ class SystemSettings extends \Piwik\Settings\Plugin\SystemSettings
             $field->inlineHelp = Piwik::translate('QueuedTracking_RedisPasswordFieldHelp') . '</br>';
             $field->validators[] = new CharacterLength(null, 128);
         });
+    }
+
+    private function createRedisPersistentConnectionSetting()
+    {
+        $setting = $this->makeSetting('redisPersistentConnection', $default = false, FieldConfig::TYPE_BOOL, function (FieldConfig $field) {
+            $field->title = Piwik::translate('QueuedTracking_RedisPersistentConnectionFieldTitle');
+            $field->condition = 'backend=="redis"';
+            $field->uiControl = FieldConfig::UI_CONTROL_CHECKBOX;
+            $field->inlineHelp = Piwik::translate('QueuedTracking_RedisPersistentConnectionFieldHelp') . '</br>';
+        });
+
+        // like redisTimeout, only configurable in config.ini.php for now
+        $setting->setIsWritableByCurrentUser(false);
+
+        return $setting;
     }
 
     private function createRedisDatabaseSetting()

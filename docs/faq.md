@@ -170,6 +170,21 @@ notify_queue_threshold_emails[] = example@example.org
 notify_queue_threshold_single_queue = 250000
 ```
 
+__Can the tracker reuse its Redis connection instead of opening one per request?__
+
+Yes, for a standalone Redis (not Sentinel or Cluster) using the `phpredis` extension. By default, every tracking request
+opens a new connection to Redis, which on a busy server means thousands of new connections per minute, each with a
+TLS handshake when Redis is reached over TLS. To keep one connection open per PHP process instead, set the following in
+your `config/config.ini.php`:
+
+```
+[QueuedTracking]
+redisPersistentConnection = 1
+```
+
+Each PHP-FPM worker then keeps its own connection, so Redis sees up to `pm.max_children` connections per server.
+After a Redis restart, a worker may fail its first request on the dropped connection before reconnecting.
+
 __Are there any known issues?__
 
 * In case you are using bulk tracking the bulk tracking response varies compared to the regular one. We will always return

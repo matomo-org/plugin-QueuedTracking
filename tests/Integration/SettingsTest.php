@@ -205,6 +205,23 @@ class SettingsTest extends IntegrationTestCase
         $this->assertEmpty($this->settings->redisDatabase->getValue());
     }
 
+    public function test_redisPersistentConnection_ShouldBeDisabledByDefault()
+    {
+        $this->assertFalse($this->settings->redisPersistentConnection->getValue());
+    }
+
+    public function test_redisPersistentConnection_ShouldNotBeWritableByDefault()
+    {
+        $this->assertFalse($this->settings->redisPersistentConnection->isWritableByCurrentUser());
+    }
+
+    public function test_redisPersistentConnection_ShouldConvertAValueToBool()
+    {
+        $this->settings->redisPersistentConnection->setIsWritableByCurrentUser(true);
+        $this->settings->redisPersistentConnection->setValue('1');
+        $this->assertTrue($this->settings->redisPersistentConnection->getValue());
+    }
+
     public function test_redisTimeout_ShouldBeNotUnlimitedByDefault()
     {
         $this->assertSame(0.0, $this->settings->redisTimeout->getValue());

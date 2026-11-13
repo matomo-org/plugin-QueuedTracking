@@ -20,6 +20,8 @@
         "RedisPasswordFieldHelp": "Password set on the Redis server, if any. Redis can be instructed to require a password before allowing clients to execute commands.",
         "RedisDatabaseFieldTitle": "Redis database",
         "RedisDatabaseFieldHelp": "In case you are using Redis for caching make sure to use a different database.",
+        "RedisPersistentConnectionFieldTitle": "Use a persistent Redis connection",
+        "RedisPersistentConnectionFieldHelp": "Reuse one Redis connection per PHP process instead of opening a new one for every tracking request. Saves a connection (and a TLS handshake when connecting over TLS) per request. Standalone Redis only, requires the phpredis extension.",
         "QueueEnabledFieldTitle": "Queue enabled",
         "QueueEnabledFieldHelp": "If enabled, all tracking requests will be written into a queue instead of the directly into the database. Requires a Redis server and phpredis PHP extension if using Redis as a backend.",
         "NumRequestsToProcessFieldTitle": "Number of requests that are processed in one batch",
