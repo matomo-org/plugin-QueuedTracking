@@ -347,6 +347,8 @@ class RedisTest extends IntegrationTestCase
 
         $this->assertSame('inThisDatabase', $backend->get($this->key));
         $this->assertSame('inTheOtherDatabase', $other->get($this->key));
+        $this->assertSame('queuedtracking-' . $database, $backend->getConnection()->getPersistentID());
+        $this->assertSame('queuedtracking-' . $otherDatabase, $other->getConnection()->getPersistentID());
 
         $other->delete($this->key);
     }
