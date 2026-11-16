@@ -44,6 +44,11 @@ class SentinelTest extends RedisTest
         return $sentinel;
     }
 
+    public function test_persistentConnection_shouldKeepEachDatabaseSeparate()
+    {
+        $this->markTestSkipped('Persistent connections are only supported by the standalone Redis backend');
+    }
+
     public function test_canCreateInstanceWithMultipleSentinelAndFallback()
     {
         $settings = Factory::getSettings();

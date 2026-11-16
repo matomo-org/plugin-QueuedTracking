@@ -29,6 +29,11 @@ class Redis implements Backend
      */
     protected $database;
 
+    /**
+     * @var bool
+     */
+    protected $persistent = false;
+
     public function testConnection()
     {
         try {
@@ -260,7 +265,14 @@ end';
     protected function connect()
     {
         $this->redis = new \Redis();
-        $success = $this->redis->connect($this->host, $this->port, $this->timeout, null, 100);
+
+        if ($this->persistent) {
+            // One persistent connection per database: a phpredis client sharing it could select() another database.
+            $persistentId = 'queuedtracking-' . (int) $this->database;
+            $success = $this->redis->pconnect($this->host, $this->port, $this->timeout, $persistentId, 100);
+        } else {
+            $success = $this->redis->connect($this->host, $this->port, $this->timeout, null, 100);
+        }
 
         if ($success && !empty($this->password)) {
             $success = $this->redis->auth($this->password);
@@ -308,5 +320,10 @@ end';
     public function setDatabase($database)
     {
         $this->database = $database;
+    }
+
+    public function setUsePersistentConnection($persistent)
+    {
+        $this->persistent = (bool) $persistent;
     }
 }
