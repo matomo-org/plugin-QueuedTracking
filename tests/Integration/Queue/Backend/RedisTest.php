@@ -338,19 +338,26 @@ class RedisTest extends IntegrationTestCase
         $database = (int) $settings->redisDatabase->getValue();
         $otherDatabase = $database === 14 ? 13 : 14;
 
-        $backend = $this->createPersistentRedisBackend($database);
-        $other = $this->createPersistentRedisBackend($otherDatabase);
+        // Without pooling, phpredis clients with the same persistent id share one socket.
+        $pooling = ini_set('redis.pconnect.pooling_enabled', '0');
 
-        $other->delete($this->key);
-        $backend->setIfNotExists($this->key, 'inThisDatabase', 100);
-        $other->setIfNotExists($this->key, 'inTheOtherDatabase', 100);
+        try {
+            $backend = $this->createPersistentRedisBackend($database);
+            $other = $this->createPersistentRedisBackend($otherDatabase);
 
-        $this->assertSame('inThisDatabase', $backend->get($this->key));
-        $this->assertSame('inTheOtherDatabase', $other->get($this->key));
-        $this->assertSame('queuedtracking-' . $database, $backend->getConnection()->getPersistentID());
-        $this->assertSame('queuedtracking-' . $otherDatabase, $other->getConnection()->getPersistentID());
+            $other->delete($this->key);
+            $backend->setIfNotExists($this->key, 'inThisDatabase', 100);
+            $other->setIfNotExists($this->key, 'inTheOtherDatabase', 100);
 
-        $other->delete($this->key);
+            $this->assertSame('inThisDatabase', $backend->get($this->key));
+            $this->assertSame('inTheOtherDatabase', $other->get($this->key));
+            $this->assertSame('queuedtracking-' . $database, $backend->getConnection()->getPersistentID());
+            $this->assertSame('queuedtracking-' . $otherDatabase, $other->getConnection()->getPersistentID());
+
+            $other->delete($this->key);
+        } finally {
+            ini_set('redis.pconnect.pooling_enabled', $pooling);
+        }
     }
 
     private function createPersistentRedisBackend($database)

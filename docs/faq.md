@@ -183,7 +183,6 @@ redisPersistentConnection = 1
 ```
 
 Each PHP-FPM worker then keeps its own connection, so Redis sees up to `pm.max_children` connections per server.
-After a Redis restart, a worker may fail its first request on the dropped connection before reconnecting.
 
 __Are there any known issues?__
 
