@@ -75,6 +75,7 @@ class Test extends ConsoleCommand
         $output->writeln('Timeout: ' . $settings->redisTimeout->getValue());
         $output->writeln('Password: ' . $settings->redisPassword->getValue());
         $output->writeln('Database: ' . $settings->redisDatabase->getValue());
+        $output->writeln('PersistentConnection (standalone Redis only): ' . (int) $settings->redisPersistentConnection->getValue());
         $output->writeln('RedisBackendType: ' . $settings->getRedisType());
         $output->writeln('SentinelMasterName: ' . $settings->sentinelMasterName->getValue());
 

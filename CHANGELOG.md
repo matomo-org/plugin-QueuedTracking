@@ -1,5 +1,8 @@
 ## Changelog
 
+5.2.3
+- Added the `redisPersistentConnection` setting to reuse one Redis connection per PHP process instead of connecting on every tracking request
+
 5.2.2 - 2026-10-26
 - Fixed the Redis Cluster backend failing with a syntax error on PHP 7.2 and 7.3
 - Fixed the Redis Cluster backend failing with a fatal error when the numbers of configured hosts and ports do not match
