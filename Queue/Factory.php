@@ -81,6 +81,7 @@ class Factory
         } else {
             $redis = new Queue\Backend\Redis();
             $redis->setDatabase($database);
+            $redis->setUsePersistentConnection($settings->redisPersistentConnection->getValue());
         }
 
         $redis->setConfig($host, $port, $timeout, $password);
