@@ -27,6 +27,8 @@
         "RedisHostFieldTitle": "Redis ósta nó soicéad unix",
         "RedisPasswordFieldHelp": "Pasfhocal socraithe ar an bhfreastalaí Redis, más ann dó. Is féidir treoir a thabhairt do Redis pasfhocal a éileamh sula gceadaítear do chliaint orduithe a fhorghníomhú.",
         "RedisPasswordFieldTitle": "Redis pasfhocal",
+        "RedisPersistentConnectionFieldHelp": "Athúsáid nasc Redis amháin in aghaidh an phróisis PHP, in áit ceann nua a oscailt do gach iarratas rianaithe. Sábhálann sé seo nasc amháin (agus croitheadh láimhe TLS, má bhíonn nasc á dhéanamh trí TLS) in aghaidh an iarratais. Baineann sé seo le Redis neamhspleách amháin, agus teastaíonn an síneadh phpredis uaidh.",
+        "RedisPersistentConnectionFieldTitle": "Úsáid nasc Redis buan",
         "RedisPortFieldHelp": "Port an fhreastalaí Redis ar siúl. Ba chóir go mbeadh an luach idir 1 agus 65535. Bain úsáid as 0 má tá tú ag baint úsáide as soicéad unix chun ceangal le freastalaí Redis.",
         "RedisPortFieldTitle": "Redis port",
         "RedisTimeoutFieldHelp": "Redis am istigh ceangail i soicindí. Ciallaíonn “0.0” gan teorainn. Is féidir leis a bheith ina snámhán m.sh. “2.5” le haghaidh teorainn ama ceangail 2.5 soicind.",
