@@ -27,6 +27,8 @@
         "RedisHostFieldTitle": "Hostitel Redis nebo unixový socket",
         "RedisPasswordFieldHelp": "Heslo nastavené na serveru Redis, pokud nějaké používá. Redis lze nastavit tak, aby před povolením spouštění příkazů vyžadoval od klientů heslo.",
         "RedisPasswordFieldTitle": "Heslo Redis",
+        "RedisPersistentConnectionFieldHelp": "Opakovaně použít jedno připojení k Redis pro každý proces PHP místo otevírání nového připojení pro každý požadavek na měření. U každého požadavku tím odpadne navázání připojení (a při připojení přes TLS také handshake TLS). Pouze pro samostatný Redis, vyžaduje rozšíření phpredis.",
+        "RedisPersistentConnectionFieldTitle": "Používat trvalé připojení k Redis",
         "RedisPortFieldHelp": "Port, na kterém běží server Redis. Hodnota musí být v rozsahu 1 až 65535. Pokud se k serveru Redis připojujete unixovým socketem, použijte 0.",
         "RedisPortFieldTitle": "Port Redis",
         "RedisTimeoutFieldHelp": "Časový limit připojení k serveru Redis v sekundách. Hodnota „0.0“ znamená bez omezení. Lze zadat desetinné číslo, například „2.5“ pro časový limit připojení 2,5 sekundy.",
