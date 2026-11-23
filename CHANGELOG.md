@@ -1,5 +1,5 @@
 ## Changelog
-6.0.5
+6.0.5 - 2026-11-23
 - Added the `redisPersistentConnection` setting to reuse one Redis connection per PHP process instead of connecting on every tracking request
 
 6.0.4 - 2026-11-09
