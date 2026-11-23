@@ -1,4 +1,7 @@
 ## Changelog
+6.0.6
+- Fixed the requests following one that a plugin rejects with a client error, such as a `BadRequestException`, in a queued request set being lost; the rejected request is now skipped on its own, like an invalid request, instead of being logged as a warning
+
 6.0.5 - 2026-11-23
 - Added the `redisPersistentConnection` setting to reuse one Redis connection per PHP process instead of connecting on every tracking request
 

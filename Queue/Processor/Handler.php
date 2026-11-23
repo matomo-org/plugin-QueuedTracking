@@ -14,7 +14,10 @@ use Piwik\Common;
 use Piwik\Container\StaticContainer;
 use Piwik\Db\TransactionErrors;
 use Piwik\Exception\InvalidRequestParameterException;
+use Piwik\Exception\PluginDeactivatedException;
+use Piwik\Exception\PluginNotFoundException;
 use Piwik\Exception\UnexpectedWebsiteFoundException;
+use Piwik\Http\HttpCodeException;
 use Piwik\Plugins\QueuedTracking\Configuration;
 use Piwik\Tracker;
 use Piwik\Tracker\Db\DbException;
@@ -73,6 +76,16 @@ class Handler
                     ['message' => $ex->getMessage()]
                 );
             } catch (\Throwable $th) {
+                if ($this->isRejectedWithClientError($th)) {
+                    $this->failIfTransactionAborted();
+                    // eg a plugin's BadRequestException, left out on its own like an invalid request
+                    StaticContainer::get(\Piwik\Log\LoggerInterface::class)->debug(
+                        'Skipped a queued tracking request rejected with status {code}: {message}',
+                        ['code' => $th->getCode(), 'message' => $th->getMessage()]
+                    );
+                    continue;
+                }
+
                 // Log the error to help with debugging and visibility
                 $message = "There was an error while trying to process a queued tracking request.";
                 $message .= "\nError:\n" . $th->getMessage() . "\nStack trace:\n" . $th->getTraceAsString();
@@ -93,6 +106,22 @@ class Handler
         // so a retry of the batch does not process the requests left out again
         $requestSet->setRequests($this->trackedRequests);
         $this->requestSetsToRetry[] = $requestSet;
+    }
+
+    private function isRejectedWithClientError(\Throwable $th): bool
+    {
+        // these describe the server's plugin setup, not the request
+        if (
+            !$th instanceof HttpCodeException
+            || $th instanceof PluginDeactivatedException
+            || $th instanceof PluginNotFoundException
+        ) {
+            return false;
+        }
+
+        $code = (int) $th->getCode();
+
+        return $code >= 400 && $code < 500;
     }
 
     public function onException(RequestSet $requestSet, Exception $e)

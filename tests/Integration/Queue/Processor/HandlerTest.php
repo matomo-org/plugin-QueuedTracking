@@ -13,6 +13,7 @@ use Piwik\Common;
 use Piwik\Db;
 use Piwik\Exception\InvalidRequestParameterException;
 use Piwik\Exception\UnexpectedWebsiteFoundException;
+use Piwik\Http\BadRequestException;
 use Piwik\Plugins\QueuedTracking\Queue\Processor\Handler;
 use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\ForcedException;
 use Piwik\Plugins\QueuedTracking\tests\Framework\Mock\Tracker;
@@ -421,6 +422,7 @@ class HandlerTest extends IntegrationTestCase
             // the handler skips these requests, but must still notice the ended transaction
             'invalid request' => [new InvalidRequestParameterException('forced invalid request')],
             'unknown site' => [new UnexpectedWebsiteFoundException('forced unknown site')],
+            'client error' => [new BadRequestException('forced bad request')],
             'other error' => [new ForcedException('forced exception')],
         ];
     }
@@ -474,6 +476,73 @@ class HandlerTest extends IntegrationTestCase
         $this->assertSame(2, $this->tracker->getCountOfLoggedRequests());
         $this->assertFalse($this->handler->hasErrors());
         $this->assertSame([0, 2], $this->getIndexes($requestSet));
+    }
+
+    public function testProcessShouldSkipARequestRejectedWithAClientErrorStatus()
+    {
+        $requestSet = $this->buildRequestSetFromParams([[], ['forceBadRequest' => 1], []]);
+
+        $this->handler->process($this->tracker, $requestSet);
+
+        $this->assertSame(2, $this->tracker->getCountOfLoggedRequests());
+        $this->assertFalse($this->handler->hasErrors());
+        $this->assertSame([0, 2], $this->getIndexes($requestSet));
+    }
+
+    /**
+     * @dataProvider getStatusCodesOfRejectedRequests
+     */
+    public function testProcessShouldSkipARequestRejectedWithAnyClientErrorStatus(int $statusCode)
+    {
+        $requestSet = $this->buildRequestSetFromParams([[], ['forceHttpCode' => $statusCode], []]);
+
+        $this->handler->process($this->tracker, $requestSet);
+
+        $this->assertFalse($this->handler->hasErrors());
+        $this->assertSame([0, 2], $this->getIndexes($requestSet));
+    }
+
+    public function getStatusCodesOfRejectedRequests(): array
+    {
+        return [
+            'lowest' => [400],
+            'not found' => [404],
+            // no client waits for a queued request, so there is nothing to send it again
+            'too many requests' => [429],
+            'highest' => [499],
+        ];
+    }
+
+    /**
+     * @dataProvider getStatusCodesOfFailedRequests
+     */
+    public function testProcessShouldFailOnAnHttpCodeExceptionWithoutAClientErrorStatus(int $statusCode)
+    {
+        $requestSet = $this->buildRequestSetFromParams([[], ['forceHttpCode' => $statusCode], []]);
+
+        $this->processExpectingAnError($requestSet);
+
+        $this->assertTrue($this->handler->hasErrors());
+        $this->assertSame([0], $this->getIndexes($requestSet));
+    }
+
+    public function getStatusCodesOfFailedRequests(): array
+    {
+        return [
+            'redirect' => [302],
+            'server error' => [500],
+            'unavailable' => [503],
+        ];
+    }
+
+    public function testProcessShouldFailOnADeactivatedPluginAsItIsNoClientError()
+    {
+        $requestSet = $this->buildRequestSetFromParams([[], ['forcePluginDeactivated' => 1], []]);
+
+        $this->processExpectingAnError($requestSet);
+
+        $this->assertTrue($this->handler->hasErrors());
+        $this->assertSame([0], $this->getIndexes($requestSet));
     }
 
     public function testProcessShouldLeaveOutRequestsForUnknownSitesAndInvalidRequestsOfTheSameSet()

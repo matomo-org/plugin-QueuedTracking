@@ -10,6 +10,8 @@
 namespace Piwik\Plugins\QueuedTracking\tests\Framework\Mock;
 
 use Piwik\Exception\InvalidRequestParameterException;
+use Piwik\Exception\PluginDeactivatedException;
+use Piwik\Http\BadRequestException;
 use Piwik\NoAccessException;
 use Piwik\Tracker\Db\DbException;
 use Piwik\Tracker\Request;
@@ -50,6 +52,18 @@ class Tracker extends \Piwik\Tests\Framework\Mock\Tracker
         if (!empty($allParams['forceNoAccess'])) {
             $this->numInvalidRequests++;
             throw new NoAccessException('forced missing access', 403);
+        }
+
+        if (!empty($allParams['forceBadRequest'])) {
+            throw new BadRequestException('forced bad request');
+        }
+
+        if (!empty($allParams['forceHttpCode'])) {
+            throw new ForcedHttpCodeException('forced status ' . $allParams['forceHttpCode'], (int) $allParams['forceHttpCode']);
+        }
+
+        if (!empty($allParams['forcePluginDeactivated'])) {
+            throw new PluginDeactivatedException('ForcedPlugin');
         }
 
         if (!empty($allParams['forceTypeError'])) {
