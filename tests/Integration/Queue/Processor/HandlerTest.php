@@ -476,6 +476,27 @@ class HandlerTest extends IntegrationTestCase
         $this->assertSame([0, 2], $this->getIndexes($requestSet));
     }
 
+    public function testProcessShouldSkipARequestRejectedWithAClientErrorStatus()
+    {
+        $requestSet = $this->buildRequestSetFromParams([[], ['forceBadRequest' => 1], []]);
+
+        $this->handler->process($this->tracker, $requestSet);
+
+        $this->assertSame(2, $this->tracker->getCountOfLoggedRequests());
+        $this->assertFalse($this->handler->hasErrors());
+        $this->assertSame([0, 2], $this->getIndexes($requestSet));
+    }
+
+    public function testProcessShouldFailOnADeactivatedPluginAsItIsNoClientError()
+    {
+        $requestSet = $this->buildRequestSetFromParams([[], ['forcePluginDeactivated' => 1], []]);
+
+        $this->processExpectingAnError($requestSet);
+
+        $this->assertTrue($this->handler->hasErrors());
+        $this->assertSame([0], $this->getIndexes($requestSet));
+    }
+
     public function testProcessShouldLeaveOutRequestsForUnknownSitesAndInvalidRequestsOfTheSameSet()
     {
         $requestSet = $this->buildRequestSetFromParams([['idsite' => '0'], [], ['forceInvalidRequest' => 1], [], ['idsite' => '99']]);
