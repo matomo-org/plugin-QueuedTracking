@@ -58,6 +58,10 @@ class Tracker extends \Piwik\Tests\Framework\Mock\Tracker
             throw new BadRequestException('forced bad request');
         }
 
+        if (!empty($allParams['forceHttpCode'])) {
+            throw new ForcedHttpCodeException('forced status ' . $allParams['forceHttpCode'], (int) $allParams['forceHttpCode']);
+        }
+
         if (!empty($allParams['forcePluginDeactivated'])) {
             throw new PluginDeactivatedException('ForcedPlugin');
         }
