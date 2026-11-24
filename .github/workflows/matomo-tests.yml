@@ -10,8 +10,21 @@ on:
     types: [opened, synchronize]
   push:
     branches:
-      - '**.x-dev'
+      - 'throwaway-id-309-svc-5x'
   workflow_dispatch:
+    inputs:
+      block:
+        description: 'Block mirror.gcr.io: none, full, first (unblocked after 20 s), redis (database image pulled first, then blocked)'
+        type: choice
+        options: [none, full, first, redis]
+        default: none
+      cache:
+        type: boolean
+        default: true
+      cache-down:
+        description: 'Make the Actions cache service unreachable'
+        type: boolean
+        default: false
   schedule:
   - cron: "0 2 * * 6"
 
@@ -27,9 +40,6 @@ permissions:
   security-events: none
   statuses: none
 
-concurrency:
-  group: php-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   PluginTests:
@@ -46,14 +56,31 @@ jobs:
           persist-credentials: false
       - name: Install package ripgrep
         run: sudo apt-get install ripgrep
+      - name: Service image test setup (throwaway)
+        env:
+          BLOCK: ${{ github.event_name == 'pull_request' && 'full' || inputs.block || 'none' }}
+          BREAK_SAVE: ${{ contains(github.event.head_commit.message, '[break-save]') }}
+          CACHE_DOWN: ${{ inputs.cache-down || contains(github.event.head_commit.message, '[cache-down]') }}
+          DB_IMAGE: mirror.gcr.io/library/${{ (matrix.database.engine || 'Mysql') == 'Mariadb' && 'mariadb' || 'mysql' }}:${{ matrix.database.version || '5.7' }}
+        run: |
+          echo "block=$BLOCK break-save=$BREAK_SAVE cache-down=$CACHE_DOWN db-image=$DB_IMAGE"
+          case "$BLOCK" in
+            redis) [ -z "$DB_IMAGE" ] || docker pull -q "$DB_IMAGE" ;;&
+            full|first|redis) echo "0.0.0.0 mirror.gcr.io" | sudo tee -a /etc/hosts ;;&
+            first) nohup sh -c 'sleep 20; sudo sed -i "/mirror.gcr.io/d" /etc/hosts' >/dev/null 2>&1 & ;;
+          esac
+          # a file where the action wants a directory makes docker save fail
+          if [ "$BREAK_SAVE" = true ]; then touch "$RUNNER_TEMP/matomo-service-images"; fi
+          if [ "$CACHE_DOWN" = true ]; then echo "0.0.0.0 results-receiver.actions.githubusercontent.com" | sudo tee -a /etc/hosts; fi
       - name: Run tests
-        uses: matomo-org/github-action-tests@main
+        uses: matomo-org/github-action-tests@throwaway-id-309-merged
         with:
           plugin-name: 'QueuedTracking'
           php-version: ${{ matrix.php }}
           test-type: 'PluginTests'
           matomo-test-branch: ${{ matrix.target }}
           redis-service: true
+          service-image-cache: ${{ github.event_name != 'workflow_dispatch' || inputs.cache }}
           artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
           upload-artifacts: ${{ matrix.php == 'matomo5_min_php' && matrix.target == 'maximum_supported_matomo' }}
   UI:
@@ -63,8 +90,24 @@ jobs:
         with:
           lfs: true
           persist-credentials: false
+      - name: Service image test setup (throwaway)
+        env:
+          BLOCK: ${{ github.event_name == 'pull_request' && 'full' || inputs.block || 'none' }}
+          BREAK_SAVE: ${{ contains(github.event.head_commit.message, '[break-save]') }}
+          CACHE_DOWN: ${{ inputs.cache-down || contains(github.event.head_commit.message, '[cache-down]') }}
+          DB_IMAGE: mirror.gcr.io/library/${{ (matrix.database.engine || 'Mysql') == 'Mariadb' && 'mariadb' || 'mysql' }}:${{ matrix.database.version || '5.7' }}
+        run: |
+          echo "block=$BLOCK break-save=$BREAK_SAVE cache-down=$CACHE_DOWN db-image=$DB_IMAGE"
+          case "$BLOCK" in
+            redis) [ -z "$DB_IMAGE" ] || docker pull -q "$DB_IMAGE" ;;&
+            full|first|redis) echo "0.0.0.0 mirror.gcr.io" | sudo tee -a /etc/hosts ;;&
+            first) nohup sh -c 'sleep 20; sudo sed -i "/mirror.gcr.io/d" /etc/hosts' >/dev/null 2>&1 & ;;
+          esac
+          # a file where the action wants a directory makes docker save fail
+          if [ "$BREAK_SAVE" = true ]; then touch "$RUNNER_TEMP/matomo-service-images"; fi
+          if [ "$CACHE_DOWN" = true ]; then echo "0.0.0.0 results-receiver.actions.githubusercontent.com" | sudo tee -a /etc/hosts; fi
       - name: running tests
-        uses: matomo-org/github-action-tests@main
+        uses: matomo-org/github-action-tests@throwaway-id-309-merged
         with:
           plugin-name: 'QueuedTracking'
           matomo-test-branch: 'maximum_supported_matomo'
@@ -72,5 +115,6 @@ jobs:
           php-version: 'matomo5_min_php'
           node-version: '16'
           redis-service: true
+          service-image-cache: ${{ github.event_name != 'workflow_dispatch' || inputs.cache }}
           artifacts-pass: ${{ secrets.ARTIFACTS_PASS }}
           upload-artifacts: true
