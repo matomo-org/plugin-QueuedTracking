@@ -27,6 +27,8 @@
         "RedisHostFieldTitle": "Redis-vert eller unix-socket",
         "RedisPasswordFieldHelp": "Passordet som er sett på Redis-tenaren, viss det finst eitt. Redis kan setjast opp til å krevje passord før klientar kan køyre kommandoar.",
         "RedisPasswordFieldTitle": "Redis-passord",
+        "RedisPersistentConnectionFieldHelp": "Gjenbruk éi Redis-tilkopling per PHP-prosess i staden for å opne ei ny for kvar sporingsførespurnad. Sparer éi tilkopling (og eit TLS-handtrykk ved tilkopling over TLS) per førespurnad. Gjeld berre frittståande Redis og krev phpredis-utvidinga.",
+        "RedisPersistentConnectionFieldTitle": "Bruk ei vedvarande Redis-tilkopling",
         "RedisPortFieldHelp": "Porten Redis-tenaren køyrer på. Verdien bør vere mellom 1 og 65535. Bruk 0 viss du brukar unix-socket for å kople til Redis-tenaren.",
         "RedisPortFieldTitle": "Redis-port",
         "RedisTimeoutFieldHelp": "Tidsavbrot for Redis-tilkoplinga i sekund. «0.0» tyder uavgrensa. Kan vere eit desimaltal, t.d. «2.5» for eit tidsavbrot på 2,5 sekund.",
