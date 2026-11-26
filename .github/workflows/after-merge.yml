@@ -1,0 +1,22 @@
+# Runs after each merge into a dev branch: resolves approved pull requests whose only conflict is in
+# CHANGELOG.md, and bumps the version once translation updates are merged. The logic lives in
+# matomo-org/plugin-ci-workflows; see the "After merge" section of its README.md.
+
+name: After merge
+
+on:
+  push:
+    branches: ['5.x-dev', '6.x-dev']
+
+permissions: {}
+
+jobs:
+  after-merge:
+    # Granted here because permissions can only be reduced down a call chain, never elevated.
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    uses: matomo-org/plugin-ci-workflows/.github/workflows/plugin-after-merge.yml@main
+    secrets:
+      approver-token: ${{ secrets.TESTS_ACCESS_TOKEN }}
