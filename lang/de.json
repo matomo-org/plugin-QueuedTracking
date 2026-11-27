@@ -27,6 +27,8 @@
         "RedisHostFieldTitle": "Redis-Host oder Unix-Socket",
         "RedisPasswordFieldHelp": "Passwort des Redis-Servers, falls vorhanden. Redis kann angewiesen werden, ein Passwort zu verlangen, bevor Clients Befehle ausführen dürfen.",
         "RedisPasswordFieldTitle": "Redis-Passwort",
+        "RedisPersistentConnectionFieldHelp": "Verwenden Sie eine Redis-Verbindung pro PHP-Prozess wieder, statt für jede Tracking-Anfrage eine neue zu öffnen. Spart pro Anfrage einen Verbindungsaufbau (und bei Verbindungen über TLS einen TLS-Handshake). Nur für eigenständige Redis-Instanzen; erfordert die Erweiterung phpredis.",
+        "RedisPersistentConnectionFieldTitle": "Eine persistente Redis-Verbindung verwenden",
         "RedisPortFieldHelp": "Der Port, auf dem der Redis-Server läuft. Der Wert sollte zwischen 1 und 65535 liegen. Verwenden Sie 0, wenn Sie eine Unix-Socket-Verbindung zum Redis-Server verwenden.",
         "RedisPortFieldTitle": "Redis-Port",
         "RedisTimeoutFieldHelp": "Redis-Verbindungs-Zeitlimit in Sekunden. „0.0“ bedeutet unbegrenzt. Kann eine Fließkommazahl sein, z.B. „2.5“ für ein Verbindungs-Zeitlimit von 2,5 Sekunden.",

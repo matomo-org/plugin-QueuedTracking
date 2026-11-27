@@ -27,6 +27,8 @@
         "RedisHostFieldTitle": "Hôte Redis ou socket unix",
         "RedisPasswordFieldHelp": "Mot de passe défini sur le serveur Redis, le cas échéant. Redis peut être configuré pour exiger un mot de passe avant d’autoriser les clients à exécuter des commandes.",
         "RedisPasswordFieldTitle": "Mot de passe Redis",
+        "RedisPersistentConnectionFieldHelp": "Réutilisez une seule connexion Redis par processus PHP au lieu d’en ouvrir une nouvelle pour chaque requête de suivi. Cela évite une connexion par requête, ainsi qu’une négociation TLS lors d’une connexion via TLS. Redis autonome uniquement ; nécessite l’extension phpredis.",
+        "RedisPersistentConnectionFieldTitle": "Utiliser une connexion Redis persistante",
         "RedisPortFieldHelp": "Port sur lequel le serveur Redis est en cours d’exécution. La valeur doit être comprise entre 1 et 65535. Utilisez 0 si vous utilisez un socket Unix pour vous connecter au serveur Redis.",
         "RedisPortFieldTitle": "Port Redis",
         "RedisTimeoutFieldHelp": "Délai d’expiration de la connexion Redis en secondes. \"0.0\" signifie illimité. Peut être un nombre à virgule flottante, par exemple \"2.5\" pour un délai de connexion de 2,5 secondes.",
